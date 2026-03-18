@@ -203,6 +203,7 @@
 <footer>
   Methodology: H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions.
   Denominator = FON FT FTEF minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
+  <br><br>* Pasadena Area operates a self-insured health benefits program through an Internal Service Fund. Their H&amp;W costs are recorded as operating expenses (object 5000) rather than employee benefits (object 3000), so this figure significantly understates their actual per-faculty cost and is not directly comparable to other districts.
 </footer>
 
 <script>
@@ -281,7 +282,7 @@ const districts = [
   {rank:69, name:"Palo Verde",           ftef:45,    adjFtef:45,    hw:922662.82,   hwPer:20503.62, code:"950"},
   {rank:70, name:"Feather River",        ftef:29,    adjFtef:29,    hw:562688.47,   hwPer:19403.05, code:"120"},
   {rank:71, name:"Allan Hancock",        ftef:163.3, adjFtef:159.3, hw:3033897.75,  hwPer:19045.18, code:"610"},
-  {rank:72, name:"Pasadena Area",        ftef:422,   adjFtef:416,   hw:6949128.04,  hwPer:16704.63, code:"770"},
+  {rank:72, name:"Pasadena Area",        ftef:422,   adjFtef:416,   hw:6949128.04,  hwPer:16704.63, code:"770", selfInsured:true},
 ];
 
 function fmt(n) {
@@ -296,7 +297,7 @@ function tier(rank) {
 }
 
 // --- Bar Chart ---
-const labels = districts.map(d => d.name);
+const labels = districts.map(d => d.selfInsured ? d.name + ' *' : d.name);
 const values = districts.map(d => d.hwPer);
 const colors = districts.map(d => {
   if (d.isYosemite) return '#e67e22';
@@ -376,7 +377,7 @@ function buildTable(data) {
 
     tr.innerHTML = `
       <td class="rank">#${d.rank}</td>
-      <td class="district-name">${d.name}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured district — H&amp;W costs reported under operating expenses, not object code 3000. Figure may be understated.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
       <td class="num">${d.adjFtef.toLocaleString()}</td>
       <td class="num">${fmt(d.hw)}</td>
       <td class="hw-value">${fmt(d.hwPer)}</td>
