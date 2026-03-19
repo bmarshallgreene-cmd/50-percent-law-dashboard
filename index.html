@@ -205,18 +205,14 @@
   </div>
 
   <div class="scenario-bar">
-    <span>View scenario:</span>
+    <span>View as:</span>
     <button class="scenario-btn active" id="btn-full" onclick="setScenario('full')">
       Full Methodology
-      <span class="btn-sub">Benefits 3000 minus STRS &amp; Medicare &divide; adj. FTEF</span>
-    </button>
-    <button class="scenario-btn" id="btn-lib" onclick="setScenario('lib')">
-      Benefits Only, Librarian-Adjusted
-      <span class="btn-sub">Raw Benefits 3000 &divide; adj. FTEF (excl. librarians)</span>
+      <span class="btn-sub">Pension &amp; Medicare backed out &divide; librarian-adjusted FTEF</span>
     </button>
     <button class="scenario-btn" id="btn-basic" onclick="setScenario('basic')">
-      Basic (No Adjustments)
-      <span class="btn-sub">Raw Benefits 3000 &divide; raw FON FT FTEF</span>
+      Basic
+      <span class="btn-sub">Raw benefits total &divide; raw FON FTEF — no deductions</span>
     </button>
   </div>
 
@@ -389,9 +385,8 @@ const districts = [
 ];
 
 const SCENARIOS = {
-  full:  { getValue: d => d.hw / d.adjFtef,        getTotalHw: d => d.hw,            getFtef: d => d.adjFtef },
-  lib:   { getValue: d => d.rawBenefits / d.adjFtef, getTotalHw: d => d.rawBenefits, getFtef: d => d.adjFtef },
-  basic: { getValue: d => d.rawBenefits / d.ftef,   getTotalHw: d => d.rawBenefits,  getFtef: d => d.ftef  },
+  full:  { getValue: d => d.hw / d.adjFtef,       getTotalHw: d => d.hw,           getFtef: d => d.adjFtef },
+  basic: { getValue: d => d.rawBenefits / d.ftef,  getTotalHw: d => d.rawBenefits,  getFtef: d => d.ftef  },
 };
 
 let currentScenario = 'full';
@@ -535,7 +530,7 @@ function sortCcfs(col) {
 
 function setScenario(s) {
   currentScenario = s;
-  ['full','lib','basic'].forEach(k => document.getElementById('btn-' + k).classList.toggle('active', k === s));
+  ['full','basic'].forEach(k => document.getElementById('btn-' + k).classList.toggle('active', k === s));
   const ranked = computeRanked(s);
   const stats = computeStats(ranked);
   updateCcfsCards(ranked, stats);
@@ -684,8 +679,8 @@ function buildYfaCards() {
   const cards = [
     { label:'Yosemite Rank', value:`#${YOS_YFA.rank}`, sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
     { label:'Yosemite Max Medical', value:fmt(YOS_YFA.max), sub:`${above} districts pay more · ${below} pay less`, extra:'' },
-    { label:'Peer Avg (Max Medical)', value:fmt(peerAvg), sub:`Yosemite is ${fmt(Math.abs(diff))} ${diff >= 0 ? 'above' : 'below'} this average`, extra: diff >= 0 ? 'accent-green' : 'accent-amber' },
-    { label:'Fully Paid Plan', value:`${paidYes} / ${yfaData.length}`, sub:`${Math.round(paidYes/yfaData.length*100)}% of surveyed districts offer one`, extra:'accent-green' },
+    { label:'Peer Average Max Medical', value:fmt(peerAvg), sub:`Yosemite pays ${fmt(Math.abs(diff))} ${diff >= 0 ? 'more than' : 'less than'} the peer average`, extra: diff >= 0 ? 'accent-green' : 'accent-amber' },
+    { label:'Fully Paid Plan', value:`${paidYes} of ${yfaData.length}`, sub:`${Math.round(paidYes/yfaData.length*100)}% of surveyed districts offer fully paid coverage`, extra:'accent-green' },
   ];
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
     `<div class="card ${c.extra}"><label>${c.label}</label><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`
