@@ -217,9 +217,17 @@
   </div>
 
   <div class="chart-wrap">
-    <div style="display:flex;align-items:center;margin-bottom:16px">
+    <div style="display:flex;align-items:center;margin-bottom:12px">
       <h2 id="chartTitle" style="margin:0">H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
       <button class="jump-btn" onclick="jumpToYosemite()">&#9660; Jump to Yosemite</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:0.75rem;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.05em">Color key:</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#27ae60;display:inline-block"></span>Top quartile (ranks 1–18)</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#85c17e;display:inline-block"></span>2nd quartile (ranks 19–36)</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#f0a500;display:inline-block"></span>3rd quartile (ranks 37–54)</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#e74c3c;display:inline-block"></span>Bottom quartile (ranks 55–72)</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#e67e22;font-weight:600"><span style="width:14px;height:14px;border-radius:3px;background:#e67e22;display:inline-block"></span>Yosemite CCD</span>
     </div>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
   </div>
