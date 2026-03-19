@@ -61,16 +61,18 @@
   .card .card-value.amber { color: #b45309; }
 
   /* ── Scenario toggle (Tab 1) ── */
-  .scenario-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .scenario-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: nowrap; overflow-x: auto; }
   .scenario-bar span { font-size: 0.8rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
   .scenario-btn {
-    padding: 8px 16px; border: 2px solid #1a3a5c; border-radius: 6px;
-    background: white; color: #1a3a5c; font-size: 0.82rem; font-weight: 600;
+    padding: 6px 12px; border: 2px solid #1a3a5c; border-radius: 6px;
+    background: white; color: #1a3a5c; font-size: 0.78rem; font-weight: 600;
     cursor: pointer; transition: all 0.15s; text-align: left; line-height: 1.3;
+    white-space: nowrap; flex-shrink: 0;
   }
   .scenario-btn:hover { background: #eef2f7; }
   .scenario-btn.active { background: #1a3a5c; color: white; }
-  .scenario-btn .btn-sub { font-size: 0.72rem; font-weight: 400; opacity: 0.75; display: block; margin-top: 2px; }
+  .scenario-btn .btn-sub { font-size: 0.68rem; font-weight: 400; opacity: 0.65; display: block; margin-top: 1px; }
+  .scenario-btn.active .btn-sub { opacity: 1; color: #a8c4e0; }
 
   /* ── Chart (Tab 1) ── */
   .chart-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 28px; }
