@@ -264,9 +264,10 @@
           <th onclick="sortCcfs(2)" id="cth2">Total H&amp;W</th>
           <th onclick="sortCcfs(3)" id="cth3">FTEF</th>
           <th onclick="sortCcfs(4)" id="cth4">H&amp;W per FT Faculty</th>
-          <th onclick="sortCcfs(5)" id="cth5" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Salary (CFT Step 21)</th>
-          <th onclick="sortCcfs(6)" id="cth6" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Est. Total Comp</th>
-          <th id="cth7">Relative to Median</th>
+          <th id="cth5">Relative to Median</th>
+          <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Salary (CFT Step 21)</th>
+          <th onclick="sortCcfs(7)" id="cth7" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Est. Total Comp</th>
+          <th id="cth8">Relative to Median (Comp)</th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -504,17 +505,26 @@ function buildCcfsTable(data) {
     const tr = document.createElement('tr');
     tr.className = d.isYosemite ? 'yosemite' : 'tier-' + t;
     const totalComp = d.step21 + d.scenarioValue;
+    const compMedian = computeStats(computeRanked(currentScenario).map(x => ({...x, scenarioValue: x.totalComp}))).median;
+    const compDiff = totalComp - compMedian;
+    const compDiffStr = (compDiff >= 0 ? '+' : '') + fmt(compDiff);
+    const compDiffColor = d.isYosemite ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
+    const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     tr.innerHTML = `
       <td class="rank">#${d.rank}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
       <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
-      <td class="num">${fmt(d.step21)}</td>
-      <td class="num" style="font-weight:600">${fmt(totalComp)}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div></td>
+      <td class="num">${fmt(d.step21)}</td>
+      <td class="num" style="font-weight:600">${fmt(totalComp)}</td>
+      <td><div class="bar-cell">
+        <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffStr} vs. median</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${d.isYosemite?'#e67e22':'#6097c4'}"></div></div>
       </div></td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
@@ -543,7 +553,7 @@ function filterCcfsTable() {
 }
 
 function sortedCcfsData(data) {
-  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','step21','totalComp','scenarioValue'];
+  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','scenarioValue','step21','totalComp','totalComp'];
   const { col, dir } = ccfsSort;
   return [...data].sort((a, b) => {
     const av = typeof a[keys[col]] === 'string' ? a[keys[col]] : +a[keys[col]];
@@ -554,7 +564,7 @@ function sortedCcfsData(data) {
 
 function sortCcfs(col) {
   ccfsSort = { col, dir: ccfsSort.col === col ? (ccfsSort.dir === 'asc' ? 'desc' : 'asc') : (col === 1 ? 'asc' : 'desc') };
-  for (let i = 0; i <= 7; i++) {
+  for (let i = 0; i <= 8; i++) {
     const th = document.getElementById('cth' + i);
     if (th) th.className = i === col ? ccfsSort.dir : '';
   }
