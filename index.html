@@ -242,8 +242,8 @@
         <tr>
           <th onclick="sortCcfs(0)" id="cth0">Rank</th>
           <th onclick="sortCcfs(1)" id="cth1">District</th>
-          <th onclick="sortCcfs(2)" id="cth2">FTEF</th>
-          <th onclick="sortCcfs(3)" id="cth3">Total H&amp;W</th>
+          <th onclick="sortCcfs(2)" id="cth2">Total H&amp;W</th>
+          <th onclick="sortCcfs(3)" id="cth3">FTEF</th>
           <th onclick="sortCcfs(4)" id="cth4">H&amp;W per FT Faculty</th>
           <th id="cth5">Relative to Median</th>
         </tr>
@@ -485,8 +485,8 @@ function buildCcfsTable(data) {
     tr.innerHTML = `
       <td class="rank">#${d.rank}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
-      <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
+      <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
@@ -518,7 +518,7 @@ function filterCcfsTable() {
 }
 
 function sortedCcfsData(data) {
-  const keys = ['rank','name','scenarioFtef','scenarioHw','scenarioValue','scenarioValue'];
+  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','scenarioValue'];
   const { col, dir } = ccfsSort;
   return [...data].sort((a, b) => {
     const av = typeof a[keys[col]] === 'string' ? a[keys[col]] : +a[keys[col]];
