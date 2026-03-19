@@ -74,6 +74,21 @@
   .scenario-btn .btn-sub { font-size: 0.68rem; font-weight: 400; opacity: 0.65; display: block; margin-top: 1px; }
   .scenario-btn.active .btn-sub { opacity: 1; color: #a8c4e0; }
 
+  .jump-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: #fff3e6;
+    border: 2px solid #e67e22;
+    border-radius: 6px;
+    color: #e67e22;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .jump-btn:hover { background: #ffe0c0; }
+
   /* ── Chart (Tab 1) ── */
   .chart-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 28px; }
   .chart-wrap h2 { font-size: 1rem; font-weight: 600; color: #1a3a5c; margin-bottom: 16px; }
@@ -192,7 +207,7 @@
   <div class="scenario-bar">
     <span>View scenario:</span>
     <button class="scenario-btn active" id="btn-full" onclick="setScenario('full')">
-      Full Methodology (Current)
+      Full Methodology
       <span class="btn-sub">Benefits 3000 minus STRS &amp; Medicare &divide; adj. FTEF</span>
     </button>
     <button class="scenario-btn" id="btn-lib" onclick="setScenario('lib')">
@@ -206,7 +221,10 @@
   </div>
 
   <div class="chart-wrap">
-    <h2 id="chartTitle">H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
+    <div style="display:flex;align-items:center;margin-bottom:16px">
+      <h2 id="chartTitle" style="margin:0">H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
+      <button class="jump-btn" onclick="jumpToYosemite()">&#9660; Jump to Yosemite</button>
+    </div>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
   </div>
 
@@ -672,6 +690,18 @@ function buildYfaCards() {
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
     `<div class="card ${c.extra}"><label>${c.label}</label><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`
   ).join('');
+}
+
+function jumpToYosemite() {
+  const rows = document.querySelectorAll('#ccfsBody tr');
+  for (const row of rows) {
+    if (row.classList.contains('yosemite')) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.style.outline = '3px solid #e67e22';
+      setTimeout(() => row.style.outline = '', 2000);
+      return;
+    }
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────
