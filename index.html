@@ -3,116 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Health &amp; Welfare Cost per FT Faculty — CA Community Colleges 2024-25</title>
+<title>Faculty Health Benefits — CA Community Colleges 2024-25</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #222; }
 
-  header {
-    background: #1a3a5c;
-    color: white;
-    padding: 24px 32px;
-  }
+  /* ── Header ── */
+  header { background: #1a3a5c; color: white; padding: 24px 32px; }
   header h1 { font-size: 1.5rem; font-weight: 600; }
   header p  { font-size: 0.875rem; opacity: 0.8; margin-top: 4px; }
 
+  /* ── Tabs ── */
+  .tab-bar {
+    background: #15304e;
+    padding: 0 32px;
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 12px 22px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.9); }
+  .tab-btn.active { color: white; border-bottom-color: #e67e22; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   .container { max-width: 1200px; margin: 0 auto; padding: 24px 32px; }
 
-  /* Summary cards */
-  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  /* ── Cards (shared) ── */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
   .card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    border-top: 4px solid #1a3a5c;
+    background: white; border-radius: 8px; padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-top: 4px solid #1a3a5c;
   }
   .card.highlight { border-top-color: #e67e22; }
-  .card label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; }
-  .card .value { font-size: 1.75rem; font-weight: 700; margin-top: 4px; }
-  .card .sub { font-size: 0.8rem; color: #888; margin-top: 2px; }
-  .card.highlight .value { color: #e67e22; }
-
-  /* Chart */
-  .chart-wrap {
-    background: white;
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    margin-bottom: 28px;
+  .card.accent-green { border-top-color: #16a34a; }
+  .card.accent-amber { border-top-color: #d97706; }
+  .card label, .card .card-label {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; display: block;
   }
+  .card .value, .card .card-value { font-size: 1.75rem; font-weight: 700; margin-top: 4px; }
+  .card .sub, .card .card-sub { font-size: 0.8rem; color: #888; margin-top: 2px; }
+  .card.highlight .value { color: #e67e22; }
+  .card .card-value.blue  { color: #1d4ed8; }
+  .card .card-value.green { color: #16a34a; }
+  .card .card-value.amber { color: #b45309; }
+
+  /* ── Scenario toggle (Tab 1) ── */
+  .scenario-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .scenario-bar span { font-size: 0.8rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .scenario-btn {
+    padding: 8px 16px; border: 2px solid #1a3a5c; border-radius: 6px;
+    background: white; color: #1a3a5c; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; text-align: left; line-height: 1.3;
+  }
+  .scenario-btn:hover { background: #eef2f7; }
+  .scenario-btn.active { background: #1a3a5c; color: white; }
+  .scenario-btn .btn-sub { font-size: 0.72rem; font-weight: 400; opacity: 0.75; display: block; margin-top: 2px; }
+
+  /* ── Chart (Tab 1) ── */
+  .chart-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 28px; }
   .chart-wrap h2 { font-size: 1rem; font-weight: 600; color: #1a3a5c; margin-bottom: 16px; }
   .chart-container { height: 900px; }
 
-  /* Table section */
-  .table-wrap {
-    background: white;
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
+  /* ── Table (shared) ── */
+  .table-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
   .table-header h2 { font-size: 1rem; font-weight: 600; color: #1a3a5c; }
-  #searchBox {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    width: 220px;
-    outline: none;
+
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .search-box, .ctrl-select {
+    padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 0.875rem; outline: none; background: white; color: #222;
   }
-  #searchBox:focus { border-color: #1a3a5c; }
+  .search-box { width: 220px; }
+  .search-box:focus, .ctrl-select:focus { border-color: #1a3a5c; }
 
   table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
   thead th {
-    background: #f0f3f7;
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #555;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
+    background: #f0f3f7; padding: 10px 12px; text-align: left;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #555; cursor: pointer; user-select: none; white-space: nowrap;
+    border-bottom: 2px solid #dde3ec;
   }
-  thead th:hover { background: #e3e8ef; }
+  thead th:hover { background: #e4e9f0; }
+  thead th.asc::after  { content: ' ↑'; }
+  thead th.desc::after { content: ' ↓'; }
   thead th.sorted { color: #1a3a5c; }
-  thead th::after { content: ' ↕'; opacity: 0.3; font-size: 0.7rem; }
-  thead th.asc::after { content: ' ↑'; opacity: 1; }
-  thead th.desc::after { content: ' ↓'; opacity: 1; }
 
   tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
-  tbody tr:hover { background: #fafbfd; }
-  tbody tr.yosemite { background: #fff8f0; }
-  tbody tr.yosemite:hover { background: #fff3e6; }
-  tbody td { padding: 10px 12px; }
+  tbody tr:hover { background: #fafbfc; }
+  tbody tr.yosemite, tbody tr.yos { background: #fff8f2; }
+  tbody tr.yosemite:hover, tbody tr.yos:hover { background: #fff2e4; }
 
-  .rank { color: #888; font-weight: 600; width: 48px; }
-  .district-name { font-weight: 500; }
-  .yosemite .district-name { color: #e67e22; font-weight: 700; }
+  td { padding: 10px 12px; vertical-align: middle; }
+  td.rank { font-weight: 600; color: #888; width: 60px; }
+  td.district-name, .dname { font-weight: 500; }
+  .yos .dname { color: #e67e22; font-weight: 700; }
+
   .yosemite-badge {
-    display: inline-block;
-    background: #e67e22;
-    color: white;
-    font-size: 0.65rem;
-    padding: 1px 5px;
-    border-radius: 3px;
-    margin-left: 6px;
-    vertical-align: middle;
-    font-weight: 600;
+    display: inline-block; background: #e67e22; color: white;
+    font-size: 0.65rem; padding: 1px 5px; border-radius: 3px;
+    margin-left: 6px; vertical-align: middle; font-weight: 600;
   }
 
   .hw-value { font-weight: 600; font-size: 0.95rem; }
   .bar-cell { min-width: 140px; }
-  .bar-bg { background: #eee; border-radius: 3px; height: 8px; width: 100%; }
-  .bar-fill { height: 8px; border-radius: 3px; }
+  .bar-bg { background: #eee; border-radius: 3px; height: 8px; width: 100%; overflow: hidden; }
+  .bar-fill { height: 8px; border-radius: 3px; transition: width 0.3s; }
 
   .tier-1 .bar-fill { background: #27ae60; }
   .tier-2 .bar-fill { background: #85c17e; }
@@ -124,318 +133,550 @@
   .tier-4 .hw-value { color: #c0392b; }
   .yosemite .hw-value { color: #e67e22 !important; }
 
-  .num { color: #555; }
+  .num { text-align: right; color: #555; font-variant-numeric: tabular-nums; }
+  .no-data { color: #ccc; }
+
+  /* Delta (Tab 2) */
+  .delta { text-align: right; font-size: 0.82rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .delta.above { color: #16a34a; }
+  .delta.below { color: #dc2626; }
+  .delta.same  { color: #888; }
+
+  /* Badges (Tab 2) */
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; }
+  .badge-yes { background: #dcfce7; color: #15803d; }
+  .badge-no  { background: #fff3cd; color: #92400e; }
+  .badge-unk { background: #f3f4f6; color: #9ca3af; }
+
+  .table-footer { padding: 9px 0 0; font-size: 0.75rem; color: #999; display: flex; justify-content: space-between; }
 
   footer {
-    text-align: center;
-    padding: 24px;
-    font-size: 0.75rem;
-    color: #999;
+    text-align: center; padding: 24px;
+    font-size: 0.75rem; color: #999;
+    max-width: 1200px; margin: 0 auto;
   }
 
   @media (max-width: 768px) {
     .cards { grid-template-columns: repeat(2, 1fr); }
     .container { padding: 16px; }
+    .scenario-bar { flex-direction: column; align-items: flex-start; }
+    .tab-bar { padding: 0 16px; overflow-x: auto; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Health &amp; Welfare Cost per Full-Time Instructional Faculty</h1>
-  <p>California Community College Districts &mdash; Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data</p>
+  <h1>Faculty Health Benefits — CA Community College Districts</h1>
+  <p>Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports, Fall 2024 FON Data &amp; YFA Benefits Survey</p>
 </header>
 
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('ccfs')">CCFS-311 Analysis &mdash; All 72 Districts</button>
+  <button class="tab-btn" onclick="showTab('yfa')">YFA Survey &mdash; 28 Districts</button>
+</div>
+
+<!-- ══════════════════════════════════════════ TAB 1: CCFS-311 ══ -->
+<div class="tab-panel active" id="tab-ccfs">
 <div class="container">
 
   <div class="cards">
-    <div class="card">
-      <label>Statewide Mean</label>
-      <div class="value">$39,783</div>
-      <div class="sub">72 districts</div>
-    </div>
-    <div class="card">
-      <label>Statewide Median</label>
-      <div class="value">$40,397</div>
-      <div class="sub">50th percentile</div>
-    </div>
-    <div class="card">
-      <label>Range</label>
-      <div class="value">$16,705 – $66,142</div>
-      <div class="sub">Pasadena Area to West Kern</div>
-    </div>
-    <div class="card highlight">
-      <label>Yosemite CCD</label>
-      <div class="value">$36,538</div>
-      <div class="sub">Rank 46 of 72 &mdash; $3,859 below median</div>
-    </div>
+    <div class="card"><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
+    <div class="card"><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
+    <div class="card"><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
+    <div class="card highlight"><label>Yosemite CCD</label><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
+  </div>
+
+  <div class="scenario-bar">
+    <span>View scenario:</span>
+    <button class="scenario-btn active" id="btn-full" onclick="setScenario('full')">
+      Full Methodology (Current)
+      <span class="btn-sub">Benefits 3000 minus STRS &amp; Medicare &divide; adj. FTEF</span>
+    </button>
+    <button class="scenario-btn" id="btn-lib" onclick="setScenario('lib')">
+      Benefits Only, Librarian-Adjusted
+      <span class="btn-sub">Raw Benefits 3000 &divide; adj. FTEF (excl. librarians)</span>
+    </button>
+    <button class="scenario-btn" id="btn-basic" onclick="setScenario('basic')">
+      Basic (No Adjustments)
+      <span class="btn-sub">Raw Benefits 3000 &divide; raw FON FT FTEF</span>
+    </button>
   </div>
 
   <div class="chart-wrap">
-    <h2>H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
-    <div class="chart-container">
-      <canvas id="barChart"></canvas>
-    </div>
+    <h2 id="chartTitle">H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
+    <div class="chart-container"><canvas id="barChart"></canvas></div>
   </div>
 
   <div class="table-wrap">
     <div class="table-header">
       <h2>District Detail</h2>
-      <input type="text" id="searchBox" placeholder="Search district…" oninput="filterTable()">
+      <input type="text" class="search-box" id="ccfsSearch" placeholder="Search district…" oninput="filterCcfsTable()">
     </div>
-    <table id="dataTable">
+    <table id="ccfsTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)" id="th0">Rank</th>
-          <th onclick="sortTable(1)" id="th1">District</th>
-          <th onclick="sortTable(2)" id="th2">Adj. FT FTEF</th>
-          <th onclick="sortTable(3)" id="th3">Total H&amp;W Estimate</th>
-          <th onclick="sortTable(4)" id="th4">H&amp;W per FT Faculty</th>
-          <th id="th5">Relative to Median</th>
+          <th onclick="sortCcfs(0)" id="cth0">Rank</th>
+          <th onclick="sortCcfs(1)" id="cth1">District</th>
+          <th onclick="sortCcfs(2)" id="cth2">FTEF</th>
+          <th onclick="sortCcfs(3)" id="cth3">Total H&amp;W</th>
+          <th onclick="sortCcfs(4)" id="cth4">H&amp;W per FT Faculty</th>
+          <th id="cth5">Relative to Median</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="ccfsBody"></tbody>
     </table>
   </div>
 
 </div>
-
 <footer>
-  Methodology: H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions.
-  Denominator = FON FT FTEF minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
-  <br><br>* Pasadena Area operates a self-insured health benefits program through an Internal Service Fund. Their H&amp;W costs are recorded as operating expenses (object 5000) rather than employee benefits (object 3000), so this figure significantly understates their actual per-faculty cost and is not directly comparable to other districts.
+  <strong>Full Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions. Denominator = FON FT FTEF minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
+  <br><br>* Pasadena Area operates a self-insured health benefits program through an Internal Service Fund. Their H&amp;W costs are recorded as operating expenses (object 5000) rather than employee benefits (object 3000), so this figure significantly understates their actual per-faculty cost.
 </footer>
+</div>
 
+<!-- ══════════════════════════════════════════ TAB 2: YFA SURVEY ══ -->
+<div class="tab-panel" id="tab-yfa">
+<div class="container">
+
+  <div class="cards" id="yfaCards"></div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>District Detail</h2>
+      <div class="controls">
+        <input class="search-box" type="text" id="yfaSearch" placeholder="Filter by district…" oninput="renderYfa()">
+        <select class="ctrl-select" id="filterPaid" onchange="renderYfa()">
+          <option value="">All districts</option>
+          <option value="yes">Fully paid plan only</option>
+          <option value="no">No fully paid plan</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th onclick="setYfaSort('rank')" style="text-align:center">Rank <span id="si-rank">▼</span></th>
+          <th onclick="setYfaSort('name')">District <span id="si-name">⇅</span></th>
+          <th onclick="setYfaSort('avg')" class="num">Avg Medical <span id="si-avg">⇅</span></th>
+          <th onclick="setYfaSort('max')" class="num">Max Medical <span id="si-max">⇅</span></th>
+          <th onclick="setYfaSort('delta')" class="num">vs. Yosemite <span id="si-delta">⇅</span></th>
+          <th onclick="setYfaSort('paid')">Fully Paid Plan <span id="si-paid">⇅</span></th>
+          <th class="bar-cell">Relative Max</th>
+        </tr>
+      </thead>
+      <tbody id="yfaBody"></tbody>
+    </table>
+    <div class="table-footer">
+      <span id="yfaCount"></span>
+      <span>Click any column header to sort &nbsp;·&nbsp; Data from YFA Benefits Survey</span>
+    </div>
+  </div>
+
+</div>
+<footer>
+  Data sourced from the Yosemite Faculty Association benefits survey. Figures represent annual employer medical contribution amounts. Survey coverage is self-reported and may not include all plan tiers. Districts listed are those that responded to the survey.
+</footer>
+</div>
+
+<!-- ══════════════════════════════════════════ SCRIPTS ══ -->
 <script>
-const MEDIAN = 40397;
-const MAX_HW = 66142.35;
+// ── Tab switching ──────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'ccfs' && !chartInitialized) initChart();
+}
 
+// ══════════════════════════════════════════════════════════════
+// TAB 1 — CCFS-311
+// ══════════════════════════════════════════════════════════════
 const districts = [
-  {rank:1,  name:"West Kern",              ftef:60,    adjFtef:60,    hw:3968541.15,  hwPer:66142.35, code:"690"},
-  {rank:2,  name:"San Diego",              ftef:558,   adjFtef:549,   hw:33255880.82, hwPer:60575.37, code:"70"},
-  {rank:3,  name:"Long Beach",             ftef:348,   adjFtef:341,   hw:19679977.87, hwPer:57712.55, code:"840"},
-  {rank:4,  name:"Hartnell",               ftef:119.6, adjFtef:117.6, hw:6777198.12,  hwPer:57629.24, code:"450"},
-  {rank:5,  name:"MiraCosta",              ftef:208.8, adjFtef:203.8, hw:11027985.33, hwPer:54111.80, code:"50"},
-  {rank:6,  name:"Monterey Peninsula",     ftef:115.4, adjFtef:112.4, hw:6019693.22,  hwPer:53555.99, code:"460"},
-  {rank:7,  name:"Cerritos",               ftef:269,   adjFtef:264,   hw:14047261.28, hwPer:53209.32, code:"810"},
-  {rank:8,  name:"Rancho Santiago",        ftef:356,   adjFtef:348,   hw:18239675.46, hwPer:52412.86, code:"870"},
-  {rank:9,  name:"Santa Monica",           ftef:347.9, adjFtef:343.9, hw:18000062.43, hwPer:52340.98, code:"780"},
-  {rank:10, name:"San Jose-Evergreen",     ftef:241.1, adjFtef:237.1, hw:12380715.99, hwPer:52217.28, code:"470"},
-  {rank:11, name:"Contra Costa",           ftef:482.2, adjFtef:475.2, hw:24810912.16, hwPer:52211.52, code:"310"},
-  {rank:12, name:"San Joaquin Delta",      ftef:241.6, adjFtef:238.6, hw:12383029.28, hwPer:51898.70, code:"550"},
-  {rank:13, name:"Desert",                 ftef:148,   adjFtef:146,   hw:7294515.24,  hwPer:49962.43, code:"930"},
-  {rank:14, name:"Cabrillo",               ftef:187.3, adjFtef:184.3, hw:9067457.22,  hwPer:49199.44, code:"410"},
-  {rank:15, name:"Santa Barbara",          ftef:211,   adjFtef:209,   hw:10242778.69, hwPer:49008.51, code:"650"},
-  {rank:16, name:"South Orange",           ftef:406.3, adjFtef:397.3, hw:19149119.25, hwPer:48198.14, code:"890"},
-  {rank:17, name:"San Francisco",          ftef:345.9, adjFtef:331.9, hw:15345210.36, hwPer:46234.44, code:"360"},
-  {rank:18, name:"Coast",                  ftef:415.2, adjFtef:405.2, hw:18525346.87, hwPer:45719.02, code:"830"},
-  {rank:19, name:"Solano",                 ftef:134,   adjFtef:132,   hw:6002062.57,  hwPer:45470.17, code:"280"},
-  {rank:20, name:"Chaffey",               ftef:240.2, adjFtef:235.2, hw:10671306.38, hwPer:45371.20, code:"920"},
-  {rank:21, name:"North Orange County",    ftef:531,   adjFtef:519,   hw:23490633.53, hwPer:45261.34, code:"860"},
-  {rank:22, name:"Peralta",               ftef:296.5, adjFtef:290.5, hw:13112212.50, hwPer:45136.70, code:"340"},
-  {rank:23, name:"Butte",                 ftef:183.4, adjFtef:179.4, hw:8083039.19,  hwPer:45055.96, code:"110"},
-  {rank:24, name:"El Camino",             ftef:334.9, adjFtef:327.9, hw:14605046.26, hwPer:44541.16, code:"720"},
-  {rank:25, name:"Gavilan Joint",         ftef:74,    adjFtef:71,    hw:3146322.18,  hwPer:44314.40, code:"440"},
-  {rank:26, name:"Foothill-DeAnza",       ftef:404.2, adjFtef:397.2, hw:17188737.21, hwPer:43274.77, code:"420"},
-  {rank:27, name:"Los Angeles",           ftef:1621.5,adjFtef:1594.5,hw:67706014.69, hwPer:42462.22, code:"740"},
-  {rank:28, name:"Marin",                 ftef:123.9, adjFtef:119.9, hw:5065497.71,  hwPer:42247.69, code:"330"},
-  {rank:29, name:"Merced",               ftef:184.8, adjFtef:179.8, hw:7541805.56,  hwPer:41945.53, code:"530"},
-  {rank:30, name:"Grossmont-Cuyamaca",   ftef:294.5, adjFtef:289.5, hw:12084777.98, hwPer:41743.62, code:"20"},
-  {rank:31, name:"Palomar",              ftef:298.3, adjFtef:291.3, hw:12088571.84, hwPer:41498.70, code:"60"},
-  {rank:32, name:"Riverside",            ftef:497.7, adjFtef:489.7, hw:20294568.18, hwPer:41442.86, code:"960"},
-  {rank:33, name:"Southwestern",         ftef:265.4, adjFtef:259.4, hw:10685280.27, hwPer:41192.29, code:"90"},
-  {rank:34, name:"Glendale",             ftef:217.5, adjFtef:210.5, hw:8664175.74,  hwPer:41159.98, code:"730"},
-  {rank:35, name:"West Hills",           ftef:102,   adjFtef:102,   hw:4149608.62,  hwPer:40682.44, code:"580"},
-  {rank:36, name:"Shasta-Tehama-Trinity",ftef:128,   adjFtef:126,   hw:5109557.65,  hwPer:40552.04, code:"170"},
-  {rank:37, name:"Barstow",              ftef:40.5,  adjFtef:37.5,  hw:1509040.51,  hwPer:40241.08, code:"910"},
-  {rank:38, name:"Copper Mountain",      ftef:25.7,  adjFtef:25.7,  hw:1022671.98,  hwPer:39792.68, code:"970"},
-  {rank:39, name:"Citrus",               ftef:162,   adjFtef:159,   hw:6281361.95,  hwPer:39505.42, code:"820"},
-  {rank:40, name:"Mendocino-Lake",       ftef:61,    adjFtef:61,    hw:2342534.59,  hwPer:38402.21, code:"140"},
-  {rank:41, name:"West Valley-Mission",  ftef:266,   adjFtef:259,   hw:9928555.47,  hwPer:38334.19, code:"490"},
-  {rank:42, name:"Santa Clarita",        ftef:226,   adjFtef:221,   hw:8382268.65,  hwPer:37928.82, code:"660"},
-  {rank:43, name:"San Mateo",            ftef:365.4, adjFtef:354.4, hw:13409261.41, hwPer:37836.52, code:"370"},
-  {rank:44, name:"Victor Valley",        ftef:132,   adjFtef:130,   hw:4805369.76,  hwPer:36964.38, code:"990"},
-  {rank:45, name:"Mt. San Antonio",      ftef:443,   adjFtef:433,   hw:15921924.55, hwPer:36771.19, code:"850"},
-  {rank:46, name:"Yosemite",             ftef:315,   adjFtef:309,   hw:11290204.66, hwPer:36537.88, code:"590", isYosemite:true},
-  {rank:47, name:"Siskiyou",             ftef:45.5,  adjFtef:44.5,  hw:1620921.12,  hwPer:36425.19, code:"180"},
-  {rank:48, name:"Rio Hondo",            ftef:239.1, adjFtef:235.1, hw:8480333.33,  hwPer:36071.18, code:"880"},
-  {rank:49, name:"Sierra",               ftef:232.4, adjFtef:228.4, hw:8206977.83,  hwPer:35932.48, code:"270"},
-  {rank:50, name:"Compton",              ftef:102.5, adjFtef:100.5, hw:3596214.86,  hwPer:35783.23, code:"710"},
-  {rank:51, name:"Chabot-Las Positas",   ftef:285,   adjFtef:277,   hw:9699300.54,  hwPer:35015.53, code:"480"},
-  {rank:52, name:"Ohlone",               ftef:112,   adjFtef:109,   hw:3794879.27,  hwPer:34815.41, code:"430"},
-  {rank:53, name:"Imperial",             ftef:145,   adjFtef:144,   hw:4992122.18,  hwPer:34667.52, code:"30"},
-  {rank:54, name:"Lassen",              ftef:36.1,  adjFtef:35.1,  hw:1202283.11,  hwPer:34253.08, code:"130"},
-  {rank:55, name:"Lake Tahoe",           ftef:38.1,  adjFtef:38.1,  hw:1302042.58,  hwPer:34174.35, code:"220"},
-  {rank:56, name:"Kern",                 ftef:495,   adjFtef:488,   hw:16040002.58, hwPer:32868.86, code:"520"},
-  {rank:57, name:"Sequoias",             ftef:216.5, adjFtef:211.5, hw:6589648.04,  hwPer:31156.73, code:"560"},
-  {rank:58, name:"Napa Valley",          ftef:93.1,  adjFtef:93.1,  hw:2843451.75,  hwPer:30541.91, code:"240"},
-  {rank:59, name:"Yuba",                 ftef:122.1, adjFtef:121.1, hw:3601571.79,  hwPer:29740.48, code:"290"},
-  {rank:60, name:"Ventura",              ftef:454.3, adjFtef:442.3, hw:13122915.79, hwPer:29669.72, code:"680"},
-  {rank:61, name:"Redwoods",             ftef:72.3,  adjFtef:70.3,  hw:1989171.69,  hwPer:28295.47, code:"160"},
-  {rank:62, name:"San Bernardino",       ftef:285.9, adjFtef:281.9, hw:7894983.20,  hwPer:28006.33, code:"980"},
-  {rank:63, name:"State Center",         ftef:701.2, adjFtef:691.2, hw:18684056.74, hwPer:27031.33, code:"570"},
-  {rank:64, name:"Mt. San Jacinto",      ftef:217.8, adjFtef:213.8, hw:5616296.81,  hwPer:26268.93, code:"940"},
-  {rank:65, name:"Antelope Valley",      ftef:190,   adjFtef:186,   hw:4734614.95,  hwPer:25454.92, code:"620"},
-  {rank:66, name:"Los Rios",             ftef:905.1, adjFtef:883.1, hw:22037118.02, hwPer:24954.27, code:"230"},
-  {rank:67, name:"Sonoma County",        ftef:308.1, adjFtef:298.1, hw:7402900.21,  hwPer:24833.61, code:"260"},
-  {rank:68, name:"San Luis Obispo",      ftef:137.3, adjFtef:136.3, hw:3374803.21,  hwPer:24760.11, code:"640"},
-  {rank:69, name:"Palo Verde",           ftef:45,    adjFtef:45,    hw:922662.82,   hwPer:20503.62, code:"950"},
-  {rank:70, name:"Feather River",        ftef:29,    adjFtef:29,    hw:562688.47,   hwPer:19403.05, code:"120"},
-  {rank:71, name:"Allan Hancock",        ftef:163.3, adjFtef:159.3, hw:3033897.75,  hwPer:19045.18, code:"610"},
-  {rank:72, name:"Pasadena Area",        ftef:422,   adjFtef:416,   hw:6949128.04,  hwPer:16704.63, code:"770", selfInsured:true},
+  {name:"West Kern",             ftef:60,     adjFtef:60,    rawBenefits:11006984,  hw:3968541.15,  code:"690"},
+  {name:"San Diego",             ftef:558,    adjFtef:549,   rawBenefits:110878610, hw:33255880.82, code:"70"},
+  {name:"Long Beach",            ftef:348,    adjFtef:341,   rawBenefits:62008967,  hw:19679977.87, code:"840"},
+  {name:"Hartnell",              ftef:119.6,  adjFtef:117.6, rawBenefits:22081179,  hw:6777198.12,  code:"450"},
+  {name:"MiraCosta",             ftef:208.8,  adjFtef:203.8, rawBenefits:43036401,  hw:11027985.33, code:"50"},
+  {name:"Monterey Peninsula",    ftef:115.4,  adjFtef:112.4, rawBenefits:18270805,  hw:6019693.22,  code:"460"},
+  {name:"Cerritos",              ftef:269,    adjFtef:264,   rawBenefits:44881544,  hw:14047261.28, code:"810"},
+  {name:"Rancho Santiago",       ftef:356,    adjFtef:348,   rawBenefits:77102874,  hw:18239675.46, code:"870"},
+  {name:"Santa Monica",          ftef:347.9,  adjFtef:343.9, rawBenefits:71906524,  hw:18000062.43, code:"780"},
+  {name:"San Jose-Evergreen",    ftef:241.1,  adjFtef:237.1, rawBenefits:44905391,  hw:12380715.99, code:"470"},
+  {name:"Contra Costa",          ftef:482.2,  adjFtef:475.2, rawBenefits:82935993,  hw:24810912.16, code:"310"},
+  {name:"San Joaquin Delta",     ftef:241.6,  adjFtef:238.6, rawBenefits:40203013,  hw:12383029.28, code:"550"},
+  {name:"Desert",                ftef:148,    adjFtef:146,   rawBenefits:24772561,  hw:7294515.24,  code:"930"},
+  {name:"Cabrillo",              ftef:187.3,  adjFtef:184.3, rawBenefits:26500724,  hw:9067457.22,  code:"410"},
+  {name:"Santa Barbara",         ftef:211,    adjFtef:209,   rawBenefits:31402684,  hw:10242778.69, code:"650"},
+  {name:"South Orange",          ftef:406.3,  adjFtef:397.3, rawBenefits:79924747,  hw:19149119.25, code:"890"},
+  {name:"San Francisco",         ftef:345.9,  adjFtef:331.9, rawBenefits:54965752,  hw:15345210.36, code:"360"},
+  {name:"Coast",                 ftef:415.2,  adjFtef:405.2, rawBenefits:73857935,  hw:18525346.87, code:"830"},
+  {name:"Solano",                ftef:134,    adjFtef:132,   rawBenefits:20609643,  hw:6002062.57,  code:"280"},
+  {name:"Chaffey",               ftef:240.2,  adjFtef:235.2, rawBenefits:43734182,  hw:10671306.38, code:"920"},
+  {name:"North Orange County",   ftef:531,    adjFtef:519,   rawBenefits:85726727,  hw:23490633.53, code:"860"},
+  {name:"Peralta",               ftef:296.5,  adjFtef:290.5, rawBenefits:48520385,  hw:13112212.50, code:"340"},
+  {name:"Butte",                 ftef:183.4,  adjFtef:179.4, rawBenefits:27242657,  hw:8083039.19,  code:"110"},
+  {name:"El Camino",             ftef:334.9,  adjFtef:327.9, rawBenefits:47038990,  hw:14605046.26, code:"720"},
+  {name:"Gavilan Joint",         ftef:74,     adjFtef:71,    rawBenefits:11291541,  hw:3146322.18,  code:"440"},
+  {name:"Foothill-DeAnza",       ftef:404.2,  adjFtef:397.2, rawBenefits:64692761,  hw:17188737.21, code:"420"},
+  {name:"Los Angeles",           ftef:1621.5, adjFtef:1594.5,rawBenefits:246036558, hw:67706014.69, code:"740"},
+  {name:"Marin",                 ftef:123.9,  adjFtef:119.9, rawBenefits:21788993,  hw:5065497.71,  code:"330"},
+  {name:"Merced",                ftef:184.8,  adjFtef:179.8, rawBenefits:29267480,  hw:7541805.56,  code:"530"},
+  {name:"Grossmont-Cuyamaca",    ftef:294.5,  adjFtef:289.5, rawBenefits:42886994,  hw:12084777.98, code:"20"},
+  {name:"Palomar",               ftef:298.3,  adjFtef:291.3, rawBenefits:46227451,  hw:12088571.84, code:"60"},
+  {name:"Riverside",             ftef:497.7,  adjFtef:489.7, rawBenefits:92484310,  hw:20294568.18, code:"960"},
+  {name:"Southwestern",          ftef:265.4,  adjFtef:259.4, rawBenefits:40398640,  hw:10685280.27, code:"90"},
+  {name:"Glendale",              ftef:217.5,  adjFtef:210.5, rawBenefits:36482138,  hw:8664175.74,  code:"730"},
+  {name:"West Hills",            ftef:102,    adjFtef:102,   rawBenefits:15662599,  hw:4149608.62,  code:"580"},
+  {name:"Shasta-Tehama-Trinity", ftef:128,    adjFtef:126,   rawBenefits:18956756,  hw:5109557.65,  code:"170"},
+  {name:"Barstow",               ftef:40.5,   adjFtef:37.5,  rawBenefits:7158486,   hw:1509040.51,  code:"910"},
+  {name:"Copper Mountain",       ftef:25.7,   adjFtef:25.7,  rawBenefits:5577711,   hw:1022671.98,  code:"970"},
+  {name:"Citrus",                ftef:162,    adjFtef:159,   rawBenefits:31071058,  hw:6281361.95,  code:"820"},
+  {name:"Mendocino-Lake",        ftef:61,     adjFtef:61,    rawBenefits:9795420,   hw:2342534.59,  code:"140"},
+  {name:"West Valley-Mission",   ftef:266,    adjFtef:259,   rawBenefits:48240198,  hw:9928555.47,  code:"490"},
+  {name:"Santa Clarita",         ftef:226,    adjFtef:221,   rawBenefits:39034273,  hw:8382268.65,  code:"660"},
+  {name:"San Mateo",             ftef:365.4,  adjFtef:354.4, rawBenefits:61725671,  hw:13409261.41, code:"370"},
+  {name:"Victor Valley",         ftef:132,    adjFtef:130,   rawBenefits:26703552,  hw:4805369.76,  code:"990"},
+  {name:"Mt. San Antonio",       ftef:443,    adjFtef:433,   rawBenefits:80440970,  hw:15921924.55, code:"850"},
+  {name:"Yosemite",              ftef:315,    adjFtef:309,   rawBenefits:43892425,  hw:11290204.66, code:"590", isYosemite:true},
+  {name:"Siskiyou",              ftef:45.5,   adjFtef:44.5,  rawBenefits:6343812,   hw:1620921.12,  code:"180"},
+  {name:"Rio Hondo",             ftef:239.1,  adjFtef:235.1, rawBenefits:38860174,  hw:8480333.33,  code:"880"},
+  {name:"Sierra",                ftef:232.4,  adjFtef:228.4, rawBenefits:33216068,  hw:8206977.83,  code:"270"},
+  {name:"Compton",               ftef:102.5,  adjFtef:100.5, rawBenefits:11983193,  hw:3596214.86,  code:"710"},
+  {name:"Chabot-Las Positas",    ftef:285,    adjFtef:277,   rawBenefits:44463838,  hw:9699300.54,  code:"480"},
+  {name:"Ohlone",                ftef:112,    adjFtef:109,   rawBenefits:18097322,  hw:3794879.27,  code:"430"},
+  {name:"Imperial",              ftef:145,    adjFtef:144,   rawBenefits:18686321,  hw:4992122.18,  code:"30"},
+  {name:"Lassen",                ftef:36.1,   adjFtef:35.1,  rawBenefits:6174246,   hw:1202283.11,  code:"130"},
+  {name:"Lake Tahoe",            ftef:38.1,   adjFtef:38.1,  rawBenefits:6104827,   hw:1302042.58,  code:"220"},
+  {name:"Kern",                  ftef:495,    adjFtef:488,   rawBenefits:63009067,  hw:16040002.58, code:"520"},
+  {name:"Sequoias",              ftef:216.5,  adjFtef:211.5, rawBenefits:26796844,  hw:6589648.04,  code:"560"},
+  {name:"Napa Valley",           ftef:93.1,   adjFtef:93.1,  rawBenefits:11468528,  hw:2843451.75,  code:"240"},
+  {name:"Yuba",                  ftef:122.1,  adjFtef:121.1, rawBenefits:19166832,  hw:3601571.79,  code:"290"},
+  {name:"Ventura",               ftef:454.3,  adjFtef:442.3, rawBenefits:56988995,  hw:13122915.79, code:"680"},
+  {name:"Redwoods",              ftef:72.3,   adjFtef:70.3,  rawBenefits:11459864,  hw:1989171.69,  code:"160"},
+  {name:"San Bernardino",        ftef:285.9,  adjFtef:281.9, rawBenefits:33781422,  hw:7894983.20,  code:"980"},
+  {name:"State Center",          ftef:701.2,  adjFtef:691.2, rawBenefits:75595537,  hw:18684056.74, code:"570"},
+  {name:"Mt. San Jacinto",       ftef:217.8,  adjFtef:213.8, rawBenefits:28957292,  hw:5616296.81,  code:"940"},
+  {name:"Antelope Valley",       ftef:190,    adjFtef:186,   rawBenefits:24134706,  hw:4734614.95,  code:"620"},
+  {name:"Los Rios",              ftef:905.1,  adjFtef:883.1, rawBenefits:108489610, hw:22037118.02, code:"230"},
+  {name:"Sonoma County",         ftef:308.1,  adjFtef:298.1, rawBenefits:39858951,  hw:7402900.21,  code:"260"},
+  {name:"San Luis Obispo",       ftef:137.3,  adjFtef:136.3, rawBenefits:16009912,  hw:3374803.21,  code:"640"},
+  {name:"Palo Verde",            ftef:45,     adjFtef:45,    rawBenefits:5594243,   hw:922662.82,   code:"950"},
+  {name:"Feather River",         ftef:29,     adjFtef:29,    rawBenefits:3791530,   hw:562688.47,   code:"120"},
+  {name:"Allan Hancock",         ftef:163.3,  adjFtef:159.3, rawBenefits:19714045,  hw:3033897.75,  code:"610"},
+  {name:"Pasadena Area",         ftef:422,    adjFtef:416,   rawBenefits:57573472,  hw:6949128.04,  code:"770", selfInsured:true},
 ];
 
-function fmt(n) {
-  return '$' + Math.round(n).toLocaleString();
+const SCENARIOS = {
+  full:  { getValue: d => d.hw / d.adjFtef,        getTotalHw: d => d.hw,            getFtef: d => d.adjFtef },
+  lib:   { getValue: d => d.rawBenefits / d.adjFtef, getTotalHw: d => d.rawBenefits, getFtef: d => d.adjFtef },
+  basic: { getValue: d => d.rawBenefits / d.ftef,   getTotalHw: d => d.rawBenefits,  getFtef: d => d.ftef  },
+};
+
+let currentScenario = 'full';
+let ccfsSort = { col: 0, dir: 'asc' };
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+
+function computeRanked(scenario) {
+  const s = SCENARIOS[scenario];
+  return districts
+    .map(d => ({ ...d, scenarioValue: s.getValue(d), scenarioHw: s.getTotalHw(d), scenarioFtef: s.getFtef(d) }))
+    .sort((a, b) => b.scenarioValue - a.scenarioValue)
+    .map((d, i) => ({ ...d, rank: i + 1 }));
+}
+
+function computeStats(ranked) {
+  const vals = ranked.map(d => d.scenarioValue).sort((a, b) => a - b);
+  const n = vals.length;
+  return {
+    mean:   vals.reduce((s, v) => s + v, 0) / n,
+    median: n % 2 === 0 ? (vals[n/2-1] + vals[n/2]) / 2 : vals[Math.floor(n/2)],
+    max: vals[n-1], min: vals[0]
+  };
 }
 
 function tier(rank) {
-  if (rank <= 18) return 1;
-  if (rank <= 36) return 2;
-  if (rank <= 54) return 3;
-  return 4;
+  return rank <= 18 ? 1 : rank <= 36 ? 2 : rank <= 54 ? 3 : 4;
 }
 
-// --- Bar Chart ---
-const labels = districts.map(d => d.selfInsured ? d.name + ' *' : d.name);
-const values = districts.map(d => d.hwPer);
-const colors = districts.map(d => {
-  if (d.isYosemite) return '#e67e22';
-  const t = tier(d.rank);
-  return t === 1 ? '#27ae60' : t === 2 ? '#85c17e' : t === 3 ? '#f0a500' : '#e74c3c';
-});
+// Chart
+let chart, chartInitialized = false;
+const TIER_COLORS = ['#27ae60','#85c17e','#f0a500','#e74c3c'];
 
-const borderColors = districts.map(d => d.isYosemite ? '#b85c00' : 'transparent');
-const borderWidths = districts.map(d => d.isYosemite ? 3 : 0);
-const barThickness = districts.map(d => d.isYosemite ? 18 : 10);
-
-const ctx = document.getElementById('barChart').getContext('2d');
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels,
-    datasets: [{
-      data: values,
-      backgroundColor: colors,
-      borderColor: borderColors,
-      borderWidth: borderWidths,
-      borderRadius: 3,
-      borderSkipped: false,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
+function initChart() {
+  const ctx = document.getElementById('barChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: [], borderRadius: 3, borderSkipped: false }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
           label: ctx => ' ' + fmt(ctx.raw) + ' per FT faculty',
           title: ctx => ctx[0].label,
+        }}
+      },
+      scales: {
+        x: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 11 } }, grid: { color: '#eee' } },
+        y: {
+          ticks: {
+            font: ctx => ({ size: ctx.tick.label === 'Yosemite' ? 13 : 11, weight: ctx.tick.label === 'Yosemite' ? 'bold' : 'normal' }),
+            color: ctx => ctx.tick.label === 'Yosemite' ? '#e67e22' : '#333',
+          },
+          grid: { display: false }
         }
       }
-    },
-    scales: {
-      x: {
-        ticks: {
-          callback: v => '$' + (v/1000).toFixed(0) + 'k',
-          font: { size: 11 }
-        },
-        grid: { color: '#eee' }
-      },
-      y: {
-        ticks: {
-          font: ctx => ({
-            size: ctx.tick.label === 'Yosemite' ? 13 : 11,
-            weight: ctx.tick.label === 'Yosemite' ? 'bold' : 'normal',
-          }),
-          color: ctx => ctx.tick.label === 'Yosemite' ? '#e67e22' : '#333',
-        },
-        grid: { display: false }
-      }
     }
-  }
-});
+  });
+  chartInitialized = true;
+  updateChart(computeRanked(currentScenario));
+}
 
-// --- Table ---
-let currentSort = { col: 0, dir: 'asc' };
+function updateChart(ranked) {
+  if (!chartInitialized) return;
+  chart.data.labels = ranked.map(d => d.selfInsured ? d.name + ' *' : d.name);
+  chart.data.datasets[0].data = ranked.map(d => d.scenarioValue);
+  chart.data.datasets[0].backgroundColor = ranked.map(d => d.isYosemite ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
+  chart.data.datasets[0].borderColor = ranked.map(d => d.isYosemite ? '#b85c00' : 'transparent');
+  chart.data.datasets[0].borderWidth = ranked.map(d => d.isYosemite ? 3 : 0);
+  chart.update();
+}
 
-function buildTable(data) {
-  const tbody = document.getElementById('tableBody');
+function buildCcfsTable(data) {
+  const stats = computeStats(computeRanked(currentScenario));
+  const max = data.reduce((m, d) => Math.max(m, d.scenarioValue), 0);
+  const tbody = document.getElementById('ccfsBody');
   tbody.innerHTML = '';
   data.forEach(d => {
-    const t = d.isYosemite ? 3 : tier(d.rank); // Yosemite styled separately
-    const diff = d.hwPer - MEDIAN;
+    const t = tier(d.rank);
+    const diff = d.scenarioValue - stats.median;
     const diffStr = (diff >= 0 ? '+' : '') + fmt(diff);
     const diffColor = d.isYosemite ? '#e67e22' : (diff >= 0 ? '#1e8449' : '#c0392b');
-    const pct = (d.hwPer / MAX_HW * 100).toFixed(1);
-
+    const pct = (d.scenarioValue / max * 100).toFixed(1);
+    const barColor = d.isYosemite ? '#e67e22' : TIER_COLORS[t-1];
     const tr = document.createElement('tr');
-    if (d.isYosemite) tr.className = 'yosemite';
-    else tr.className = 'tier-' + t;
-
+    tr.className = d.isYosemite ? 'yosemite' : 'tier-' + t;
     tr.innerHTML = `
       <td class="rank">#${d.rank}</td>
-      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured district — H&amp;W costs reported under operating expenses, not object code 3000. Figure may be understated.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
-      <td class="num">${d.adjFtef.toLocaleString()}</td>
-      <td class="num">${fmt(d.hw)}</td>
-      <td class="hw-value">${fmt(d.hwPer)}</td>
-      <td>
-        <div class="bar-cell">
-          <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${d.isYosemite?'#e67e22':colors[d.rank-1]}"></div></div>
-        </div>
-      </td>
-    `;
-    // store sort values
-    tr.dataset.rank = d.rank;
-    tr.dataset.name = d.name;
-    tr.dataset.ftef = d.adjFtef;
-    tr.dataset.hw = d.hw;
-    tr.dataset.hwPer = d.hwPer;
+      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td class="num">${d.scenarioFtef.toLocaleString()}</td>
+      <td class="num">${fmt(d.scenarioHw)}</td>
+      <td class="hw-value">${fmt(d.scenarioValue)}</td>
+      <td><div class="bar-cell">
+        <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div></td>`;
+    tr.dataset.rank = d.rank; tr.dataset.name = d.name;
+    tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
     tbody.appendChild(tr);
   });
 }
 
-function filterTable() {
-  const q = document.getElementById('searchBox').value.toLowerCase();
-  const filtered = districts.filter(d => d.name.toLowerCase().includes(q));
-  buildTable(sortedData(filtered));
+function updateCcfsCards(ranked, stats) {
+  const yos = ranked.find(d => d.isYosemite);
+  const minD = ranked[ranked.length-1], maxD = ranked[0];
+  document.getElementById('cardMean').textContent = fmt(stats.mean);
+  document.getElementById('cardMedian').textContent = fmt(stats.median);
+  document.getElementById('cardRange').textContent = fmt(stats.min) + ' – ' + fmt(stats.max);
+  document.getElementById('cardRangeSub').textContent = minD.name + ' to ' + maxD.name;
+  document.getElementById('cardYosemite').textContent = fmt(yos.scenarioValue);
+  const diff = yos.scenarioValue - stats.median;
+  document.getElementById('cardYosemiteSub').textContent =
+    `Rank ${yos.rank} of 72 — $${Math.round(Math.abs(diff)).toLocaleString()} ${diff >= 0 ? 'above' : 'below'} median`;
 }
 
-function sortedData(data) {
-  const { col, dir } = currentSort;
-  const keys = ['rank', 'name', 'adjFtef', 'hw', 'hwPer', 'hwPer'];
+function filterCcfsTable() {
+  const q = document.getElementById('ccfsSearch').value.toLowerCase();
+  const ranked = computeRanked(currentScenario);
+  buildCcfsTable(sortedCcfsData(ranked.filter(d => d.name.toLowerCase().includes(q))));
+}
+
+function sortedCcfsData(data) {
+  const keys = ['rank','name','scenarioFtef','scenarioHw','scenarioValue','scenarioValue'];
+  const { col, dir } = ccfsSort;
   return [...data].sort((a, b) => {
-    const k = keys[col];
-    const av = typeof a[k] === 'string' ? a[k] : +a[k];
-    const bv = typeof b[k] === 'string' ? b[k] : +b[k];
-    if (av < bv) return dir === 'asc' ? -1 : 1;
-    if (av > bv) return dir === 'asc' ? 1 : -1;
-    return 0;
+    const av = typeof a[keys[col]] === 'string' ? a[keys[col]] : +a[keys[col]];
+    const bv = typeof b[keys[col]] === 'string' ? b[keys[col]] : +b[keys[col]];
+    return av < bv ? (dir === 'asc' ? -1 : 1) : av > bv ? (dir === 'asc' ? 1 : -1) : 0;
   });
 }
 
-function sortTable(col) {
-  if (currentSort.col === col) {
-    currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
-  } else {
-    currentSort = { col, dir: col === 1 ? 'asc' : 'desc' };
-  }
-  // update header classes
+function sortCcfs(col) {
+  ccfsSort = { col, dir: ccfsSort.col === col ? (ccfsSort.dir === 'asc' ? 'desc' : 'asc') : (col === 1 ? 'asc' : 'desc') };
   for (let i = 0; i <= 5; i++) {
-    const th = document.getElementById('th' + i);
-    if (!th) continue;
-    th.className = '';
-    if (i === col) th.className = currentSort.dir;
+    const th = document.getElementById('cth' + i);
+    if (th) th.className = i === col ? ccfsSort.dir : '';
   }
-  const q = document.getElementById('searchBox').value.toLowerCase();
-  const filtered = districts.filter(d => d.name.toLowerCase().includes(q));
-  buildTable(sortedData(filtered));
+  filterCcfsTable();
 }
 
-buildTable(districts);
+function setScenario(s) {
+  currentScenario = s;
+  ['full','lib','basic'].forEach(k => document.getElementById('btn-' + k).classList.toggle('active', k === s));
+  const ranked = computeRanked(s);
+  const stats = computeStats(ranked);
+  updateCcfsCards(ranked, stats);
+  updateChart(ranked);
+  buildCcfsTable(sortedCcfsData(ranked));
+}
+
+// ══════════════════════════════════════════════════════════════
+// TAB 2 — YFA SURVEY
+// ══════════════════════════════════════════════════════════════
+const YFA_RAW = [
+  ["Yosemite",25692,26400,"Yes"],
+  ["Gavilan",null,28500,"No"],
+  ["Compton",17000,17000,"Yes"],
+  ["Antelope Valley",null,17500,"No"],
+  ["Foothill-DeAnza",null,44296.32,"No"],
+  ["Pasadena Area",27012,27012,"Yes"],
+  ["Mt. San Antonio",null,28184.3,"Yes"],
+  ["Riverside",48925.44,48925.44,"Yes"],
+  ["Ohlone",19500,19500,"Yes"],
+  ["Grossmont-Cuyamaca",null,30480,"Yes"],
+  ["Citrus",34477.44,37761.84,"Yes"],
+  ["Contra Costa",null,60690,"No"],
+  ["Mira Costa",null,34908,"Yes"],
+  ["Mt. San Jacinto",null,21187.5,"Yes"],
+  ["El Camino",null,27000,"Yes"],
+  ["Napa Valley",14026.32,14026.32,"Yes"],
+  ["Lake Tahoe",20139.76,20139.76,"Yes"],
+  ["Kern",22165.8,22165.8,"Yes"],
+  ["Palomar",null,34068,"Yes"],
+  ["West Kern",20850,20850,"Yes"],
+  ["Santa Barbara",null,31465.56,"Yes"],
+  ["San Bernardino",18288,18288,"Yes"],
+  ["Victor Valley",26244,26244,"Yes"],
+  ["San Diego CCD",null,33840,"Yes"],
+  ["Marin CCD",23747,41830,"No"],
+  ["Shasta-Tehama-Trinity Joint CCD",null,20628,"No"],
+  ["Merced CCD",31068,31068,"No"],
+  ["Lassen",23496,23496,"Yes"],
+];
+
+const yfaData = YFA_RAW.map(([name, avg, max, paidStr]) => ({
+  name, avg, max, paid: paidStr === "Yes" ? true : paidStr === "No" ? false : null
+}));
+const yfaSorted = [...yfaData].filter(d => d.max != null).sort((a,b) => b.max - a.max);
+yfaSorted.forEach((d, i) => { d.rank = i + 1; });
+yfaData.filter(d => d.max == null).forEach(d => { d.rank = null; });
+
+const YFA_MAX = Math.max(...yfaData.map(d => d.max).filter(Boolean));
+const YFA_MIN = Math.min(...yfaData.map(d => d.max).filter(Boolean));
+const YOS_YFA = yfaData.find(d => d.name === 'Yosemite');
+
+let yfaSortCol = 'rank', yfaSortDir = 1;
+
+function fmtDelta(n) {
+  if (n == null) return null;
+  return (n >= 0 ? '+' : '') + '$' + Math.abs(Math.round(n)).toLocaleString();
+}
+
+function setYfaSort(col) {
+  if (yfaSortCol === col) { yfaSortDir *= -1; }
+  else { yfaSortCol = col; yfaSortDir = col === 'name' ? 1 : col === 'rank' ? 1 : -1; }
+  renderYfa();
+}
+
+function renderYfa() {
+  const q = document.getElementById('yfaSearch').value.toLowerCase();
+  const fp = document.getElementById('filterPaid').value;
+
+  ['rank','name','avg','max','delta','paid'].forEach(c => {
+    const el = document.getElementById('si-' + c);
+    if (!el) return;
+    if (c === yfaSortCol) {
+      el.textContent = yfaSortDir === 1 ? '▲' : '▼';
+      el.closest('th').classList.add('sorted');
+    } else {
+      el.textContent = '⇅';
+      el.closest('th').classList.remove('sorted');
+    }
+  });
+
+  let rows = yfaData.filter(d => {
+    if (q && !d.name.toLowerCase().includes(q)) return false;
+    if (fp === 'yes' && d.paid !== true) return false;
+    if (fp === 'no' && d.paid !== false) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    let av, bv;
+    if (yfaSortCol === 'name')  { av = a.name; bv = b.name; }
+    else if (yfaSortCol === 'avg')   { av = a.avg ?? -Infinity; bv = b.avg ?? -Infinity; }
+    else if (yfaSortCol === 'max')   { av = a.max ?? -Infinity; bv = b.max ?? -Infinity; }
+    else if (yfaSortCol === 'rank')  { av = a.rank ?? 999; bv = b.rank ?? 999; }
+    else if (yfaSortCol === 'delta') { av = (a.max??0) - YOS_YFA.max; bv = (b.max??0) - YOS_YFA.max; }
+    else if (yfaSortCol === 'paid')  { av = a.paid===true?0:a.paid===false?1:2; bv = b.paid===true?0:b.paid===false?1:2; }
+    else { av = a.rank ?? 999; bv = b.rank ?? 999; }
+    return av < bv ? -yfaSortDir : av > bv ? yfaSortDir : 0;
+  });
+
+  const tbody = document.getElementById('yfaBody');
+  tbody.innerHTML = '';
+  rows.forEach(d => {
+    const isYos = d.name === 'Yosemite';
+    const delta = d.max != null ? d.max - YOS_YFA.max : null;
+    const barW = d.max ? Math.round((d.max / YFA_MAX) * 100) : 0;
+    const barColor = isYos ? '#e67e22' : (d.max === YFA_MAX ? '#27ae60' : d.max === YFA_MIN ? '#e74c3c' : '#93c5fd');
+    let deltaCls = 'same', deltaStr = '—';
+    if (delta != null && !isYos) { deltaCls = delta > 0 ? 'above' : 'below'; deltaStr = fmtDelta(delta); }
+
+    let paidHtml = d.paid === true
+      ? '<span class="badge badge-yes">Yes</span>'
+      : d.paid === false
+        ? '<span class="badge badge-no">No</span>'
+        : '<span class="badge badge-unk">?</span>';
+
+    const rankHtml = d.rank
+      ? `<span class="rank${d.rank <= 5 ? ' top5' : ''}">${d.rank}</span>`
+      : `<span class="rank no-data">—</span>`;
+
+    const tr = document.createElement('tr');
+    if (isYos) tr.className = 'yos';
+    tr.innerHTML = `
+      <td style="text-align:center">${rankHtml}</td>
+      <td><span class="dname">${isYos ? '★ ' : ''}${d.name}</span>${isYos ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td class="num">${d.avg != null ? fmt(d.avg) : '<span class="no-data">—</span>'}</td>
+      <td class="num"><strong>${d.max != null ? fmt(d.max) : '<span class="no-data">—</span>'}</strong></td>
+      <td class="delta ${deltaCls}">${deltaStr}</td>
+      <td>${paidHtml}</td>
+      <td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${barW}%;background:${barColor}"></div></div></td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('yfaCount').textContent = `${rows.length} of ${yfaData.length} districts`;
+}
+
+function buildYfaCards() {
+  const withMax = yfaData.filter(d => d.max != null);
+  const peerAvg = Math.round(withMax.reduce((s,d) => s + d.max, 0) / withMax.length);
+  const above = withMax.filter(d => d.max > YOS_YFA.max).length;
+  const below = withMax.filter(d => d.max < YOS_YFA.max).length;
+  const paidYes = yfaData.filter(d => d.paid === true).length;
+  const paidNo  = yfaData.filter(d => d.paid === false).length;
+  const diff = YOS_YFA.max - peerAvg;
+
+  const cards = [
+    { label:'Yosemite Rank', value:`#${YOS_YFA.rank}`, sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
+    { label:'Yosemite Max Medical', value:fmt(YOS_YFA.max), sub:`${above} districts pay more · ${below} pay less`, extra:'' },
+    { label:'Peer Avg (Max Medical)', value:fmt(peerAvg), sub:`${fmt(Math.abs(diff))} ${diff >= 0 ? 'above' : 'below'} peer average`, extra: diff >= 0 ? 'accent-green' : 'accent-amber' },
+    { label:'Fully Paid Plan', value:`${paidYes} / ${yfaData.length}`, sub:`${paidNo} districts do not offer one`, extra:'' },
+  ];
+  document.getElementById('yfaCards').innerHTML = cards.map(c =>
+    `<div class="card ${c.extra}"><label>${c.label}</label><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`
+  ).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+setScenario('full');
+initChart();
+buildYfaCards();
+renderYfa();
 </script>
 </body>
 </html>
