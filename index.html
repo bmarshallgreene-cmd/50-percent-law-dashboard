@@ -667,7 +667,7 @@ function buildYfaCards() {
     { label:'Yosemite Rank', value:`#${YOS_YFA.rank}`, sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
     { label:'Yosemite Max Medical', value:fmt(YOS_YFA.max), sub:`${above} districts pay more · ${below} pay less`, extra:'' },
     { label:'Peer Avg (Max Medical)', value:fmt(peerAvg), sub:`${fmt(Math.abs(diff))} ${diff >= 0 ? 'above' : 'below'} peer average`, extra: diff >= 0 ? 'accent-green' : 'accent-amber' },
-    { label:'Fully Paid Plan', value:`${paidYes} / ${yfaData.length}`, sub:`${paidNo} districts do not offer one`, extra:'' },
+    { label:'Fully Paid Plan', value:`${paidYes} / ${yfaData.length}`, sub:`${Math.round(paidYes/yfaData.length*100)}% of surveyed districts offer one`, extra:'accent-green' },
   ];
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
     `<div class="card ${c.extra}"><label>${c.label}</label><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`
