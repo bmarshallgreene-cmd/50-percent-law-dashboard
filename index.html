@@ -114,6 +114,7 @@
 
   /* ── Table (shared) ── */
   .table-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
   .table-header h2 { font-size: 1rem; font-weight: 600; color: #1a3a5c; }
 
@@ -256,6 +257,7 @@
       <h2>District Detail</h2>
       <input type="text" class="search-box" id="ccfsSearch" placeholder="Search district…" oninput="filterCcfsTable()">
     </div>
+    <div class="table-scroll">
     <table id="ccfsTable">
       <thead>
         <tr>
@@ -272,6 +274,7 @@
       </thead>
       <tbody id="ccfsBody"></tbody>
     </table>
+    </div>
   </div>
 
 </div>
