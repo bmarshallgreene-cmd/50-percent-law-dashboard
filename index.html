@@ -299,7 +299,13 @@
 <footer>
   <strong>Full Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions. Denominator = FON FT FTEF minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
   <br><br><strong>Note on part-time faculty benefits:</strong> Districts that extend health &amp; welfare benefits to part-time faculty will have higher 3000-series expenditures that are not fully attributable to full-time faculty. This may cause some districts' per-FT figures to be overstated relative to districts that offer benefits only to full-time employees.
-  <br><br>* Pasadena Area operates a self-insured health benefits program through an Internal Service Fund. Their H&amp;W costs are recorded as operating expenses (object 5000) rather than employee benefits (object 3000), so this figure significantly understates their actual per-faculty cost.
+  <br><br><strong>* Self-insured districts:</strong> Districts marked with * operate self-insured or self-funded health plans where costs may not be fully captured in object code 3000 of the CCFS-311, causing figures to be understated.
+  <ul style="text-align:left;margin:8px auto;max-width:900px;color:#999;font-size:0.75rem">
+    <li><strong>Pasadena Area</strong> — Confirmed: routes H&amp;W costs through an Internal Service Fund (Fund 61) and records them as operating expenses (object 5000), not employee benefits. Figure is significantly understated.</li>
+    <li><strong>Shasta-Tehama-Trinity</strong> — Self-insured via STSIG JPA (Shasta Trinity Schools Insurance Group); claims administered by Anthem Blue Cross. CCFS-311 recording treatment unverified.</li>
+    <li><strong>Riverside</strong> — Operates a standalone self-funded PPO administered by Health Now/Blue Shield. CCFS-311 recording treatment unverified.</li>
+  </ul>
+  <em>Note: Many districts participate in SISC (Self-Insured Schools of California), a public JPA. SISC districts generally pay contributions that still appear correctly in object 3000 and are not flagged here. Districts using CalPERS health plans (e.g., Foothill-DeAnza, Los Angeles, North Orange County, San Mateo, Solano) are fully insured and not affected by this issue.</em>
   <br><br><strong>Sources:</strong>
   &nbsp;(1) <a href="https://fiscalportal.cccco.edu/Reports/AnnualReports" target="_blank" style="color:#1a3a5c">CCFS-311 Annual Reports — CCCCO Fiscal Portal</a>
   &nbsp;&nbsp;(2) <a href="https://www.cccco.edu/About-Us/Chancellors-Office/Divisions/Educational-Services-and-Support/What-we-do/Full-Time-Faculty-Obligation-Number" target="_blank" style="color:#1a3a5c">Fall 2024 FON Report — CCCCO</a>
@@ -401,11 +407,11 @@ const districts = [
   {name:"Merced",                ftef:184.8,  adjFtef:179.8, rawBenefits:29267480,  hw:7541805.56,  code:"530", step21:120395, region:"Central Valley", multi:false},
   {name:"Grossmont-Cuyamaca",    ftef:294.5,  adjFtef:289.5, rawBenefits:42886994,  hw:12084777.98, code:"20",  step21:132111, region:"San Diego",      multi:true},
   {name:"Palomar",               ftef:298.3,  adjFtef:291.3, rawBenefits:46227451,  hw:12088571.84, code:"60",  step21:139645, region:"San Diego",      multi:false},
-  {name:"Riverside",             ftef:497.7,  adjFtef:489.7, rawBenefits:92484310,  hw:20294568.18, code:"960", step21:163876, region:"Inland Empire",  multi:true},
+  {name:"Riverside",             ftef:497.7,  adjFtef:489.7, rawBenefits:92484310,  hw:20294568.18, code:"960", step21:163876, selfInsured:true, region:"Inland Empire",  multi:true},
   {name:"Southwestern",          ftef:265.4,  adjFtef:259.4, rawBenefits:40398640,  hw:10685280.27, code:"90",  step21:138004, region:"San Diego",      multi:false},
   {name:"Glendale",              ftef:217.5,  adjFtef:210.5, rawBenefits:36482138,  hw:8664175.74,  code:"730", step21:122736, region:"Greater LA",     multi:false},
   {name:"West Hills",            ftef:102,    adjFtef:102,   rawBenefits:15662599,  hw:4149608.62,  code:"580", step21:144441, region:"Central Valley", multi:true},
-  {name:"Shasta-Tehama-Trinity", ftef:128,    adjFtef:126,   rawBenefits:18956756,  hw:5109557.65,  code:"170", step21:112552, region:"Northern CA",    multi:false},
+  {name:"Shasta-Tehama-Trinity", ftef:128,    adjFtef:126,   rawBenefits:18956756,  hw:5109557.65,  code:"170", step21:112552, selfInsured:true, region:"Northern CA",    multi:false},
   {name:"Barstow",               ftef:40.5,   adjFtef:37.5,  rawBenefits:7158486,   hw:1509040.51,  code:"910", step21:135099, region:"Inland Empire",  multi:false},
   {name:"Copper Mountain",       ftef:25.7,   adjFtef:25.7,  rawBenefits:5577711,   hw:1022671.98,  code:"970", step21:136887, region:"Inland Empire",  multi:false},
   {name:"Citrus",                ftef:162,    adjFtef:159,   rawBenefits:31071058,  hw:6281361.95,  code:"820", step21:135770, region:"Greater LA",     multi:false},
