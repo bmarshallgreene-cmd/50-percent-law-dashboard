@@ -735,6 +735,7 @@ function sortCcfs(col) {
 function setScenario(s) {
   currentScenario = s;
   ['full','basic'].forEach(k => document.getElementById('btn-' + k).classList.toggle('active', k === s));
+  document.getElementById('cth3').textContent = s === 'full' ? 'Adj. FTEF' : 'FTEF';
   const ranked = computeRanked(s);
   const stats = computeStats(ranked);
   updateCcfsCards(ranked, stats);
