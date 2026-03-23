@@ -204,13 +204,15 @@
 
 <header>
   <h1>Faculty Health Benefits — CA Community College Districts</h1>
-  <p>Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports, Fall 2024 FON Data &amp; YFA Benefits Survey</p>
+  <p id="headerSub">Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data</p>
 </header>
 
 <div class="tab-bar">
-  <span class="tab-bar-label">View:</span>
+  <span class="tab-bar-label">Section:</span>
   <button class="tab-btn active" onclick="showTab('ccfs')">CCFS-311 Analysis — All 72 Districts</button>
   <button class="tab-btn" onclick="showTab('yfa')" id="yfaTabBtn">YFA Benefits Survey</button>
+  <span class="tab-bar-label" style="margin-left:auto">Your district:</span>
+  <select id="districtSelector" class="ctrl-select" style="background:rgba(255,255,255,0.1);color:white;border-color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 10px" onchange="setFocusedDistrict(this.value)"></select>
 </div>
 
 <!-- ══════════════════════════════════════════ TAB 1: CCFS-311 ══ -->
@@ -221,11 +223,11 @@
     <div class="card"><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
     <div class="card"><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
     <div class="card"><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
-    <div class="card highlight"><label>Yosemite CCD</label><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
+    <div class="card highlight"><label id="cardFocusLabel">Your District</label><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
   </div>
 
   <div class="scenario-bar">
-    <span>View as:</span>
+    <span>Calculation:</span>
     <button class="scenario-btn active" id="btn-full" onclick="setScenario('full')">
       Full Methodology
       <span class="btn-sub">Pension &amp; Medicare backed out &divide; librarian-adjusted FTEF</span>
@@ -239,7 +241,7 @@
   <div class="chart-wrap">
     <div style="display:flex;align-items:center;margin-bottom:12px">
       <h2 id="chartTitle" style="margin:0">H&amp;W Cost per FT Faculty &mdash; All Districts, Ranked</h2>
-      <button class="jump-btn" onclick="jumpToYosemite()">&#9660; Jump to Yosemite</button>
+      <button class="jump-btn" id="jumpBtn" onclick="jumpToFocused()">&#9660; Jump to Yosemite</button>
     </div>
     <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap">
       <span style="font-size:0.75rem;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.05em">Color key:</span>
@@ -247,7 +249,7 @@
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#85c17e;display:inline-block"></span>2nd quartile (ranks 19–36)</span>
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#f0a500;display:inline-block"></span>3rd quartile (ranks 37–54)</span>
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#e74c3c;display:inline-block"></span>Bottom quartile (ranks 55–72)</span>
-      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#e67e22;font-weight:600"><span style="width:14px;height:14px;border-radius:3px;background:#e67e22;display:inline-block"></span>Yosemite CCD</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#e67e22;font-weight:600"><span style="width:14px;height:14px;border-radius:3px;background:#e67e22;display:inline-block"></span><span id="colorKeyFocus">Yosemite CCD</span></span>
     </div>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
   </div>
@@ -338,7 +340,7 @@
           <th onclick="setYfaSort('name')">District <span id="si-name">⇅</span></th>
           <th onclick="setYfaSort('avg')" class="num">Avg Medical <span id="si-avg">⇅</span></th>
           <th onclick="setYfaSort('max')" class="num">Max Medical <span id="si-max">⇅</span></th>
-          <th onclick="setYfaSort('delta')" class="num">vs. Yosemite <span id="si-delta">⇅</span></th>
+          <th onclick="setYfaSort('delta')" class="num" id="yfaDeltaHdr">vs. Yosemite <span id="si-delta">⇅</span></th>
           <th onclick="setYfaSort('paid')">Fully Paid Plan <span id="si-paid">⇅</span></th>
           <th class="bar-cell">Relative Max</th>
         </tr>
@@ -363,12 +365,36 @@
 
 <!-- ══════════════════════════════════════════ SCRIPTS ══ -->
 <script>
+// ── Focused district ───────────────────────────────────────────
+let focusedDistrict = 'Yosemite';
+
+function isFocused(d) { return d.name === focusedDistrict; }
+
+function setFocusedDistrict(name) {
+  focusedDistrict = name;
+  // Update all labels
+  document.getElementById('cardFocusLabel').textContent = name;
+  document.getElementById('jumpBtn').textContent = '▼ Jump to ' + name;
+  document.getElementById('colorKeyFocus').textContent = name;
+  document.getElementById('yfaDeltaHdr').innerHTML = 'vs. ' + name + ' <span id="si-delta">⇅</span>';
+  // Re-render both tabs
+  setScenario(currentScenario);
+  buildYfaCards();
+  renderYfa();
+}
+
 // ── Tab switching ──────────────────────────────────────────────
+const TAB_SUBTITLES = {
+  ccfs: 'Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data',
+  yfa:  'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
+};
+
 function showTab(id) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   event.currentTarget.classList.add('active');
+  document.getElementById('headerSub').innerHTML = TAB_SUBTITLES[id];
   if (id === 'ccfs' && !chartInitialized) initChart();
 }
 
@@ -504,8 +530,8 @@ function initChart() {
         x: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 11 } }, grid: { color: '#eee' } },
         y: {
           ticks: {
-            font: ctx => ({ size: ctx.tick.label === 'Yosemite' ? 13 : 11, weight: ctx.tick.label === 'Yosemite' ? 'bold' : 'normal' }),
-            color: ctx => ctx.tick.label === 'Yosemite' ? '#e67e22' : '#333',
+            font: ctx => ({ size: ctx.tick.label === focusedDistrict ? 13 : 11, weight: ctx.tick.label === focusedDistrict ? 'bold' : 'normal' }),
+            color: ctx => ctx.tick.label === focusedDistrict ? '#e67e22' : '#333',
           },
           grid: { display: false }
         }
@@ -520,9 +546,9 @@ function updateChart(ranked) {
   if (!chartInitialized) return;
   chart.data.labels = ranked.map(d => d.selfInsured ? d.name + ' *' : d.name);
   chart.data.datasets[0].data = ranked.map(d => d.scenarioValue);
-  chart.data.datasets[0].backgroundColor = ranked.map(d => d.isYosemite ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
-  chart.data.datasets[0].borderColor = ranked.map(d => d.isYosemite ? '#b85c00' : 'transparent');
-  chart.data.datasets[0].borderWidth = ranked.map(d => d.isYosemite ? 3 : 0);
+  chart.data.datasets[0].backgroundColor = ranked.map(d => isFocused(d) ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
+  chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#b85c00' : 'transparent');
+  chart.data.datasets[0].borderWidth = ranked.map(d => isFocused(d) ? 3 : 0);
   chart.update();
 }
 
@@ -535,20 +561,20 @@ function buildCcfsTable(data) {
     const t = tier(d.rank);
     const diff = d.scenarioValue - stats.median;
     const diffStr = (diff >= 0 ? '+' : '') + fmt(diff);
-    const diffColor = d.isYosemite ? '#e67e22' : (diff >= 0 ? '#1e8449' : '#c0392b');
+    const diffColor = isFocused(d) ? '#e67e22' : (diff >= 0 ? '#1e8449' : '#c0392b');
     const pct = (d.scenarioValue / max * 100).toFixed(1);
-    const barColor = d.isYosemite ? '#e67e22' : TIER_COLORS[t-1];
+    const barColor = isFocused(d) ? '#e67e22' : TIER_COLORS[t-1];
     const tr = document.createElement('tr');
-    tr.className = d.isYosemite ? 'yosemite' : 'tier-' + t;
+    tr.className = isFocused(d) ? 'yosemite' : 'tier-' + t;
     const totalComp = d.step21 + d.scenarioValue;
     const compMedian = computeStats(computeRanked(currentScenario).map(x => ({...x, scenarioValue: x.totalComp}))).median;
     const compDiff = totalComp - compMedian;
     const compDiffStr = (compDiff >= 0 ? '+' : '') + fmt(compDiff);
-    const compDiffColor = d.isYosemite ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
+    const compDiffColor = isFocused(d) ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     tr.innerHTML = `
       <td class="rank">#${d.rank}</td>
-      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${d.isYosemite ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
       <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
@@ -560,7 +586,7 @@ function buildCcfsTable(data) {
       <td class="num" style="font-weight:600">${fmt(totalComp)}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffStr} vs. median</div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${d.isYosemite?'#e67e22':'#6097c4'}"></div></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
       </div></td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
@@ -570,7 +596,7 @@ function buildCcfsTable(data) {
 }
 
 function updateCcfsCards(ranked, stats) {
-  const yos = ranked.find(d => d.isYosemite);
+  const yos = ranked.find(d => isFocused(d));
   const minD = ranked[ranked.length-1], maxD = ranked[0];
   document.getElementById('cardMean').textContent = fmt(stats.mean);
   document.getElementById('cardMedian').textContent = fmt(stats.median);
@@ -671,7 +697,7 @@ yfaData.filter(d => d.max == null).forEach(d => { d.rank = null; });
 
 const YFA_MAX = Math.max(...yfaData.map(d => d.max).filter(Boolean));
 const YFA_MIN = Math.min(...yfaData.map(d => d.max).filter(Boolean));
-const YOS_YFA = yfaData.find(d => d.name === 'Yosemite');
+function getYosYfa() { return yfaData.find(d => d.name === focusedDistrict) || yfaData.find(d => d.name === 'Yosemite'); }
 
 let yfaSortCol = 'rank', yfaSortDir = 1;
 
@@ -715,7 +741,7 @@ function renderYfa() {
     else if (yfaSortCol === 'avg')   { av = a.avg ?? -Infinity; bv = b.avg ?? -Infinity; }
     else if (yfaSortCol === 'max')   { av = a.max ?? -Infinity; bv = b.max ?? -Infinity; }
     else if (yfaSortCol === 'rank')  { av = a.rank ?? 999; bv = b.rank ?? 999; }
-    else if (yfaSortCol === 'delta') { av = (a.max??0) - YOS_YFA.max; bv = (b.max??0) - YOS_YFA.max; }
+    else if (yfaSortCol === 'delta') { av = (a.max??0) - (getYosYfa()?.max??0); bv = (b.max??0) - (getYosYfa()?.max??0); }
     else if (yfaSortCol === 'paid')  { av = a.paid===true?0:a.paid===false?1:2; bv = b.paid===true?0:b.paid===false?1:2; }
     else { av = a.rank ?? 999; bv = b.rank ?? 999; }
     return av < bv ? -yfaSortDir : av > bv ? yfaSortDir : 0;
@@ -723,9 +749,10 @@ function renderYfa() {
 
   const tbody = document.getElementById('yfaBody');
   tbody.innerHTML = '';
+  const yosYfa = getYosYfa();
   rows.forEach(d => {
-    const isYos = d.name === 'Yosemite';
-    const delta = d.max != null ? d.max - YOS_YFA.max : null;
+    const isYos = d.name === focusedDistrict;
+    const delta = d.max != null && yosYfa ? d.max - yosYfa.max : null;
     const barW = d.max ? Math.round((d.max / YFA_MAX) * 100) : 0;
     const barColor = isYos ? '#e67e22' : (d.max === YFA_MAX ? '#27ae60' : d.max === YFA_MIN ? '#e74c3c' : '#93c5fd');
     let deltaCls = 'same', deltaStr = '—';
@@ -758,18 +785,19 @@ function renderYfa() {
 }
 
 function buildYfaCards() {
+  const yosYfa = getYosYfa();
   const withMax = yfaData.filter(d => d.max != null);
   const peerAvg = Math.round(withMax.reduce((s,d) => s + d.max, 0) / withMax.length);
-  const above = withMax.filter(d => d.max > YOS_YFA.max).length;
-  const below = withMax.filter(d => d.max < YOS_YFA.max).length;
+  const above = yosYfa ? withMax.filter(d => d.max > yosYfa.max).length : '—';
+  const below = yosYfa ? withMax.filter(d => d.max < yosYfa.max).length : '—';
   const paidYes = yfaData.filter(d => d.paid === true).length;
-  const paidNo  = yfaData.filter(d => d.paid === false).length;
-  const diff = YOS_YFA.max - peerAvg;
+  const diff = yosYfa ? yosYfa.max - peerAvg : null;
+  const distLabel = focusedDistrict;
 
   const cards = [
-    { label:'Yosemite Rank', value:`#${YOS_YFA.rank}`, sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
-    { label:'Yosemite Max Medical', value:fmt(YOS_YFA.max), sub:`${above} districts pay more · ${below} pay less`, extra:'' },
-    { label:'Peer Average Max Medical', value:fmt(peerAvg), sub:`Yosemite pays ${fmt(Math.abs(diff))} ${diff >= 0 ? 'more than' : 'less than'} the peer average`, extra: diff >= 0 ? 'accent-green' : 'accent-amber' },
+    { label: distLabel + ' Rank', value: yosYfa ? `#${yosYfa.rank}` : '—', sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
+    { label: distLabel + ' Max Medical', value: yosYfa ? fmt(yosYfa.max) : '—', sub: yosYfa ? `${above} districts pay more · ${below} pay less` : 'Not in survey data', extra:'' },
+    { label:'Peer Average Max Medical', value:fmt(peerAvg), sub: diff != null ? `${distLabel} pays ${fmt(Math.abs(diff))} ${diff >= 0 ? 'more than' : 'less than'} the peer average` : 'Selected district not in survey', extra: diff != null ? (diff >= 0 ? 'accent-green' : 'accent-amber') : '' },
     { label:'Fully Paid Plan', value:`${paidYes} of ${yfaData.length}`, sub:`${Math.round(paidYes/yfaData.length*100)}% of surveyed districts offer fully paid coverage`, extra:'accent-green' },
   ];
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
@@ -777,7 +805,7 @@ function buildYfaCards() {
   ).join('');
 }
 
-function jumpToYosemite() {
+function jumpToFocused() {
   const rows = document.querySelectorAll('#ccfsBody tr');
   for (const row of rows) {
     if (row.classList.contains('yosemite')) {
@@ -791,6 +819,17 @@ function jumpToYosemite() {
 
 // ── Init ──────────────────────────────────────────────────────
 document.getElementById('yfaTabBtn').textContent = `YFA Benefits Survey — ${yfaData.length} Districts`;
+
+// Populate district selector
+const sel = document.getElementById('districtSelector');
+[...districts].sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
+  const opt = document.createElement('option');
+  opt.value = d.name;
+  opt.textContent = d.name;
+  if (d.name === 'Yosemite') opt.selected = true;
+  sel.appendChild(opt);
+});
+
 setScenario('full');
 initChart();
 buildYfaCards();
