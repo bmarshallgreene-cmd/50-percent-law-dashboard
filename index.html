@@ -277,6 +277,7 @@
           <option value="">All Districts</option>
           <option value="single">Single College</option>
           <option value="multi">Multi-College</option>
+          <option value="ccci">CCCI Members</option>
         </select>
       </div>
     </div>
@@ -408,17 +409,17 @@ const districts = [
   {name:"San Diego",             ftef:558,    adjFtef:549,   rawBenefits:110878610, hw:33255880.82, code:"70",  step21:130082, region:"San Diego",      multi:true},
   {name:"Long Beach",            ftef:348,    adjFtef:341,   rawBenefits:62008967,  hw:19679977.87, code:"840", step21:142206, region:"Greater LA",     multi:false},
   {name:"Hartnell",              ftef:119.6,  adjFtef:117.6, rawBenefits:22081179,  hw:6777198.12,  code:"450", step21:144970, region:"Central Coast",  multi:false},
-  {name:"MiraCosta",             ftef:208.8,  adjFtef:203.8, rawBenefits:43036401,  hw:11027985.33, code:"50",  step21:168592, region:"San Diego",      multi:false},
+  {name:"MiraCosta",             ftef:208.8,  adjFtef:203.8, rawBenefits:43036401,  hw:11027985.33, code:"50",  step21:168592, region:"San Diego",      multi:false, ccci:true},
   {name:"Monterey Peninsula",    ftef:115.4,  adjFtef:112.4, rawBenefits:18270805,  hw:6019693.22,  code:"460", step21:131284, region:"Central Coast",  multi:false},
   {name:"Cerritos",              ftef:269,    adjFtef:264,   rawBenefits:44881544,  hw:14047261.28, code:"810", step21:150155, region:"Greater LA",     multi:false},
   {name:"Rancho Santiago",       ftef:356,    adjFtef:348,   rawBenefits:77102874,  hw:18239675.46, code:"870", step21:151513, region:"Greater LA",     multi:true},
-  {name:"Santa Monica",          ftef:347.9,  adjFtef:343.9, rawBenefits:71906524,  hw:18000062.43, code:"780", step21:150298, region:"Greater LA",     multi:false},
+  {name:"Santa Monica",          ftef:347.9,  adjFtef:343.9, rawBenefits:71906524,  hw:18000062.43, code:"780", step21:150298, region:"Greater LA",     multi:false, ccci:true},
   {name:"San Jose-Evergreen",    ftef:241.1,  adjFtef:237.1, rawBenefits:44905391,  hw:12380715.99, code:"470", step21:161254, region:"Bay Area",       multi:true},
-  {name:"Contra Costa",          ftef:482.2,  adjFtef:475.2, rawBenefits:82935993,  hw:24810912.16, code:"310", step21:126300, region:"Bay Area",       multi:true},
+  {name:"Contra Costa",          ftef:482.2,  adjFtef:475.2, rawBenefits:82935993,  hw:24810912.16, code:"310", step21:126300, region:"Bay Area",       multi:true,  ccci:true},
   {name:"San Joaquin Delta",     ftef:241.6,  adjFtef:238.6, rawBenefits:40203013,  hw:12383029.28, code:"550", step21:130332, region:"Central Valley", multi:false},
   {name:"Desert",                ftef:148,    adjFtef:146,   rawBenefits:24772561,  hw:7294515.24,  code:"930", step21:152247, region:"Inland Empire",  multi:false},
   {name:"Cabrillo",              ftef:187.3,  adjFtef:184.3, rawBenefits:26500724,  hw:9067457.22,  code:"410", step21:128117, region:"Central Coast",  multi:false},
-  {name:"Santa Barbara",         ftef:211,    adjFtef:209,   rawBenefits:31402684,  hw:10242778.69, code:"650", step21:132472, region:"Central Coast",  multi:false},
+  {name:"Santa Barbara",         ftef:211,    adjFtef:209,   rawBenefits:31402684,  hw:10242778.69, code:"650", step21:132472, region:"Central Coast",  multi:false, ccci:true},
   {name:"South Orange",          ftef:406.3,  adjFtef:397.3, rawBenefits:79924747,  hw:19149119.25, code:"890", step21:164526, region:"Greater LA",     multi:true},
   {name:"San Francisco",         ftef:345.9,  adjFtef:331.9, rawBenefits:54965752,  hw:15345210.36, code:"360", step21:136935, region:"Bay Area",       multi:false},
   {name:"Coast",                 ftef:415.2,  adjFtef:405.2, rawBenefits:73857935,  hw:18525346.87, code:"830", step21:149341, region:"Greater LA",     multi:true},
@@ -429,7 +430,7 @@ const districts = [
   {name:"Butte",                 ftef:183.4,  adjFtef:179.4, rawBenefits:27242657,  hw:8083039.19,  code:"110", step21:142589, region:"Northern CA",    multi:false},
   {name:"El Camino",             ftef:334.9,  adjFtef:327.9, rawBenefits:47038990,  hw:14605046.26, code:"720", step21:146137, region:"Greater LA",     multi:false},
   {name:"Gavilan Joint",         ftef:74,     adjFtef:71,    rawBenefits:11291541,  hw:3146322.18,  code:"440", step21:136697, region:"Bay Area",       multi:false},
-  {name:"Foothill-DeAnza",       ftef:404.2,  adjFtef:397.2, rawBenefits:64692761,  hw:17188737.21, code:"420", step21:131081, region:"Bay Area",       multi:true},
+  {name:"Foothill-DeAnza",       ftef:404.2,  adjFtef:397.2, rawBenefits:64692761,  hw:17188737.21, code:"420", step21:131081, region:"Bay Area",       multi:true,  ccci:true},
   {name:"Los Angeles",           ftef:1621.5, adjFtef:1594.5,rawBenefits:246036558, hw:67706014.69, code:"740", step21:145110, region:"Greater LA",     multi:true},
   {name:"Marin",                 ftef:123.9,  adjFtef:119.9, rawBenefits:21788993,  hw:5065497.71,  code:"330", step21:156037, region:"Bay Area",       multi:false},
   {name:"Merced",                ftef:184.8,  adjFtef:179.8, rawBenefits:29267480,  hw:7541805.56,  code:"530", step21:120395, region:"Central Valley", multi:false},
@@ -449,33 +450,33 @@ const districts = [
   {name:"San Mateo",             ftef:365.4,  adjFtef:354.4, rawBenefits:61725671,  hw:13409261.41, code:"370", step21:147720, region:"Bay Area",       multi:true},
   {name:"Victor Valley",         ftef:132,    adjFtef:130,   rawBenefits:26703552,  hw:4805369.76,  code:"990", step21:142425, region:"Inland Empire",  multi:false},
   {name:"Mt. San Antonio",       ftef:443,    adjFtef:433,   rawBenefits:80440970,  hw:15921924.55, code:"850", step21:158955, region:"Greater LA",     multi:false},
-  {name:"Yosemite",              ftef:315,    adjFtef:309,   rawBenefits:43892425,  hw:11290204.66, code:"590", step21:124814, isYosemite:true,         region:"Central Valley", multi:true},
+  {name:"Yosemite",              ftef:315,    adjFtef:309,   rawBenefits:43892425,  hw:11290204.66, code:"590", step21:124814, isYosemite:true,         region:"Central Valley", multi:true,  ccci:true},
   {name:"Siskiyou",              ftef:45.5,   adjFtef:44.5,  rawBenefits:6343812,   hw:1620921.12,  code:"180", step21:117203, region:"Northern CA",    multi:false},
   {name:"Rio Hondo",             ftef:239.1,  adjFtef:235.1, rawBenefits:38860174,  hw:8480333.33,  code:"880", step21:144482, region:"Greater LA",     multi:false},
   {name:"Sierra",                ftef:232.4,  adjFtef:228.4, rawBenefits:33216068,  hw:8206977.83,  code:"270", step21:128545, region:"Sacramento",     multi:false},
   {name:"Compton",               ftef:102.5,  adjFtef:100.5, rawBenefits:11983193,  hw:3596214.86,  code:"710", step21:104489, region:"Greater LA",     multi:false},
-  {name:"Chabot-Las Positas",    ftef:285,    adjFtef:277,   rawBenefits:44463838,  hw:9699300.54,  code:"480", step21:142394, region:"Bay Area",       multi:true},
-  {name:"Ohlone",                ftef:112,    adjFtef:109,   rawBenefits:18097322,  hw:3794879.27,  code:"430", step21:160116, region:"Bay Area",       multi:false},
+  {name:"Chabot-Las Positas",    ftef:285,    adjFtef:277,   rawBenefits:44463838,  hw:9699300.54,  code:"480", step21:142394, region:"Bay Area",       multi:true,  ccci:true},
+  {name:"Ohlone",                ftef:112,    adjFtef:109,   rawBenefits:18097322,  hw:3794879.27,  code:"430", step21:160116, region:"Bay Area",       multi:false, ccci:true},
   {name:"Imperial",              ftef:145,    adjFtef:144,   rawBenefits:18686321,  hw:4992122.18,  code:"30",  step21:151309, region:"San Diego",      multi:false},
   {name:"Lassen",                ftef:36.1,   adjFtef:35.1,  rawBenefits:6174246,   hw:1202283.11,  code:"130", step21:127611, region:"Northern CA",    multi:false},
   {name:"Lake Tahoe",            ftef:38.1,   adjFtef:38.1,  rawBenefits:6104827,   hw:1302042.58,  code:"220", step21:129355, region:"Sacramento",     multi:false},
   {name:"Kern",                  ftef:495,    adjFtef:488,   rawBenefits:63009067,  hw:16040002.58, code:"520", step21:145781, region:"Central Valley", multi:true},
   {name:"Sequoias",              ftef:216.5,  adjFtef:211.5, rawBenefits:26796844,  hw:6589648.04,  code:"560", step21:141400, region:"Central Valley", multi:false},
   {name:"Napa Valley",           ftef:93.1,   adjFtef:93.1,  rawBenefits:11468528,  hw:2843451.75,  code:"240", step21:122428, region:"Bay Area",       multi:false},
-  {name:"Yuba",                  ftef:122.1,  adjFtef:121.1, rawBenefits:19166832,  hw:3601571.79,  code:"290", step21:133653, region:"Sacramento",     multi:true},
+  {name:"Yuba",                  ftef:122.1,  adjFtef:121.1, rawBenefits:19166832,  hw:3601571.79,  code:"290", step21:133653, region:"Sacramento",     multi:true,  ccci:true},
   {name:"Ventura",               ftef:454.3,  adjFtef:442.3, rawBenefits:56988995,  hw:13122915.79, code:"680", step21:128728, region:"Greater LA",     multi:true},
-  {name:"Redwoods",              ftef:72.3,   adjFtef:70.3,  rawBenefits:11459864,  hw:1989171.69,  code:"160", step21:148006, region:"Northern CA",    multi:false},
+  {name:"Redwoods",              ftef:72.3,   adjFtef:70.3,  rawBenefits:11459864,  hw:1989171.69,  code:"160", step21:148006, region:"Northern CA",    multi:false, ccci:true},
   {name:"San Bernardino",        ftef:285.9,  adjFtef:281.9, rawBenefits:33781422,  hw:7894983.20,  code:"980", step21:128126, region:"Inland Empire",  multi:true},
   {name:"State Center",          ftef:701.2,  adjFtef:691.2, rawBenefits:75595537,  hw:18684056.74, code:"570", step21:140017, region:"Central Valley", multi:true},
   {name:"Mt. San Jacinto",       ftef:217.8,  adjFtef:213.8, rawBenefits:28957292,  hw:5616296.81,  code:"940", step21:154617, region:"Inland Empire",  multi:false},
   {name:"Antelope Valley",       ftef:190,    adjFtef:186,   rawBenefits:24134706,  hw:4734614.95,  code:"620", step21:128034, region:"Greater LA",     multi:false},
   {name:"Los Rios",              ftef:905.1,  adjFtef:883.1, rawBenefits:108489610, hw:22037118.02, code:"230", step21:124248, region:"Sacramento",     multi:true},
-  {name:"Sonoma County",         ftef:308.1,  adjFtef:298.1, rawBenefits:39858951,  hw:7402900.21,  code:"260", step21:144619, region:"Bay Area",       multi:false},
+  {name:"Sonoma County",         ftef:308.1,  adjFtef:298.1, rawBenefits:39858951,  hw:7402900.21,  code:"260", step21:144619, region:"Bay Area",       multi:false, ccci:true},
   {name:"San Luis Obispo",       ftef:137.3,  adjFtef:136.3, rawBenefits:16009912,  hw:3374803.21,  code:"640", step21:131421, region:"Central Coast",  multi:false},
   {name:"Palo Verde",            ftef:45,     adjFtef:45,    rawBenefits:5594243,   hw:922662.82,   code:"950", step21:142326, region:"Inland Empire",  multi:false},
   {name:"Feather River",         ftef:29,     adjFtef:29,    rawBenefits:3791530,   hw:562688.47,   code:"120", step21:125126, region:"Northern CA",    multi:false},
-  {name:"Allan Hancock",         ftef:163.3,  adjFtef:159.3, rawBenefits:19714045,  hw:3033897.75,  code:"610", step21:127485, region:"Central Coast",  multi:false},
-  {name:"Pasadena Area",         ftef:422,    adjFtef:416,   rawBenefits:57573472,  hw:6949128.04,  code:"770", step21:129764, selfInsured:true,        region:"Greater LA",     multi:false},
+  {name:"Allan Hancock",         ftef:163.3,  adjFtef:159.3, rawBenefits:19714045,  hw:3033897.75,  code:"610", step21:127485, region:"Central Coast",  multi:false, ccci:true},
+  {name:"Pasadena Area",         ftef:422,    adjFtef:416,   rawBenefits:57573472,  hw:6949128.04,  code:"770", step21:129764, selfInsured:true,        region:"Greater LA",     multi:false, ccci:true},
 ];
 
 const SCENARIOS = {
@@ -620,6 +621,7 @@ function filterCcfsTable() {
     if (region && d.region !== region) return false;
     if (type === 'single' && d.multi) return false;
     if (type === 'multi' && !d.multi) return false;
+    if (type === 'ccci' && !d.ccci) return false;
     return true;
   });
   buildCcfsTable(sortedCcfsData(filtered));
