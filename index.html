@@ -243,7 +243,7 @@
       <h2 id="chartTitle" style="margin:0">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
       <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
         <select id="jumpSelect" class="ctrl-select" style="font-size:0.78rem;padding:5px 8px"></select>
-        <button class="jump-btn" onclick="jumpToSelected()">&#9660; Jump</button>
+        <button class="jump-btn" onclick="jumpToSelected()">Select</button>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap">
@@ -895,14 +895,18 @@ function buildYfaCards() {
 }
 
 function jumpToSelected() {
-  const target = document.getElementById('jumpSelect').value.toLowerCase();
+  const name = document.getElementById('jumpSelect').value;
+  // Update focused district — re-renders chart, cards, table
+  setFocusedDistrict(name);
+  // Sync the header "Your district:" selector
+  document.getElementById('districtSelector').value = name;
+  // Scroll to the now-highlighted row
+  const target = name.toLowerCase();
   const rows = document.querySelectorAll('#ccfsBody tr');
   for (const row of rows) {
     const nameCell = row.querySelector('td.district-name');
     if (nameCell && nameCell.textContent.toLowerCase().includes(target)) {
       row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      row.style.outline = '3px solid #e67e22';
-      setTimeout(() => row.style.outline = '', 2000);
       return;
     }
   }
