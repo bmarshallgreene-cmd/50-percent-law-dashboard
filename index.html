@@ -294,7 +294,7 @@
           <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
           <th onclick="sortCcfs(7)" id="cth7" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
           <th id="cth8">vs. Median (Comp)</th>
-          <th onclick="sortCcfs(9)" id="cth9" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65">(CA avg)</span></th>
+          <th onclick="sortCcfs(9)" id="cth9" style="white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -645,7 +645,7 @@ function buildCcfsTable(data) {
   const max = data.reduce((m, d) => Math.max(m, d.scenarioValue), 0);
   const tbody = document.getElementById('ccfsBody');
   tbody.innerHTML = '';
-  data.forEach(d => {
+  data.forEach((d, i) => {
     const t = tier(d.rank);
     const diff = d.scenarioValue - stats.median;
     const diffStr = (diff >= 0 ? '+' : '') + fmt(diff);
@@ -661,7 +661,7 @@ function buildCcfsTable(data) {
     const compDiffColor = isFocused(d) ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     tr.innerHTML = `
-      <td class="rank">#${d.rank}</td>
+      <td class="rank">#${i + 1}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
       <td class="num">${d.scenarioFtef.toLocaleString()}</td>
