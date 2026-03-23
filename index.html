@@ -294,7 +294,7 @@
           <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
           <th onclick="sortCcfs(7)" id="cth7" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
           <th id="cth8">vs. Median (Comp)</th>
-          <th onclick="sortCcfs(9)" id="cth9" title="Cost-of-Living index for district's primary county. CA statewide avg = 100. Source: MIT Living Wage Calculator, Feb 2026 (1 adult, 0 children). Hover a cell to see county name.">COL Index <span style="font-weight:400;font-size:0.72em;opacity:0.65">(CA=100)</span></th>
+          <th onclick="sortCcfs(9)" id="cth9" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65">(CA avg)</span></th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -574,7 +574,7 @@ function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
 function computeRanked(scenario) {
   const s = SCENARIOS[scenario];
   return districts
-    .map(d => ({ ...d, scenarioValue: s.getValue(d), scenarioHw: s.getTotalHw(d), scenarioFtef: s.getFtef(d), totalComp: d.step21 + s.getValue(d), col: (COL_DATA[d.name]||{}).col||null, colCounty: (COL_DATA[d.name]||{}).county||'' }))
+    .map(d => { const col = (COL_DATA[d.name]||{}).col||null; const tc = d.step21 + s.getValue(d); return { ...d, scenarioValue: s.getValue(d), scenarioHw: s.getTotalHw(d), scenarioFtef: s.getFtef(d), totalComp: tc, col, colCounty: (COL_DATA[d.name]||{}).county||'', adjComp: col ? tc * 100 / col : null }; })
     .sort((a, b) => b.scenarioValue - a.scenarioValue)
     .map((d, i) => ({ ...d, rank: i + 1 }));
 }
@@ -676,7 +676,7 @@ function buildCcfsTable(data) {
         <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffStr} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
       </div></td>
-      <td class="num" title="${d.colCounty ? d.colCounty + ' County' : ''}" style="color:${d.col==null?'#aaa':d.col<90?'#27ae60':d.col>115?'#c0392b':'#444'}">${d.col != null ? d.col.toFixed(1) : '—'}</td>`;
+      <td class="num" style="padding-top:6px;padding-bottom:6px">${d.col != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${fmt(totalComp * 100 / d.col)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
     tr.dataset.step21 = d.step21; tr.dataset.totalComp = totalComp;
@@ -714,7 +714,7 @@ function filterCcfsTable() {
 }
 
 function sortedCcfsData(data) {
-  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','scenarioValue','step21','totalComp','totalComp','col'];
+  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','scenarioValue','step21','totalComp','totalComp','adjComp'];
   const { col, dir } = ccfsSort;
   return [...data].sort((a, b) => {
     const av = typeof a[keys[col]] === 'string' ? a[keys[col]] : +a[keys[col]];
