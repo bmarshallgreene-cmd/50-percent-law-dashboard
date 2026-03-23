@@ -534,8 +534,8 @@ function initChart() {
         x: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 11 } }, grid: { color: '#eee' } },
         y: {
           ticks: {
-            font: ctx => ({ size: ctx.tick.label === focusedDistrict ? 13 : 11, weight: ctx.tick.label === focusedDistrict ? 'bold' : 'normal' }),
-            color: ctx => ctx.tick.label === focusedDistrict ? '#e67e22' : '#333',
+            font: ctx => { const lbl = ctx.tick.label.replace(/ \*$/, ''); return { size: lbl === focusedDistrict ? 13 : 11, weight: lbl === focusedDistrict ? 'bold' : 'normal' }; },
+            color: ctx => ctx.tick.label.replace(/ \*$/, '') === focusedDistrict ? '#e67e22' : '#333',
           },
           grid: { display: false }
         }
@@ -554,8 +554,8 @@ function updateChart(ranked) {
   chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#b85c00' : 'transparent');
   chart.data.datasets[0].borderWidth = ranked.map(d => isFocused(d) ? 3 : 0);
   const fd = focusedDistrict;
-  chart.options.scales.y.ticks.font  = ctx => ({ size: ctx.tick.label === fd ? 13 : 11, weight: ctx.tick.label === fd ? 'bold' : 'normal' });
-  chart.options.scales.y.ticks.color = ctx => ctx.tick.label === fd ? '#e67e22' : '#333';
+  chart.options.scales.y.ticks.font  = ctx => { const lbl = ctx.tick.label.replace(/ \*$/, ''); return { size: lbl === fd ? 13 : 11, weight: lbl === fd ? 'bold' : 'normal' }; };
+  chart.options.scales.y.ticks.color = ctx => ctx.tick.label.replace(/ \*$/, '') === fd ? '#e67e22' : '#333';
   chart.update();
 }
 
