@@ -290,10 +290,11 @@
           <th onclick="sortCcfs(2)" id="cth2">Total H&amp;W</th>
           <th onclick="sortCcfs(3)" id="cth3">FTEF</th>
           <th onclick="sortCcfs(4)" id="cth4">H&amp;W / FT</th>
-          <th id="cth5">vs. Median</th>
-          <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
-          <th onclick="sortCcfs(7)" id="cth7" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
-          <th id="cth8">vs. Median (Comp)</th>
+          <th onclick="sortCcfs(5)" id="cth5" title="Cost-of-Living index for district's primary county. CA statewide avg = 100. Source: MIT Living Wage Calculator, Feb 2026 (1 adult, 0 children). Hover a cell to see county name.">COL Index</th>
+          <th id="cth6">vs. Median</th>
+          <th onclick="sortCcfs(7)" id="cth7" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
+          <th onclick="sortCcfs(8)" id="cth8" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
+          <th id="cth9">vs. Median (Comp)</th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -317,6 +318,7 @@
   &nbsp;(1) <a href="https://fiscalportal.cccco.edu/Reports/AnnualReports" target="_blank" style="color:#1a3a5c">CCFS-311 Annual Reports — CCCCO Fiscal Portal</a>
   &nbsp;&nbsp;(2) <a href="https://www.cccco.edu/About-Us/Chancellors-Office/Divisions/Educational-Services-and-Support/What-we-do/Full-Time-Faculty-Obligation-Number" target="_blank" style="color:#1a3a5c">Fall 2024 FON Report — CCCCO</a>
   &nbsp;&nbsp;(3) <a href="https://www.cft.org/sites/main/files/file-attachments/cft_full-time-cc-faculty-salaries-2024-25_final.pdf?1755291975" target="_blank" style="color:#1a3a5c">CFT Full-Time CC Faculty Salaries 2024-25</a>
+  &nbsp;&nbsp;(4) <a href="https://livingwage.mit.edu/states/06" target="_blank" style="color:#1a3a5c">MIT Living Wage Calculator — California Counties (Feb 2026, 1 adult / 0 children)</a>
 </footer>
 </div>
 
@@ -365,6 +367,7 @@
   &nbsp;(1) <a href="https://fiscalportal.cccco.edu/Reports/AnnualReports" target="_blank" style="color:#1a3a5c">CCFS-311 Annual Reports — CCCCO Fiscal Portal</a>
   &nbsp;&nbsp;(2) <a href="https://www.cccco.edu/About-Us/Chancellors-Office/Divisions/Educational-Services-and-Support/What-we-do/Full-Time-Faculty-Obligation-Number" target="_blank" style="color:#1a3a5c">Fall 2024 FON Report — CCCCO</a>
   &nbsp;&nbsp;(3) <a href="https://www.cft.org/sites/main/files/file-attachments/cft_full-time-cc-faculty-salaries-2024-25_final.pdf?1755291975" target="_blank" style="color:#1a3a5c">CFT Full-Time CC Faculty Salaries 2024-25</a>
+  &nbsp;&nbsp;(4) <a href="https://livingwage.mit.edu/states/06" target="_blank" style="color:#1a3a5c">MIT Living Wage Calculator — California Counties (Feb 2026, 1 adult / 0 children)</a>
 </footer>
 </div>
 
@@ -480,6 +483,83 @@ const districts = [
   {name:"Pasadena Area",         ftef:422,    adjFtef:416,   instrBenefits:23984217,  hw:6949128.04,  code:"770", step21:129764, selfInsured:true,        region:"Greater LA",     multi:false, ccci:true},
 ];
 
+// ── Cost-of-Living index per district (MIT Living Wage Calculator, Feb 2026)
+// 1 adult, 0 children. CA statewide avg ($30.48/hr) = 100.
+const COL_DATA = {
+  'Allan Hancock':         { col: 117.4, county: 'Santa Barbara' },
+  'Antelope Valley':       { col:  94.9, county: 'Los Angeles'   },
+  'Barstow':               { col:  90.6, county: 'San Bernardino'},
+  'Butte':                 { col:  78.9, county: 'Butte'         },
+  'Cabrillo':              { col: 140.9, county: 'Santa Cruz'    },
+  'Cerritos':              { col:  94.9, county: 'Los Angeles'   },
+  'Chabot-Las Positas':    { col: 106.0, county: 'Alameda'       },
+  'Chaffey':               { col:  90.6, county: 'San Bernardino'},
+  'Citrus':                { col:  94.9, county: 'Los Angeles'   },
+  'Coast':                 { col: 119.8, county: 'Orange'        },
+  'Compton':               { col:  94.9, county: 'Los Angeles'   },
+  'Contra Costa':          { col: 108.3, county: 'Contra Costa'  },
+  'Copper Mountain':       { col:  90.6, county: 'San Bernardino'},
+  'Desert':                { col:  94.6, county: 'Riverside'     },
+  'El Camino':             { col:  94.9, county: 'Los Angeles'   },
+  'Feather River':         { col:  78.8, county: 'Plumas'        },
+  'Foothill-DeAnza':       { col: 124.7, county: 'Santa Clara'   },
+  'Gavilan Joint':         { col: 124.7, county: 'Santa Clara'   },
+  'Glendale':              { col:  94.9, county: 'Los Angeles'   },
+  'Grossmont-Cuyamaca':    { col: 107.9, county: 'San Diego'     },
+  'Hartnell':              { col: 109.7, county: 'Monterey'      },
+  'Imperial':              { col:  73.4, county: 'Imperial'      },
+  'Kern':                  { col:  79.0, county: 'Kern'          },
+  'Lake Tahoe':            { col:  97.5, county: 'El Dorado'     },
+  'Lassen':                { col:  75.9, county: 'Lassen'        },
+  'Long Beach':            { col:  94.9, county: 'Los Angeles'   },
+  'Los Angeles':           { col:  94.9, county: 'Los Angeles'   },
+  'Los Rios':              { col:  92.3, county: 'Sacramento'    },
+  'Marin':                 { col: 119.3, county: 'Marin'         },
+  'Mendocino-Lake':        { col:  85.3, county: 'Mendocino'     },
+  'Merced':                { col:  79.9, county: 'Merced'        },
+  'MiraCosta':             { col: 107.9, county: 'San Diego'     },
+  'Monterey Peninsula':    { col: 109.7, county: 'Monterey'      },
+  'Mt. San Antonio':       { col:  94.9, county: 'Los Angeles'   },
+  'Mt. San Jacinto':       { col:  94.6, county: 'Riverside'     },
+  'Napa Valley':           { col: 103.1, county: 'Napa'          },
+  'North Orange County':   { col: 119.8, county: 'Orange'        },
+  'Ohlone':                { col: 106.0, county: 'Alameda'       },
+  'Palomar':               { col: 107.9, county: 'San Diego'     },
+  'Palo Verde':            { col:  94.6, county: 'Riverside'     },
+  'Pasadena Area':         { col:  94.9, county: 'Los Angeles'   },
+  'Peralta':               { col: 106.0, county: 'Alameda'       },
+  'Rancho Santiago':       { col: 119.8, county: 'Orange'        },
+  'Redwoods':              { col:  79.0, county: 'Humboldt'      },
+  'Rio Hondo':             { col:  94.9, county: 'Los Angeles'   },
+  'Riverside':             { col:  94.6, county: 'Riverside'     },
+  'San Bernardino':        { col:  90.6, county: 'San Bernardino'},
+  'San Diego':             { col: 107.9, county: 'San Diego'     },
+  'San Francisco':         { col: 106.4, county: 'San Francisco' },
+  'San Joaquin Delta':     { col:  85.4, county: 'San Joaquin'   },
+  'San Jose-Evergreen':    { col: 124.7, county: 'Santa Clara'   },
+  'San Luis Obispo':       { col:  97.5, county: 'San Luis Obispo'},
+  'San Mateo':             { col: 126.1, county: 'San Mateo'     },
+  'Santa Barbara':         { col: 117.4, county: 'Santa Barbara' },
+  'Santa Clarita':         { col:  94.9, county: 'Los Angeles'   },
+  'Santa Monica':          { col:  94.9, county: 'Los Angeles'   },
+  'Sequoias':              { col:  80.2, county: 'Tulare'        },
+  'Shasta-Tehama-Trinity': { col:  80.5, county: 'Shasta'        },
+  'Sierra':                { col: 104.7, county: 'Placer'        },
+  'Siskiyou':              { col:  75.5, county: 'Siskiyou'      },
+  'Solano':                { col:  91.4, county: 'Solano'        },
+  'Sonoma County':         { col: 102.7, county: 'Sonoma'        },
+  'South Orange':          { col: 119.8, county: 'Orange'        },
+  'Southwestern':          { col: 107.9, county: 'San Diego'     },
+  'State Center':          { col:  83.2, county: 'Fresno'        },
+  'Ventura':               { col: 103.1, county: 'Ventura'       },
+  'Victor Valley':         { col:  90.6, county: 'San Bernardino'},
+  'West Hills':            { col:  83.2, county: 'Fresno'        },
+  'West Kern':             { col:  79.0, county: 'Kern'          },
+  'West Valley-Mission':   { col: 124.7, county: 'Santa Clara'   },
+  'Yosemite':              { col:  82.7, county: 'Stanislaus'    },
+  'Yuba':                  { col:  78.8, county: 'Yuba'          },
+};
+
 const SCENARIOS = {
   full:  { getValue: d => d.hw / d.adjFtef,       getTotalHw: d => d.hw,           getFtef: d => d.adjFtef },
   basic: { getValue: d => d.instrBenefits / d.ftef, getTotalHw: d => d.instrBenefits, getFtef: d => d.ftef  },
@@ -493,7 +573,7 @@ function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
 function computeRanked(scenario) {
   const s = SCENARIOS[scenario];
   return districts
-    .map(d => ({ ...d, scenarioValue: s.getValue(d), scenarioHw: s.getTotalHw(d), scenarioFtef: s.getFtef(d), totalComp: d.step21 + s.getValue(d) }))
+    .map(d => ({ ...d, scenarioValue: s.getValue(d), scenarioHw: s.getTotalHw(d), scenarioFtef: s.getFtef(d), totalComp: d.step21 + s.getValue(d), col: (COL_DATA[d.name]||{}).col||null, colCounty: (COL_DATA[d.name]||{}).county||'' }))
     .sort((a, b) => b.scenarioValue - a.scenarioValue)
     .map((d, i) => ({ ...d, rank: i + 1 }));
 }
@@ -585,6 +665,7 @@ function buildCcfsTable(data) {
       <td class="num">${fmt(d.scenarioHw)}</td>
       <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
+      <td class="num" title="${d.colCounty ? d.colCounty + ' County' : ''}" style="color:${d.col==null?'#aaa':d.col<90?'#27ae60':d.col>115?'#c0392b':'#444'}">${d.col != null ? d.col.toFixed(1) : '—'}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
@@ -632,7 +713,7 @@ function filterCcfsTable() {
 }
 
 function sortedCcfsData(data) {
-  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','scenarioValue','step21','totalComp','totalComp'];
+  const keys = ['rank','name','scenarioHw','scenarioFtef','scenarioValue','col','scenarioValue','step21','totalComp','totalComp'];
   const { col, dir } = ccfsSort;
   return [...data].sort((a, b) => {
     const av = typeof a[keys[col]] === 'string' ? a[keys[col]] : +a[keys[col]];
@@ -643,7 +724,7 @@ function sortedCcfsData(data) {
 
 function sortCcfs(col) {
   ccfsSort = { col, dir: ccfsSort.col === col ? (ccfsSort.dir === 'asc' ? 'desc' : 'asc') : (col === 1 ? 'asc' : 'desc') };
-  for (let i = 0; i <= 8; i++) {
+  for (let i = 0; i <= 9; i++) {
     const th = document.getElementById('cth' + i);
     if (th) th.className = i === col ? ccfsSort.dir : '';
   }
