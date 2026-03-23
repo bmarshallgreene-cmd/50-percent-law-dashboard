@@ -186,6 +186,18 @@
 
   .table-footer { padding: 9px 0 0; font-size: 0.75rem; color: #999; display: flex; justify-content: space-between; }
 
+  /* ── Column visibility toggles ── */
+  #ccfsTable .comp-col   { display: none; }
+  #ccfsTable .secret-col { display: none; }
+  #ccfsTable.show-comp   .comp-col   { display: table-cell; }
+  #ccfsTable.show-secret .secret-col { display: table-cell; }
+  .comp-toggle-btn {
+    font-size: 0.75rem; padding: 4px 10px; border: 1px solid #ccd3de;
+    background: #f4f6f9; color: #555; border-radius: 4px; cursor: pointer;
+  }
+  .comp-toggle-btn:hover { background: #e4e9f0; }
+  .comp-toggle-btn.active { background: #1a3a5c; color: white; border-color: #1a3a5c; }
+
   footer {
     text-align: center; padding: 24px;
     font-size: 0.75rem; color: #999;
@@ -240,7 +252,7 @@
 
   <div class="chart-wrap">
     <div style="display:flex;align-items:center;margin-bottom:12px">
-      <h2 id="chartTitle" style="margin:0">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
+      <h2 id="chartTitle" style="margin:0;cursor:default" onclick="toggleSecretCol()">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
       <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
         <select id="jumpSelect" class="ctrl-select" style="font-size:0.78rem;padding:5px 8px"></select>
         <button class="jump-btn" onclick="jumpToSelected()">Select</button>
@@ -279,6 +291,7 @@
           <option value="multi">Multi-College</option>
           <option value="ccci">CCCI Members</option>
         </select>
+        <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp ▼</button>
       </div>
     </div>
     <div class="table-scroll">
@@ -291,10 +304,10 @@
           <th onclick="sortCcfs(3)" id="cth3">Adj. FON FT</th>
           <th onclick="sortCcfs(4)" id="cth4">H&amp;W / FT</th>
           <th id="cth5">vs. Median</th>
-          <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
-          <th onclick="sortCcfs(7)" id="cth7" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
-          <th id="cth8">vs. Median (Comp)</th>
-          <th onclick="sortCcfs(9)" id="cth9" style="white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
+          <th onclick="sortCcfs(6)" id="cth6" class="comp-col" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
+          <th onclick="sortCcfs(7)" id="cth7" class="comp-col" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
+          <th id="cth8" class="comp-col">vs. Median (Comp)</th>
+          <th onclick="sortCcfs(9)" id="cth9" class="secret-col" style="white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -670,13 +683,13 @@ function buildCcfsTable(data) {
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
       </div></td>
-      <td class="num">${fmt(d.step21)}</td>
-      <td class="num" style="font-weight:600">${fmt(totalComp)}</td>
-      <td><div class="bar-cell">
+      <td class="num comp-col">${fmt(d.step21)}</td>
+      <td class="num comp-col" style="font-weight:600">${fmt(totalComp)}</td>
+      <td class="comp-col"><div class="bar-cell">
         <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffStr} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
       </div></td>
-      <td class="num" style="padding-top:6px;padding-bottom:6px">${d.col != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${fmt(totalComp * 100 / d.col)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
+      <td class="num secret-col" style="padding-top:6px;padding-bottom:6px">${d.col != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${fmt(totalComp * 100 / d.col)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
     tr.dataset.step21 = d.step21; tr.dataset.totalComp = totalComp;
@@ -894,6 +907,18 @@ function buildYfaCards() {
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
     `<div class="card ${c.extra}"><label>${c.label}</label><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`
   ).join('');
+}
+
+function toggleCompCols() {
+  const tbl = document.getElementById('ccfsTable');
+  const btn = document.getElementById('compToggleBtn');
+  const on = tbl.classList.toggle('show-comp');
+  btn.textContent = on ? 'Salary & Comp ▲' : 'Salary & Comp ▼';
+  btn.classList.toggle('active', on);
+}
+
+function toggleSecretCol() {
+  document.getElementById('ccfsTable').classList.toggle('show-secret');
 }
 
 function jumpToSelected() {
