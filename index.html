@@ -553,6 +553,9 @@ function updateChart(ranked) {
   chart.data.datasets[0].backgroundColor = ranked.map(d => isFocused(d) ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
   chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#b85c00' : 'transparent');
   chart.data.datasets[0].borderWidth = ranked.map(d => isFocused(d) ? 3 : 0);
+  const fd = focusedDistrict;
+  chart.options.scales.y.ticks.font  = ctx => ({ size: ctx.tick.label === fd ? 13 : 11, weight: ctx.tick.label === fd ? 'bold' : 'normal' });
+  chart.options.scales.y.ticks.color = ctx => ctx.tick.label === fd ? '#e67e22' : '#333';
   chart.update();
 }
 
