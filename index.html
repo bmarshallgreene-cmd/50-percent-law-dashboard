@@ -230,11 +230,11 @@
     <span>Calculation:</span>
     <button class="scenario-btn active" id="btn-full" onclick="setScenario('full')">
       Full Methodology
-      <span class="btn-sub">Pension &amp; Medicare backed out &divide; librarian-adjusted FTEF</span>
+      <span class="btn-sub">Pension &amp; Medicare backed out &divide; librarian-adjusted FON FT</span>
     </button>
     <button class="scenario-btn" id="btn-basic" onclick="setScenario('basic')">
       Basic
-      <span class="btn-sub">Raw benefits total &divide; raw FON FTEF — no deductions</span>
+      <span class="btn-sub">Raw benefits total &divide; raw FON FT — no deductions</span>
     </button>
   </div>
 
@@ -288,7 +288,7 @@
           <th onclick="sortCcfs(0)" id="cth0">Rank</th>
           <th onclick="sortCcfs(1)" id="cth1">District</th>
           <th onclick="sortCcfs(2)" id="cth2">Total H&amp;W</th>
-          <th onclick="sortCcfs(3)" id="cth3">FTEF</th>
+          <th onclick="sortCcfs(3)" id="cth3">Adj. FON FT</th>
           <th onclick="sortCcfs(4)" id="cth4">H&amp;W / FT</th>
           <th id="cth5">vs. Median</th>
           <th onclick="sortCcfs(6)" id="cth6" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
@@ -304,8 +304,8 @@
 
 </div>
 <footer>
-  <strong>Full Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions. Denominator = FON FT FTEF minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
-  <br><br><strong>Basic Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) with no deductions. Denominator = raw FON FT FTEF with no librarian adjustment. This is a simpler calculation but will include STRS and Medicare employer contributions in the benefits figure, causing all values to be modestly overstated compared to Full Methodology. Useful as a quick reference or sanity check.
+  <strong>Full Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) minus estimated STRS (19.1%) and Medicare (1.45%) contributions. Denominator = FON FT (Faculty Obligation Number full-time headcount) minus FT librarians. Calbright excluded (no FON entry). Data year: 2024-25.
+  <br><br><strong>Basic Methodology:</strong> H&amp;W estimate = Employee Benefits (3000 series, ECS 84362 A Col 10) with no deductions. Denominator = raw FON FT with no librarian adjustment. This is a simpler calculation but will include STRS and Medicare employer contributions in the benefits figure, causing all values to be modestly overstated compared to Full Methodology. Useful as a quick reference or sanity check.
   <br><br><strong>COL Index (Cost of Living):</strong> A relative cost-of-living index for each district's primary county, based on the <a href="https://livingwage.mit.edu/states/06" target="_blank" style="color:#1a3a5c">MIT Living Wage Calculator</a>'s estimated living wage for one adult with no dependents (February 2026 data). The California statewide average is set to 100. A district with a COL Index of 83 is in a county roughly 17% below the state average cost of living; a district with 126 is about 26% above. <em>Green values (&lt;90) indicate lower-cost areas; red values (&gt;115) indicate higher-cost areas.</em> This index provides context for comparing H&amp;W figures across regions — the same dollar amount provides meaningfully different purchasing power depending on where a district is located. Hover any COL Index cell to see the county name. Note: multi-campus districts are assigned to their primary or largest campus county.
   <br><br><strong>Note on part-time faculty benefits:</strong> Districts that extend health &amp; welfare benefits to part-time faculty will have higher 3000-series expenditures that are not fully attributable to full-time faculty. This may cause some districts' per-FT figures to be overstated relative to districts that offer benefits only to full-time employees.
   <br><br><strong>* Self-insured districts:</strong> Districts marked with * operate self-insured or self-funded health plans where costs may not be fully captured in object code 3000 of the CCFS-311, causing figures to be understated.
@@ -735,7 +735,7 @@ function sortCcfs(col) {
 function setScenario(s) {
   currentScenario = s;
   ['full','basic'].forEach(k => document.getElementById('btn-' + k).classList.toggle('active', k === s));
-  document.getElementById('cth3').textContent = s === 'full' ? 'Adj. FTEF' : 'FTEF';
+  document.getElementById('cth3').textContent = s === 'full' ? 'Adj. FON FT' : 'FON FT';
   const ranked = computeRanked(s);
   const stats = computeStats(ranked);
   updateCcfsCards(ranked, stats);
