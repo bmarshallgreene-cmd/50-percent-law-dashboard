@@ -235,7 +235,7 @@
     <div class="card"><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
     <div class="card"><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
     <div class="card"><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
-    <div class="card highlight"><label id="cardFocusLabel">Selected District</label><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
+    <div class="card highlight"><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px"></div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
   </div>
 
   <div class="scenario-bar">
@@ -395,6 +395,7 @@ function setFocusedDistrict(name) {
   focusedDistrict = name;
   // Update all labels
   document.getElementById('cardFocusLabel').textContent = 'Selected District';
+  document.getElementById('cardFocusName').textContent = name;
   document.getElementById('colorKeyFocus').textContent = name;
   document.getElementById('yfaDeltaHdr').innerHTML = 'vs. ' + name + ' <span id="si-delta">⇅</span>';
   // Re-render both tabs
