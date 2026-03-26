@@ -252,7 +252,7 @@
 
   <div class="chart-wrap">
     <div style="display:flex;align-items:center;margin-bottom:12px">
-      <h2 id="chartTitle" style="margin:0;cursor:default" onclick="toggleSecretCol()">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
+      <h2 id="chartTitle" style="margin:0">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
       <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
         <select id="jumpSelect" class="ctrl-select" style="font-size:0.78rem;padding:5px 8px" onchange="jumpToSelected()"></select>
       </div>
@@ -270,7 +270,7 @@
 
   <div class="table-wrap">
     <div class="table-header">
-      <h2>District Detail</h2>
+      <h2 onclick="toggleSecretCol()" style="cursor:default">District Detail</h2>
       <div class="controls">
         <input type="text" class="search-box" id="ccfsSearch" placeholder="Search district…" oninput="filterCcfsTable()">
         <select class="ctrl-select" id="ccfsRegion" onchange="filterCcfsTable()">
@@ -918,6 +918,7 @@ function toggleCompCols() {
 }
 
 function toggleSecretCol() {
+  if (!focusedDistrict.toLowerCase().includes('pasadena')) return;
   document.getElementById('ccfsTable').classList.toggle('show-secret');
 }
 
