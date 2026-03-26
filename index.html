@@ -927,15 +927,6 @@ function jumpToSelected() {
   // Sync the header "Your district:" selector
   document.getElementById('districtSelector').value = name;
   // Scroll to the now-highlighted row
-  const target = name.toLowerCase();
-  const rows = document.querySelectorAll('#ccfsBody tr');
-  for (const row of rows) {
-    const nameCell = row.querySelector('td.district-name');
-    if (nameCell && nameCell.textContent.toLowerCase().includes(target)) {
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-  }
 }
 
 // ── Init ──────────────────────────────────────────────────────
