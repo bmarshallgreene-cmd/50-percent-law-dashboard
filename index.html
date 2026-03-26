@@ -324,10 +324,9 @@
   <br><br><strong>* Self-insured districts:</strong> Districts marked with * operate self-insured or self-funded health plans where costs may not be fully captured in object code 3000 of the CCFS-311, causing figures to be understated.
   <ul style="text-align:left;margin:8px auto;max-width:900px;color:#999;font-size:0.75rem">
     <li><strong>Pasadena Area</strong> — Confirmed: routes H&amp;W costs through an Internal Service Fund (Fund 61) and records them as operating expenses (object 5000), not employee benefits. Figure is significantly understated.</li>
-    <li><strong>Shasta-Tehama-Trinity</strong> — Self-insured via STSIG JPA (Shasta Trinity Schools Insurance Group); claims administered by Anthem Blue Cross. CCFS-311 recording treatment unverified.</li>
-    <li><strong>Riverside</strong> — Operates a standalone self-funded PPO administered by Health Now/Blue Shield. CCFS-311 recording treatment unverified.</li>
+    <li><strong>Riverside</strong> — Operates a standalone self-funded PPO (district is its own risk-bearer, administered by Keenan/Blue Shield). Standalone self-funded plans are the most likely structure to route costs through an Internal Service Fund rather than object 3000; recording treatment unverified.</li>
   </ul>
-  <em>Note: Many districts participate in SISC (Self-Insured Schools of California), a public JPA. SISC districts generally pay contributions that still appear correctly in object 3000 and are not flagged here. Districts using CalPERS health plans (e.g., Foothill-DeAnza, Los Angeles, North Orange County, San Mateo, Solano) are fully insured and not affected by this issue.</em>
+  <em>Note: Many districts participate in SISC (Self-Insured Schools of California), a public JPA. SISC districts generally pay contributions that still appear correctly in object 3000 and are not flagged here. Districts using CalPERS health plans (e.g., Foothill-DeAnza, Los Angeles, North Orange County, San Mateo, Solano) are fully insured and not affected by this issue. Shasta-Tehama-Trinity participates in STSIG JPA (Shasta Trinity Schools Insurance Group), an external JPA with the same contribution-based structure as SISC — costs are expected to flow correctly through object 3000 and are not flagged.</em>
   <br><br><strong>Sources:</strong>
   &nbsp;(1) <a href="https://fiscalportal.cccco.edu/Reports/AnnualReports" target="_blank" style="color:#1a3a5c">CCFS-311 Annual Reports — CCCCO Fiscal Portal</a>
   &nbsp;&nbsp;(2) <a href="https://www.cccco.edu/About-Us/Chancellors-Office/Divisions/Educational-Services-and-Support/What-we-do/Full-Time-Faculty-Obligation-Number" target="_blank" style="color:#1a3a5c">Fall 2024 FON Report — CCCCO</a>
@@ -458,7 +457,7 @@ const districts = [
   {name:"Southwestern",          ftef:265.4,  adjFtef:259.4, instrBenefits:21250466,  hw:10685280.27, code:"90",  step21:138004, region:"San Diego",      multi:false},
   {name:"Glendale",              ftef:217.5,  adjFtef:210.5, instrBenefits:17465683,  hw:8664175.74,  code:"730", step21:122736, region:"Greater LA",     multi:false},
   {name:"West Hills",            ftef:102,    adjFtef:102,   instrBenefits:7465735,   hw:4149608.62,  code:"580", step21:144441, region:"Central Valley", multi:true},
-  {name:"Shasta-Tehama-Trinity", ftef:128,    adjFtef:126,   instrBenefits:9168756,   hw:5109557.65,  code:"170", step21:112552, selfInsured:true, region:"Northern CA",    multi:false},
+  {name:"Shasta-Tehama-Trinity", ftef:128,    adjFtef:126,   instrBenefits:9168756,   hw:5109557.65,  code:"170", step21:112552, selfInsured:false, region:"Northern CA",    multi:false},
   {name:"Barstow",               ftef:40.5,   adjFtef:37.5,  instrBenefits:2999091,   hw:1509040.51,  code:"910", step21:135099, region:"Inland Empire",  multi:false},
   {name:"Copper Mountain",       ftef:25.7,   adjFtef:25.7,  instrBenefits:2304163,   hw:1022671.98,  code:"970", step21:136887, region:"Inland Empire",  multi:false},
   {name:"Citrus",                ftef:162,    adjFtef:159,   instrBenefits:13265098,  hw:6281361.95,  code:"820", step21:135770, region:"Greater LA",     multi:false},
