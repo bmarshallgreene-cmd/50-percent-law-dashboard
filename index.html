@@ -237,6 +237,9 @@
     <div class="card"><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
     <div class="card highlight"><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
   </div>
+  <div style="text-align:right;margin:-8px 0 12px">
+    <button class="comp-toggle-btn" onclick="downloadCsv()" title="Download full dataset as CSV">⬇ Download CSV</button>
+  </div>
 
   <div class="scenario-bar">
     <span>Calculation:</span>
@@ -291,7 +294,6 @@
           <option value="ccci">CCCI Members</option>
         </select>
         <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp ▼</button>
-        <button class="comp-toggle-btn" onclick="downloadCsv()" title="Download full dataset as CSV">⬇ Download CSV</button>
       </div>
     </div>
     <div class="table-scroll">
