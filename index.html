@@ -738,7 +738,9 @@ function sortCcfs(col) {
   ccfsSort = { col, dir: ccfsSort.col === col ? (ccfsSort.dir === 'asc' ? 'desc' : 'asc') : (col === 1 ? 'asc' : 'desc') };
   for (let i = 0; i <= 9; i++) {
     const th = document.getElementById('cth' + i);
-    if (th) th.className = i === col ? ccfsSort.dir : '';
+    if (!th) continue;
+    th.classList.remove('asc', 'desc');
+    if (i === col) th.classList.add(ccfsSort.dir);
   }
   filterCcfsTable();
 }
