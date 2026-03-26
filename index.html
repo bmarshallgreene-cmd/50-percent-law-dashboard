@@ -291,6 +291,7 @@
           <option value="ccci">CCCI Members</option>
         </select>
         <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp ▼</button>
+        <button class="comp-toggle-btn" onclick="downloadCsv()" title="Download full dataset as CSV">⬇ Download CSV</button>
       </div>
     </div>
     <div class="table-scroll">
@@ -915,6 +916,40 @@ function toggleCompCols() {
   const on = tbl.classList.toggle('show-comp');
   btn.textContent = on ? 'Salary & Comp ▲' : 'Salary & Comp ▼';
   btn.classList.toggle('active', on);
+}
+
+function downloadCsv() {
+  const ranked = computeRanked(currentScenario);
+  const stats = computeStats(ranked);
+  const headers = ['Rank','District','Region','Multi-College','CCCI Member','Self-Insured','FON FT','Adj. FON FT','Total H&W','H&W per FT','vs. Median','Step 21 Salary','Total Comp','COL Index','COL County','COL-Adj. Comp'];
+  const rows = ranked.map((d, i) => {
+    const totalComp = d.step21 + d.scenarioValue;
+    const diff = d.scenarioValue - stats.median;
+    const colAdj = d.col != null ? Math.round(totalComp * 100 / d.col) : '';
+    return [
+      i + 1,
+      d.name,
+      d.region || '',
+      d.multi ? 'Yes' : 'No',
+      d.ccci ? 'Yes' : 'No',
+      d.selfInsured ? 'Yes' : 'No',
+      d.scenarioFtef,
+      d.adjFtef,
+      Math.round(d.scenarioHw),
+      Math.round(d.scenarioValue),
+      Math.round(diff),
+      d.step21,
+      Math.round(totalComp),
+      d.col != null ? d.col : '',
+      d.colCounty || '',
+      colAdj
+    ].map(v => typeof v === 'string' && v.includes(',') ? `"${v}"` : v);
+  });
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `cc-hw-per-faculty-${currentScenario}-2024-25.csv`;
+  a.click();
 }
 
 function toggleSecretCol() {
