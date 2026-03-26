@@ -674,7 +674,7 @@ function buildCcfsTable(data) {
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     tr.innerHTML = `
       <td class="rank">#${i + 1}</td>
-      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">SELECTED DISTRICT</span>' : ''}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
       <td class="num">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
@@ -875,7 +875,7 @@ function renderYfa() {
     if (isYos) tr.className = 'yos';
     tr.innerHTML = `
       <td style="text-align:center">${rankHtml}</td>
-      <td><span class="dname">${isYos ? '★ ' : ''}${d.name}</span>${isYos ? '<span class="yosemite-badge">YOUR DISTRICT</span>' : ''}</td>
+      <td><span class="dname">${isYos ? '★ ' : ''}${d.name}</span>${isYos ? '<span class="yosemite-badge">SELECTED DISTRICT</span>' : ''}</td>
       <td class="num">${d.avg != null ? fmt(d.avg) : '<span class="no-data">—</span>'}</td>
       <td class="num"><strong>${d.max != null ? fmt(d.max) : '<span class="no-data">—</span>'}</strong></td>
       <td class="delta ${deltaCls}">${deltaStr}</td>
