@@ -323,7 +323,7 @@
   <br><br><strong>Note on part-time faculty benefits:</strong> Districts that extend health &amp; welfare benefits to part-time faculty will have higher 3000-series expenditures that are not fully attributable to full-time faculty. This may cause some districts' per-FT figures to be overstated relative to districts that offer benefits only to full-time employees.
   <br><br><strong>* Self-insured districts:</strong> Districts marked with * operate self-insured or self-funded health plans where costs may not be fully captured in object code 3000 of the CCFS-311, causing figures to be understated.
   <ul style="text-align:left;margin:8px auto;max-width:900px;color:#999;font-size:0.75rem">
-    <li><strong>Pasadena Area</strong> — Confirmed: routes H&amp;W costs through an Internal Service Fund (Fund 61) and records them as operating expenses (object 5000), not employee benefits. Figure is significantly understated.</li>
+    <li><strong>Pasadena</strong> — Confirmed: routes H&amp;W costs through an Internal Service Fund (Fund 61) and records them as operating expenses (object 5000), not employee benefits. Figure is significantly understated.</li>
     <li><strong>Riverside</strong> — Operates a standalone self-funded PPO (district is its own risk-bearer, administered by Keenan/Blue Shield). Standalone self-funded plans are the most likely structure to route costs through an Internal Service Fund rather than object 3000; recording treatment unverified.</li>
   </ul>
   <em>Note: Many districts participate in SISC (Self-Insured Schools of California), a public JPA. SISC districts generally pay contributions that still appear correctly in object 3000 and are not flagged here. Districts using CalPERS health plans (e.g., Foothill-DeAnza, Los Angeles, North Orange County, San Mateo, Solano) are fully insured and not affected by this issue. Shasta-Tehama-Trinity participates in STSIG JPA (Shasta Trinity Schools Insurance Group), an external JPA with the same contribution-based structure as SISC — costs are expected to flow correctly through object 3000 and are not flagged.</em>
@@ -493,7 +493,7 @@ const districts = [
   {name:"Palo Verde",            ftef:45,     adjFtef:45,    instrBenefits:2335441,   hw:922662.82,   code:"950", step21:142326, region:"Inland Empire",  multi:false},
   {name:"Feather River",         ftef:29,     adjFtef:29,    instrBenefits:1481622,   hw:562688.47,   code:"120", step21:125126, region:"Northern CA",    multi:false},
   {name:"Allan Hancock",         ftef:163.3,  adjFtef:159.3, instrBenefits:7648219,   hw:3033897.75,  code:"610", step21:127485, region:"Central Coast",  multi:false, ccci:true},
-  {name:"Pasadena Area",         ftef:422,    adjFtef:416,   instrBenefits:23984217,  hw:6949128.04,  code:"770", step21:129764, selfInsured:true,        region:"Greater LA",     multi:false, ccci:true},
+  {name:"Pasadena",         ftef:422,    adjFtef:416,   instrBenefits:23984217,  hw:6949128.04,  code:"770", step21:129764, selfInsured:true,        region:"Greater LA",     multi:false, ccci:true},
 ];
 
 // ── Cost-of-Living index per district (MIT Living Wage Calculator, Feb 2026)
@@ -539,7 +539,7 @@ const COL_DATA = {
   'Ohlone':                { col: 106.0, county: 'Alameda'       },
   'Palomar':               { col: 107.9, county: 'San Diego'     },
   'Palo Verde':            { col:  94.6, county: 'Riverside'     },
-  'Pasadena Area':         { col:  94.9, county: 'Los Angeles'   },
+  'Pasadena':         { col:  94.9, county: 'Los Angeles'   },
   'Peralta':               { col: 106.0, county: 'Alameda'       },
   'Rancho Santiago':       { col: 119.8, county: 'Orange'        },
   'Redwoods':              { col:  79.0, county: 'Humboldt'      },
@@ -766,7 +766,7 @@ const YFA_RAW = [
   ["Compton",17000,17000,"Yes"],
   ["Antelope Valley",null,17500,"No"],
   ["Foothill-DeAnza",null,44296.32,"No"],
-  ["Pasadena Area",27012,27012,"Yes"],
+  ["Pasadena",27012,27012,"Yes"],
   ["Mt. San Antonio",null,28184.3,"Yes"],
   ["Riverside",48925.44,48925.44,"Yes"],
   ["Ohlone",19500,19500,"Yes"],
