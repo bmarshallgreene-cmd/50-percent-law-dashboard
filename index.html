@@ -154,7 +154,7 @@
     margin-left: 6px; vertical-align: middle; font-weight: 600;
   }
 
-  .hw-value { font-weight: 600; font-size: 0.95rem; }
+  .hw-value { font-weight: 600; font-size: 0.95rem; text-align: right; }
   .bar-cell { min-width: 140px; }
   .bar-bg { background: #eee; border-radius: 3px; height: 8px; width: 100%; overflow: hidden; }
   .bar-fill { height: 8px; border-radius: 3px; transition: width 0.3s; }
@@ -299,14 +299,14 @@
         <tr>
           <th onclick="sortCcfs(0)" id="cth0">Rank</th>
           <th onclick="sortCcfs(1)" id="cth1">District</th>
-          <th onclick="sortCcfs(2)" id="cth2">Total H&amp;W</th>
-          <th onclick="sortCcfs(3)" id="cth3">Adj. FON FT</th>
-          <th onclick="sortCcfs(4)" id="cth4">H&amp;W / FT</th>
+          <th onclick="sortCcfs(2)" id="cth2" style="text-align:right">Total H&amp;W</th>
+          <th onclick="sortCcfs(3)" id="cth3" style="text-align:right">Adj. FON FT</th>
+          <th onclick="sortCcfs(4)" id="cth4" style="text-align:right">H&amp;W / FT</th>
           <th id="cth5">vs. Median</th>
-          <th onclick="sortCcfs(6)" id="cth6" class="comp-col" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
-          <th onclick="sortCcfs(7)" id="cth7" class="comp-col" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
+          <th onclick="sortCcfs(6)" id="cth6" class="comp-col" style="text-align:right" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
+          <th onclick="sortCcfs(7)" id="cth7" class="comp-col" style="text-align:right" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
           <th id="cth8" class="comp-col">vs. Median (Comp)</th>
-          <th onclick="sortCcfs(9)" id="cth9" class="secret-col" style="white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
+          <th onclick="sortCcfs(9)" id="cth9" class="secret-col" style="text-align:right;white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
