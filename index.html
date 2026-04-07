@@ -300,12 +300,12 @@
     <table id="ccfsTable">
       <thead>
         <tr>
-          <th onclick="sortCcfs(0)" id="cth0">Rank</th>
-          <th onclick="sortCcfs(1)" id="cth1">District</th>
-          <th onclick="sortCcfs(2)" id="cth2" style="text-align:right">Total H&amp;W</th>
-          <th onclick="sortCcfs(3)" id="cth3" style="text-align:right">Adj. FON FT</th>
-          <th onclick="sortCcfs(4)" id="cth4" style="text-align:right">H&amp;W / FT</th>
-          <th id="cth5">vs. Median</th>
+          <th onclick="sortCcfs(0)" id="cth0" title="Rank by H&W per FT under the current methodology. Re-numbers when you sort by a different column.">Rank</th>
+          <th onclick="sortCcfs(1)" id="cth1" title="California Community College district name. Districts marked * are self-insured and may be understated — see footnote.">District</th>
+          <th onclick="sortCcfs(2)" id="cth2" style="text-align:right" title="Estimated employer-paid Health &amp; Welfare costs for the instructional program only (CCFS-311 Object 3000, ECS 84362 A, Column 10). Full methodology subtracts estimated STRS (19.1%) and Medicare (1.45%) employer contributions.">Total H&amp;W</th>
+          <th onclick="sortCcfs(3)" id="cth3" style="text-align:right" title="Faculty Obligation Number full-time headcount, minus tenured/tenure-track FTEF in counseling and library roles (ASA codes 6120, 6310, 6320, 6390, 6410, 6420, 6430 — Fall 2025 CCCCO data). Hover any cell in this column to see the exact calculation for that district.">Adj. FON FT</th>
+          <th onclick="sortCcfs(4)" id="cth4" style="text-align:right" title="Estimated employer-paid H&amp;W cost divided by Adjusted FON FT. This is the primary comparison metric.">H&amp;W / FT</th>
+          <th id="cth5" title="How this district's H&amp;W per FT compares to the statewide median across all 72 districts.">vs. Median</th>
           <th onclick="sortCcfs(6)" id="cth6" class="comp-col" style="text-align:right" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
           <th onclick="sortCcfs(7)" id="cth7" class="comp-col" style="text-align:right" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
           <th id="cth8" class="comp-col">vs. Median (Comp)</th>
