@@ -679,7 +679,7 @@ function buildCcfsTable(data) {
       <td class="rank">#${i + 1}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">SELECTED DISTRICT</span>' : ''}</td>
       <td class="num">${fmt(d.scenarioHw)}</td>
-      <td class="num">${d.scenarioFtef.toLocaleString()}</td>
+      <td class="num" title="${(() => { const adj = Math.round((d.ftef - d.adjFtef) * 10) / 10; if (d.scenarioFtef === d.ftef) return `Raw FON FT: ${d.ftef} — no adjustment in Basic mode`; if (adj === 0) return `FON FT: ${d.ftef} — no counselor/librarian data available`; return `${d.ftef} (FON FT) \u2212 ${adj} (counselors & librarians) = ${d.adjFtef}`; })()}" style="cursor:help">${d.scenarioFtef.toLocaleString()}</td>
       <td class="hw-value">${fmt(d.scenarioValue)}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
