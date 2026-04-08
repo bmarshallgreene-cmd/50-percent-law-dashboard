@@ -666,12 +666,12 @@ function initChart() {
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: {
-          label: ctx => ' ' + fmt(ctx.raw) + ' per FT faculty',
+          label: ctx => indexView ? (' Index: ' + ctx.raw.toFixed(1) + '  (median = 100)') : (' ' + fmt(ctx.raw) + ' per FT faculty'),
           title: ctx => ctx[0].label,
         }}
       },
       scales: {
-        x: { ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 11 } }, grid: { color: '#eee' } },
+        x: { ticks: { callback: v => indexView ? v.toFixed(0) : ('$' + (v/1000).toFixed(0) + 'k'), font: { size: 11 } }, grid: { color: '#eee' } },
         y: {
           ticks: {
             font: ctx => { const lbl = ctx.tick.label.replace(/ \*$/, ''); return { size: lbl === focusedDistrict ? 13 : 11, weight: lbl === focusedDistrict ? 'bold' : 'normal' }; },
@@ -688,8 +688,9 @@ function initChart() {
 
 function updateChart(ranked) {
   if (!chartInitialized) return;
+  const chartMedian = computeStats(ranked).median;
   chart.data.labels = ranked.map(d => d.selfInsured ? d.name + ' *' : d.name);
-  chart.data.datasets[0].data = ranked.map(d => d.scenarioValue);
+  chart.data.datasets[0].data = ranked.map(d => indexView ? d.scenarioValue / chartMedian * 100 : d.scenarioValue);
   chart.data.datasets[0].backgroundColor = ranked.map(d => isFocused(d) ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
   chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#b85c00' : 'transparent');
   chart.data.datasets[0].borderWidth = ranked.map(d => isFocused(d) ? 3 : 0);
