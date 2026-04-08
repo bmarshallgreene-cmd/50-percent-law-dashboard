@@ -294,6 +294,7 @@
           <option value="ccci">CCCI Members</option>
         </select>
         <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp ▼</button>
+        <button class="comp-toggle-btn" id="indexToggleBtn" onclick="toggleIndexView()" title="Replace dollar amounts with a relative index where the statewide median = 100">Index View</button>
       </div>
     </div>
     <div class="table-scroll">
@@ -401,6 +402,32 @@
 <script>
 // ── Focused district ───────────────────────────────────────────
 let focusedDistrict = 'Yosemite';
+let indexView = false;
+
+function medianOf(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  const n = s.length;
+  return n % 2 === 0 ? (s[n/2-1] + s[n/2]) / 2 : s[Math.floor(n/2)];
+}
+function fmtIdx(val, med) { return (val / med * 100).toFixed(1); }
+function fmtIdxDiff(val, med) { const d = val / med * 100 - 100; return (d >= 0 ? '+' : '') + d.toFixed(1) + ' pts'; }
+
+function toggleIndexView() {
+  indexView = !indexView;
+  const btn = document.getElementById('indexToggleBtn');
+  btn.classList.toggle('active', indexView);
+  btn.textContent = indexView ? 'Index View ✓' : 'Index View';
+  // Update column headers
+  const iSfx = indexView ? ' (idx)' : '';
+  document.getElementById('cth2').childNodes[0].textContent = 'Total H&W' + iSfx;
+  document.getElementById('cth4').childNodes[0].textContent = 'H&W / FT' + iSfx;
+  const c6 = document.getElementById('cth6'); if (c6) c6.childNodes[0].textContent = 'Step 21 Salary' + iSfx;
+  const c7 = document.getElementById('cth7'); if (c7) c7.childNodes[0].textContent = 'Total Comp' + iSfx;
+  const ranked = computeRanked(currentScenario);
+  const stats = computeStats(ranked);
+  updateCcfsCards(ranked, stats);
+  buildCcfsTable(sortedCcfsData(ranked));
+}
 
 function isFocused(d) { return d.name === focusedDistrict; }
 
@@ -669,40 +696,46 @@ function updateChart(ranked) {
 function buildCcfsTable(data) {
   const stats = computeStats(computeRanked(currentScenario));
   const max = data.reduce((m, d) => Math.max(m, d.scenarioValue), 0);
+  // Pre-compute column medians for index view
+  const medHw     = medianOf(data.map(d => d.scenarioHw));
+  const medStep21 = medianOf(data.map(d => d.step21));
+  const medComp   = medianOf(data.map(d => d.step21 + d.scenarioValue));
+  const colDistrs = data.filter(d => d.col != null);
+  const medColAdj = colDistrs.length ? medianOf(colDistrs.map(d => (d.step21 + d.scenarioValue) * 100 / d.col)) : null;
   const tbody = document.getElementById('ccfsBody');
   tbody.innerHTML = '';
   data.forEach((d, i) => {
     const t = tier(d.rank);
     const diff = d.scenarioValue - stats.median;
-    const diffStr = (diff >= 0 ? '+' : '') + fmt(diff);
     const diffColor = isFocused(d) ? '#e67e22' : (diff >= 0 ? '#1e8449' : '#c0392b');
+    const diffLabel = indexView ? fmtIdxDiff(d.scenarioValue, stats.median) : ((diff >= 0 ? '+' : '') + fmt(diff));
     const pct = (d.scenarioValue / max * 100).toFixed(1);
     const barColor = isFocused(d) ? '#e67e22' : TIER_COLORS[t-1];
     const tr = document.createElement('tr');
     tr.className = isFocused(d) ? 'yosemite' : 'tier-' + t;
     const totalComp = d.step21 + d.scenarioValue;
-    const compMedian = computeStats(computeRanked(currentScenario).map(x => ({...x, scenarioValue: x.totalComp}))).median;
-    const compDiff = totalComp - compMedian;
-    const compDiffStr = (compDiff >= 0 ? '+' : '') + fmt(compDiff);
+    const compDiff = totalComp - medComp;
     const compDiffColor = isFocused(d) ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
+    const compDiffLabel = indexView ? fmtIdxDiff(totalComp, medComp) : ((compDiff >= 0 ? '+' : '') + fmt(compDiff));
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
+    const colAdj = d.col != null ? totalComp * 100 / d.col : null;
     tr.innerHTML = `
       <td class="rank">#${i + 1}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">SELECTED DISTRICT</span>' : ''}</td>
-      <td class="num">${fmt(d.scenarioHw)}</td>
+      <td class="num">${indexView ? fmtIdx(d.scenarioHw, medHw) : fmt(d.scenarioHw)}</td>
       <td class="num" title="${(() => { const adj = Math.round((d.ftef - d.adjFtef) * 10) / 10; if (d.scenarioFtef === d.ftef) return `Raw FON FT: ${d.ftef} — no adjustment in Basic mode`; if (adj === 0) return `FON FT: ${d.ftef} — no counselor/librarian data available`; return `${d.ftef} (FON FT) \u2212 ${adj} (counselors & librarians) = ${d.adjFtef}`; })()}" style="cursor:help">${d.scenarioFtef.toLocaleString()}</td>
-      <td class="hw-value">${fmt(d.scenarioValue)}</td>
+      <td class="hw-value">${indexView ? fmtIdx(d.scenarioValue, stats.median) : fmt(d.scenarioValue)}</td>
       <td><div class="bar-cell">
-        <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffStr} vs. median</div>
+        <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffLabel} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
       </div></td>
-      <td class="num comp-col">${fmt(d.step21)}</td>
-      <td class="num comp-col" style="font-weight:600">${fmt(totalComp)}</td>
+      <td class="num comp-col">${indexView ? fmtIdx(d.step21, medStep21) : fmt(d.step21)}</td>
+      <td class="num comp-col" style="font-weight:600">${indexView ? fmtIdx(totalComp, medComp) : fmt(totalComp)}</td>
       <td class="comp-col"><div class="bar-cell">
-        <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffStr} vs. median</div>
+        <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffLabel} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
       </div></td>
-      <td class="num secret-col" style="padding-top:6px;padding-bottom:6px">${d.col != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${fmt(totalComp * 100 / d.col)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
+      <td class="num secret-col" style="padding-top:6px;padding-bottom:6px">${colAdj != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${indexView && medColAdj ? fmtIdx(colAdj, medColAdj) : fmt(colAdj)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
     tr.dataset.step21 = d.step21; tr.dataset.totalComp = totalComp;
@@ -713,14 +746,24 @@ function buildCcfsTable(data) {
 function updateCcfsCards(ranked, stats) {
   const yos = ranked.find(d => isFocused(d));
   const minD = ranked[ranked.length-1], maxD = ranked[0];
-  document.getElementById('cardMean').textContent = fmt(stats.mean);
-  document.getElementById('cardMedian').textContent = fmt(stats.median);
-  document.getElementById('cardRange').textContent = fmt(stats.min) + ' – ' + fmt(stats.max);
-  document.getElementById('cardRangeSub').textContent = minD.name + ' to ' + maxD.name;
-  document.getElementById('cardYosemite').textContent = fmt(yos.scenarioValue);
   const diff = yos.scenarioValue - stats.median;
-  document.getElementById('cardYosemiteSub').textContent =
-    `Rank ${yos.rank} of 72 — $${Math.round(Math.abs(diff)).toLocaleString()} ${diff >= 0 ? 'above' : 'below'} median`;
+  if (indexView) {
+    document.getElementById('cardMean').textContent = fmtIdx(stats.mean, stats.median);
+    document.getElementById('cardMedian').textContent = '100.0';
+    document.getElementById('cardRange').textContent = fmtIdx(stats.min, stats.median) + ' – ' + fmtIdx(stats.max, stats.median);
+    document.getElementById('cardYosemite').textContent = fmtIdx(yos.scenarioValue, stats.median);
+    const idxDiff = yos.scenarioValue / stats.median * 100 - 100;
+    document.getElementById('cardYosemiteSub').textContent =
+      `Rank ${yos.rank} of 72 — ${idxDiff >= 0 ? '+' : ''}${idxDiff.toFixed(1)} pts vs. median (100)`;
+  } else {
+    document.getElementById('cardMean').textContent = fmt(stats.mean);
+    document.getElementById('cardMedian').textContent = fmt(stats.median);
+    document.getElementById('cardRange').textContent = fmt(stats.min) + ' – ' + fmt(stats.max);
+    document.getElementById('cardYosemite').textContent = fmt(yos.scenarioValue);
+    document.getElementById('cardYosemiteSub').textContent =
+      `Rank ${yos.rank} of 72 — $${Math.round(Math.abs(diff)).toLocaleString()} ${diff >= 0 ? 'above' : 'below'} median`;
+  }
+  document.getElementById('cardRangeSub').textContent = minD.name + ' to ' + maxD.name;
 }
 
 function filterCcfsTable() {
