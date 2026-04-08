@@ -274,6 +274,7 @@
   <div class="table-wrap">
     <div class="table-header">
       <h2 onclick="toggleSecretCol()" style="cursor:default">District Detail</h2>
+        <button class="comp-toggle-btn" id="indexToggleBtn" onclick="toggleIndexView()" title="Replace dollar amounts with a relative index where the statewide median = 100" style="margin-left:10px;vertical-align:middle">Index View</button>
       <div class="controls">
         <input type="text" class="search-box" id="ccfsSearch" placeholder="Search district…" oninput="filterCcfsTable()">
         <select class="ctrl-select" id="ccfsRegion" onchange="filterCcfsTable()">
@@ -293,8 +294,7 @@
           <option value="multi">Multi-College</option>
           <option value="ccci">CCCI Members</option>
         </select>
-        <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp ▼</button>
-        <button class="comp-toggle-btn" id="indexToggleBtn" onclick="toggleIndexView()" title="Replace dollar amounts with a relative index where the statewide median = 100">Index View</button>
+        <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp</button>
       </div>
     </div>
     <div class="table-scroll">
@@ -986,7 +986,7 @@ function toggleCompCols() {
   const tbl = document.getElementById('ccfsTable');
   const btn = document.getElementById('compToggleBtn');
   const on = tbl.classList.toggle('show-comp');
-  btn.textContent = on ? 'Salary & Comp ▲' : 'Salary & Comp ▼';
+  btn.textContent = on ? 'Salary & Comp ✓' : 'Salary & Comp';
   btn.classList.toggle('active', on);
 }
 
