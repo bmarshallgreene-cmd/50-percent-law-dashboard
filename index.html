@@ -365,6 +365,7 @@
           <option value="yes">Fully paid plan only</option>
           <option value="no">No fully paid plan</option>
         </select>
+        <select class="ctrl-select" id="yfaDistrictSelect" onchange="setFocusedDistrict(this.value)"></select>
       </div>
     </div>
     <table>
@@ -438,6 +439,11 @@ function setFocusedDistrict(name) {
   document.getElementById('cardFocusName').textContent = name;
   document.getElementById('colorKeyFocus').textContent = name;
   document.getElementById('yfaDeltaHdr').innerHTML = 'vs. ' + name + ' <span id="si-delta">⇅</span>';
+  // Sync all selectors
+  document.getElementById('districtSelector').value = name;
+  document.getElementById('jumpSelect').value = name;
+  const yfaSel = document.getElementById('yfaDistrictSelect');
+  if (yfaSel) yfaSel.value = name;
   // Re-render both tabs
   setScenario(currentScenario);
   buildYfaCards();
@@ -1046,6 +1052,16 @@ const jumpSel = document.getElementById('jumpSelect');
     if (d.name === 'Yosemite') opt.selected = true;
     el.appendChild(opt);
   });
+});
+
+// Populate YFA tab district selector with YFA survey districts only
+const yfaSel = document.getElementById('yfaDistrictSelect');
+[...yfaData].sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
+  const opt = document.createElement('option');
+  opt.value = d.name;
+  opt.textContent = d.name;
+  if (d.name === focusedDistrict) opt.selected = true;
+  yfaSel.appendChild(opt);
 });
 
 setScenario('full');
