@@ -426,6 +426,7 @@ function toggleIndexView() {
   const ranked = computeRanked(currentScenario);
   const stats = computeStats(ranked);
   updateCcfsCards(ranked, stats);
+  updateChart(ranked);
   buildCcfsTable(sortedCcfsData(ranked));
 }
 
