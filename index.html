@@ -422,8 +422,6 @@
           <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Mean employer-paid H&W contribution across all administrative/management positions reported by the institution in the 2025 ACCCA Salary &amp; Benefits Survey. ⚠ = 2025 figure same as 2022 — district likely did not submit updated data.">2025 Admin H&amp;W <span id="as-y25">▼</span></th>
           <th onclick="setAcccaSort('ccfshw')" id="ath3" style="text-align:right" title="Estimated employer-paid H&W per FT faculty from CCFS-311 Tab 1 (full methodology). Shown for direct comparison.">Faculty H&amp;W (CCFS) <span id="as-ccfshw">⇅</span></th>
           <th onclick="setAcccaSort('diff')" id="ath4" style="text-align:right" title="2025 Admin H&W minus Faculty H&W. Negative = faculty receive more than admin (typical). Positive = admin receives more than faculty (unusual — may indicate faculty data is understated).">Admin vs. Faculty <span id="as-diff">⇅</span></th>
-          <th onclick="setAcccaSort('y22')" id="ath5" style="text-align:right">2022 <span id="as-y22">⇅</span></th>
-          <th onclick="setAcccaSort('change')" id="ath6" style="text-align:right" title="Change in admin H&W from 2022 to 2025. Zero means the 2025 figure was not updated.">Change 22→25 <span id="as-change">⇅</span></th>
         </tr>
       </thead>
       <tbody id="acccaBody"></tbody>
@@ -1275,9 +1273,7 @@ function renderAccca() {
       '<td class="district-name">' + d.name + (isFoc ? '<span class="yosemite-badge">SELECTED</span>' : '') + '</td>' +
       '<td class="num">' + y25Html + '</td>' +
       '<td class="num">' + ccfsHtml + '</td>' +
-      '<td class="num">' + diffHtml + '</td>' +
-      '<td class="num">' + (d.y22 != null ? fmt(d.y22) : '<span class="no-data">—</span>') + '</td>' +
-      '<td class="num">' + changeHtml + '</td>';
+      '<td class="num">' + diffHtml + '</td>';
     tbody.appendChild(tr);
   });
 
@@ -1285,7 +1281,7 @@ function renderAccca() {
   if (countEl) countEl.textContent = data.length + ' of ' + ACCCA_DATA.length + ' districts';
 
   // Update sort indicators
-  ['rank','name','y25','ccfshw','diff','y22','change'].forEach(c => {
+  ['rank','name','y25','ccfshw','diff'].forEach(c => {
     const el = document.getElementById('as-' + c);
     if (!el) return;
     if (c === acccaSortCol) {
