@@ -223,6 +223,7 @@
   <span class="tab-bar-label">Section:</span>
   <button class="tab-btn active" onclick="showTab('ccfs')">CCFS-311 Analysis — All 72 Districts</button>
   <button class="tab-btn" onclick="showTab('yfa')" id="yfaTabBtn">YFA Benefits Survey</button>
+  <button class="tab-btn" onclick="showTab('accca')" id="acccaTabBtn">ACCCA Admin Benefits</button>
   <span class="tab-bar-label" style="margin-left:auto">Selected District:</span>
   <select id="districtSelector" class="ctrl-select" style="background:rgba(255,255,255,0.1);color:white;border-color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 10px" onchange="setFocusedDistrict(this.value)"></select>
 </div>
@@ -399,6 +400,52 @@
 </footer>
 </div>
 
+<!-- ══════════════════════════════════════════ TAB 3: ACCCA ══ -->
+<div class="tab-panel" id="tab-accca">
+<div class="container">
+
+  <div class="cards" id="acccaCards"></div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>ACCCA Admin H&amp;W — District Comparison</h2>
+      <div class="controls">
+        <input class="search-box" type="text" id="acccaSearch" placeholder="Search district…" oninput="renderAccca()">
+      </div>
+    </div>
+    <div class="table-scroll">
+    <table id="acccaTable">
+      <thead>
+        <tr>
+          <th onclick="setAcccaSort('rank')" id="ath0">Rank <span id="as-rank">▼</span></th>
+          <th onclick="setAcccaSort('name')" id="ath1">District <span id="as-name">⇅</span></th>
+          <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Employer-paid H&W for admin/management positions per the 2025 ACCCA Salary &amp; Benefits Survey. ⚠ = 2025 figure same as 2022 — district likely did not submit updated data.">2025 Admin H&amp;W <span id="as-y25">▼</span></th>
+          <th onclick="setAcccaSort('ccfshw')" id="ath3" style="text-align:right" title="Estimated employer-paid H&W per FT faculty from CCFS-311 Tab 1 (full methodology). Shown for direct comparison.">Faculty H&amp;W (CCFS) <span id="as-ccfshw">⇅</span></th>
+          <th onclick="setAcccaSort('diff')" id="ath4" style="text-align:right" title="2025 Admin H&W minus Faculty H&W. Negative = faculty receive more than admin (typical). Positive = admin receives more than faculty (unusual — may indicate faculty data is understated).">Admin vs. Faculty <span id="as-diff">⇅</span></th>
+          <th onclick="setAcccaSort('y22')" id="ath5" style="text-align:right">2022 <span id="as-y22">⇅</span></th>
+          <th onclick="setAcccaSort('change')" id="ath6" style="text-align:right" title="Change in admin H&W from 2022 to 2025. Zero means the 2025 figure was not updated.">Change 22→25 <span id="as-change">⇅</span></th>
+          <th onclick="setAcccaSort('y19')" id="ath7" style="text-align:right">2019 <span id="as-y19">⇅</span></th>
+        </tr>
+      </thead>
+      <tbody id="acccaBody"></tbody>
+    </table>
+    </div>
+    <div class="table-footer">
+      <span id="acccaCount"></span>
+      <span>⚠ italic = 2025 same as 2022, likely stale &nbsp;·&nbsp; Click column headers to sort</span>
+    </div>
+  </div>
+
+</div>
+<footer>
+  Data compiled from annual <strong>ACCCA (Association of California Community College Administrators) Salary &amp; Benefits Surveys</strong>. Figures represent employer-paid H&amp;W contributions for administrative/management positions — not faculty or classified. Italic 2025 entries are stale (same as 2022 value); the district did not submit updated data. Several districts reported reductions from the 2022 survey.
+  <br><br><strong>Note:</strong> The "Faculty H&amp;W" column is drawn from Tab 1 (CCFS-311 full methodology) for the same district. Faculty H&amp;W typically exceeds admin H&amp;W; where admin exceeds faculty, the faculty figure may be understated or there may be a data issue.
+  <br><br><strong>Sources:</strong>
+  &nbsp;(1) <a href="https://accca.org/benefits/accca-salary-survey/" target="_blank" style="color:#1a3a5c">ACCCA Salary &amp; Benefits Survey — accca.org</a>
+  &nbsp;&nbsp;(2) Faculty H&amp;W: CCFS-311 Annual Reports — Analysis of Compliance with the 50 Percent Law (ECS 84362)
+</footer>
+</div>
+
 <!-- ══════════════════════════════════════════ SCRIPTS ══ -->
 <script>
 // ── Focused district ───────────────────────────────────────────
@@ -445,16 +492,19 @@ function setFocusedDistrict(name) {
   document.getElementById('jumpSelect').value = name;
   const yfaSel = document.getElementById('yfaDistrictSelect');
   if (yfaSel) yfaSel.value = name;
-  // Re-render both tabs
+  // Re-render all tabs
   setScenario(currentScenario);
   buildYfaCards();
   renderYfa();
+  buildAcccaCards();
+  renderAccca();
 }
 
 // ── Tab switching ──────────────────────────────────────────────
 const TAB_SUBTITLES = {
-  ccfs: 'Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data',
-  yfa:  'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
+  ccfs:  'Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data',
+  yfa:   'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
+  accca: 'Survey Years 2014–2025 &nbsp;|&nbsp; Source: ACCCA Salary &amp; Benefits Survey',
 };
 
 function showTab(id) {
@@ -1042,6 +1092,214 @@ function jumpToSelected() {
   // Scroll to the now-highlighted row
 }
 
+// ══════════════════════════════════════════════════════════════
+// TAB 3 — ACCCA ADMIN BENEFITS SURVEY
+// ══════════════════════════════════════════════════════════════
+const ACCCA_DATA = [
+  {name:"Allan Hancock College",      ccfs:"Allan Hancock",        y14:8348,  y16:8457,  y19:8913,  y20:8940,  y21:8940,  y22:9623,  y25:9623},
+  {name:"Antelope Valley College",    ccfs:"Antelope Valley",      y14:13385, y16:13944, y19:14500, y20:14500, y21:14500, y22:14500, y25:17500},
+  {name:"Barstow College",            ccfs:"Barstow",              y14:16362, y16:16400, y19:17113, y20:17600, y21:17600, y22:17600, y25:20500},
+  {name:"Butte College",              ccfs:"Butte",                y14:17632, y16:15343, y19:18447, y20:18447, y21:19625, y22:19625, y25:21143},
+  {name:"Cabrillo College",           ccfs:"Cabrillo",             y14:27005, y16:27768, y19:32434, y20:32434, y21:34204, y22:35399, y25:41285},
+  {name:"Cerritos College",           ccfs:"Cerritos",             y14:22891, y16:20735, y19:24217, y20:31204, y21:31204, y22:31204, y25:25733},
+  {name:"Chabot-Las Positas CCD",     ccfs:"Chabot-Las Positas",   y14:15836, y16:36608, y19:26528, y20:26528, y21:26981, y22:50805, y25:56612},
+  {name:"Chaffey College",            ccfs:"Chaffey",              y14:17697, y16:17248, y19:22011, y20:23583, y21:25149, y22:25149, y25:31535},
+  {name:"Citrus College",             ccfs:"Citrus",               y14:20848, y16:22905, y19:23874, y20:25701, y21:25701, y22:25701, y25:30151},
+  {name:"City College of San Francisco", ccfs:"San Francisco",     y14:13673, y16:16620, y19:22980, y20:22980, y21:24672, y22:22930, y25:29350},
+  {name:"Coast CCD",                  ccfs:"Coast",                y14:22345, y16:26644, y19:17500, y20:17776, y21:17980, y22:18300, y25:21400},
+  {name:"College of Marin",           ccfs:"Marin",                y14:23063, y16:23063, y19:53144, y20:61920, y21:62308, y22:69137, y25:73520},
+  {name:"College of the Canyons",     ccfs:"Santa Clarita",        y14:13672, y16:13224, y19:16271, y20:19106, y21:18728, y22:17587, y25:17142},
+  {name:"College of the Desert",      ccfs:"Desert",               y14:null,  y16:null,  y19:null,  y20:null,  y21:19200, y22:19200, y25:20688},
+  {name:"College of the Redwoods",    ccfs:"Redwoods",             y14:15000, y16:16700, y19:15000, y20:15000, y21:15000, y22:15000, y25:24500},
+  {name:"College of the Sequoias",    ccfs:"Sequoias",             y14:15000, y16:15000, y19:16554, y20:18670, y21:19032, y22:19023, y25:20385},
+  {name:"College of the Siskiyous",   ccfs:"Siskiyou",             y14:16895, y16:14769, y19:22220, y20:22220, y21:22220, y22:22220, y25:23875},
+  {name:"Compton CCD",                ccfs:"Compton",              y14:15467, y16:16455, y19:11889, y20:12000, y21:14000, y22:14000, y25:17000},
+  {name:"Contra Costa CCD",           ccfs:"Contra Costa",         y14:33778, y16:46877, y19:40694, y20:39454, y21:42754, y22:42754, y25:53878},
+  {name:"Copper Mountain College",    ccfs:"Copper Mountain",      y14:12000, y16:11833, y19:17224, y20:26291, y21:27233, y22:27233, y25:27940},
+  {name:"Cuesta College",             ccfs:"San Luis Obispo",      y14:16005, y16:16005, y19:12360, y20:12360, y21:12866, y22:12866, y25:12866},
+  {name:"El Camino College",          ccfs:"El Camino",            y14:7573,  y16:8928,  y19:18125, y20:17822, y21:18125, y22:18125, y25:18125},
+  {name:"Feather River College",      ccfs:"Feather River",        y14:18130, y16:18125, y19:16974, y20:16974, y21:17040, y22:17040, y25:17040},
+  {name:"Foothill-De Anza CCD",       ccfs:"Foothill-DeAnza",      y14:28941, y16:19603, y19:38195, y20:38195, y21:38195, y22:9607,  y25:84007},
+  {name:"Gavilan College",            ccfs:"Gavilan Joint",        y14:14002, y16:16527, y19:28500, y20:28500, y21:28500, y22:28500, y25:28500},
+  {name:"Glendale",                   ccfs:"Glendale",             y14:30065, y16:35099, y19:33216, y20:33216, y21:36070, y22:36070, y25:51330},
+  {name:"Grossmont-Cuyamaca CCD",     ccfs:"Grossmont-Cuyamaca",   y14:27887, y16:15935, y19:18047, y20:18394, y21:18425, y22:18425, y25:18425},
+  {name:"Hartnell College",           ccfs:"Hartnell",             y14:24368, y16:24368, y19:26782, y20:31897, y21:31897, y22:31897, y25:49002},
+  {name:"Imperial Valley College",    ccfs:"Imperial",             y14:18394, y16:24089, y19:18900, y20:18900, y21:18900, y22:20738, y25:20738},
+  {name:"Kern CCD",                   ccfs:"Kern",                 y14:14761, y16:14178, y19:17858, y20:17858, y21:18930, y22:22464, y25:23419},
+  {name:"Lake Tahoe College",         ccfs:"Lake Tahoe",           y14:18456, y16:18341, y19:18456, y20:18456, y21:18456, y22:18456, y25:22030},
+  {name:"Lassen College",             ccfs:"Lassen",               y14:17539, y16:18912, y19:19715, y20:20357, y21:20357, y22:22641, y25:22641},
+  {name:"Long Beach City College",    ccfs:"Long Beach",           y14:25239, y16:26310, y19:32196, y20:32668, y21:32562, y22:32562, y25:32562},
+  {name:"Los Angeles CCD",            ccfs:"Los Angeles",          y14:8550,  y16:20517, y19:22253, y20:31975, y21:34697, y22:34697, y25:50746},
+  {name:"Los Rios CCD",               ccfs:"Los Rios",             y14:14902, y16:15632, y19:16923, y20:16923, y21:17944, y22:17628, y25:17465},
+  {name:"Mendocino College",          ccfs:"Mendocino-Lake",       y14:27383, y16:27775, y19:20400, y20:20652, y21:21600, y22:21600, y25:23100},
+  {name:"Merced College",             ccfs:"Merced",               y14:47516, y16:51814, y19:23137, y20:24937, y21:25318, y22:26494, y25:30271},
+  {name:"MiraCosta College",          ccfs:"MiraCosta",            y14:20092, y16:20705, y19:22400, y20:21012, y21:23648, y22:23648, y25:null},
+  {name:"Monterey Peninsula College", ccfs:"Monterey Peninsula",   y14:19927, y16:20546, y19:23078, y20:23078, y21:23078, y22:23078, y25:36624},
+  {name:"Mt. San Antonio College",    ccfs:"Mt. San Antonio",      y14:11559, y16:11584, y19:24619, y20:24626, y21:24760, y22:26166, y25:31756},
+  {name:"Mt. San Jacinto College",    ccfs:"Mt. San Jacinto",      y14:9006,  y16:16132, y19:10558, y20:10558, y21:11577, y22:11577, y25:13129},
+  {name:"Napa Valley College",        ccfs:"Napa Valley",          y14:10219, y16:15970, y19:11409, y20:11767, y21:11967, y22:12488, y25:14789},
+  {name:"North Orange County CCD",    ccfs:"North Orange County",  y14:13354, y16:15328, y19:19379, y20:20827, y21:20053, y22:29423, y25:33454},
+  {name:"Ohlone College",             ccfs:"Ohlone",               y14:7797,  y16:13735, y19:16408, y20:17530, y21:17530, y22:17530, y25:18857},
+  {name:"Palo Verde College",         ccfs:"Palo Verde",           y14:17384, y16:19979, y19:25288, y20:25087, y21:23635, y22:24681, y25:26240},
+  {name:"Palomar College",            ccfs:"Palomar",              y14:23819, y16:24237, y19:33165, y20:33165, y21:33165, y22:33165, y25:31246},
+  {name:"Pasadena City College",      ccfs:"Pasadena",             y14:21960, y16:25077, y19:23054, y20:24416, y21:24629, y22:24629, y25:30134},
+  {name:"Peralta CCD",                ccfs:"Peralta",              y14:27636, y16:27636, y19:55579, y20:55579, y21:55552, y22:55552, y25:55487},
+  {name:"Rancho Santiago CCD",        ccfs:"Rancho Santiago",      y14:25822, y16:27788, y19:33375, y20:33375, y21:41147, y22:41147, y25:47016},
+  {name:"Rio Hondo College",          ccfs:"Rio Hondo",            y14:21360, y16:23647, y19:24497, y20:24497, y21:30457, y22:30457, y25:39233},
+  {name:"Riverside CCD",              ccfs:"Riverside",            y14:25267, y16:29126, y19:29524, y20:29524, y21:29780, y22:33896, y25:33896},
+  {name:"San Bernardino CCD",         ccfs:"San Bernardino",       y14:13561, y16:23417, y19:15643, y20:14346, y21:15198, y22:15656, y25:18979},
+  {name:"San Diego CCD",              ccfs:"San Diego",            y14:19103, y16:21006, y19:22773, y20:22835, y21:24961, y22:24961, y25:24961},
+  {name:"San Joaquin Delta College",  ccfs:"San Joaquin Delta",    y14:18946, y16:18642, y19:21747, y20:21990, y21:21990, y22:21990, y25:21990},
+  {name:"San Jose/Evergreen CCD",     ccfs:"San Jose-Evergreen",   y14:30961, y16:41774, y19:47232, y20:45987, y21:47364, y22:47364, y25:55141},
+  {name:"San Mateo County CCD",       ccfs:"San Mateo",            y14:13566, y16:16263, y19:17235, y20:21768, y21:26216, y22:26216, y25:29661},
+  {name:"Santa Barbara City College", ccfs:"Santa Barbara",        y14:10184, y16:10184, y19:24114, y20:24114, y21:24114, y22:24738, y25:28902},
+  {name:"Santa Monica College",       ccfs:"Santa Monica",         y14:18086, y16:17854, y19:29165, y20:34240, y21:32741, y22:30983, y25:41231},
+  {name:"Santa Rosa Junior College",  ccfs:"Sonoma",               y14:22432, y16:38762, y19:25582, y20:26481, y21:21599, y22:22732, y25:30223},
+  {name:"Shasta College",             ccfs:"Shasta-Tehama-Trinity",y14:11500, y16:12156, y19:11633, y20:15724, y21:15724, y22:17044, y25:17044},
+  {name:"Sierra College",             ccfs:"Sierra",               y14:16139, y16:16870, y19:18470, y20:18447, y21:19667, y22:20943, y25:31692},
+  {name:"Solano Community College",   ccfs:"Solano",               y14:49178, y16:25934, y19:25934, y20:25934, y21:25934, y22:25934, y25:25934},
+  {name:"South Orange County CCD",    ccfs:"South Orange",         y14:49723, y16:25079, y19:26506, y20:27169, y21:26806, y22:28063, y25:31225},
+  {name:"Southwestern College",       ccfs:"Southwestern",         y14:8335,  y16:8335,  y19:18371, y20:18371, y21:18371, y22:18371, y25:23152},
+  {name:"State Center CCD",           ccfs:"State Center",         y14:13879, y16:13875, y19:13882, y20:13882, y21:14744, y22:14759, y25:16766},
+  {name:"Taft College",               ccfs:"West Kern",            y14:18655, y16:18655, y19:22465, y20:22808, y21:22808, y22:22808, y25:22808},
+  {name:"Ventura County CCD",         ccfs:"Ventura",              y14:16395, y16:20205, y19:23752, y20:23752, y21:23752, y22:28723, y25:29552},
+  {name:"Victor Valley College",      ccfs:"Victor Valley",        y14:18095, y16:20743, y19:29851, y20:29851, y21:31112, y22:31112, y25:37558},
+  {name:"West Hills CCD",             ccfs:"West Hills",           y14:17678, y16:17637, y19:18526, y20:18526, y21:18526, y22:21600, y25:21958},
+  {name:"West Valley-Mission CCD",    ccfs:"West Valley-Mission",  y14:18041, y16:25396, y19:28270, y20:28270, y21:30240, y22:30240, y25:30240},
+  {name:"Yosemite",                   ccfs:"Yosemite",             y14:18582, y16:18900, y19:20909, y20:20909, y21:23124, y22:23124, y25:29199},
+  {name:"Yuba CCD",                   ccfs:"Yuba",                 y14:21273, y16:20602, y19:24273, y20:24273, y21:24476, y22:24487, y25:28534},
+];
+
+function acccaIsStale(d) { return d.y25 !== null && d.y25 === d.y22; }
+
+function getAcccaRankMap() {
+  const withY25 = [...ACCCA_DATA].filter(d => d.y25 != null).sort((a, b) => b.y25 - a.y25);
+  const m = {};
+  withY25.forEach((d, i) => { m[d.name] = i + 1; });
+  return m;
+}
+
+let acccaSortCol = 'y25', acccaSortDir = -1;
+
+function setAcccaSort(col) {
+  if (acccaSortCol === col) { acccaSortDir *= -1; }
+  else { acccaSortCol = col; acccaSortDir = col === 'name' ? 1 : -1; }
+  renderAccca();
+}
+
+function buildAcccaCards() {
+  const withY25 = ACCCA_DATA.filter(d => d.y25 != null);
+  const vals = [...withY25].map(d => d.y25).sort((a, b) => a - b);
+  const n = vals.length;
+  const mean = Math.round(vals.reduce((s, v) => s + v, 0) / n);
+  const median = n % 2 === 0 ? (vals[n/2-1] + vals[n/2]) / 2 : vals[Math.floor(n/2)];
+  const staleCount = ACCCA_DATA.filter(d => acccaIsStale(d)).length;
+  const noData = ACCCA_DATA.filter(d => d.y25 == null).length;
+  const focused = ACCCA_DATA.find(d => d.ccfs === focusedDistrict);
+  let focCard;
+  if (focused && focused.y25 != null) {
+    const stale = acccaIsStale(focused);
+    focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: fmt(focused.y25),
+      sub: stale ? '⚠ Same as 2022 — likely stale' : 'Changed from ' + fmt(focused.y22) + ' in 2022',
+      extra: 'highlight' };
+  } else {
+    focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: '—',
+      sub: focused ? 'No 2025 data submitted' : 'Not in ACCCA data', extra: 'highlight' };
+  }
+  const cards = [
+    { label: 'ACCCA Survey Mean (2025)',   value: fmt(mean),   sub: n + ' reporting districts', extra: '' },
+    { label: 'ACCCA Survey Median (2025)', value: fmt(median), sub: '50th percentile', extra: '' },
+    focCard,
+    { label: 'Stale / Missing 2025 Data', value: String(staleCount + noData),
+      sub: staleCount + ' stale · ' + noData + ' missing', extra: 'accent-amber' },
+  ];
+  document.getElementById('acccaCards').innerHTML = cards.map(c =>
+    '<div class="card ' + c.extra + '"><label>' + c.label + '</label><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
+  ).join('');
+}
+
+function renderAccca() {
+  const q = (document.getElementById('acccaSearch') || {value:''}).value.toLowerCase();
+  const rankMap = getAcccaRankMap();
+  const ranked = computeRanked(currentScenario);
+  const ccfsMap = {};
+  ranked.forEach(d => { ccfsMap[d.name] = d.scenarioValue; });
+
+  let data = ACCCA_DATA.filter(d => {
+    if (q && !d.name.toLowerCase().includes(q) && !(d.ccfs && d.ccfs.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  data = [...data].sort((a, b) => {
+    const acfs = a.ccfs ? (ccfsMap[a.ccfs] ?? -Infinity) : -Infinity;
+    const bcfs = b.ccfs ? (ccfsMap[b.ccfs] ?? -Infinity) : -Infinity;
+    let av, bv;
+    if (acccaSortCol === 'name')   { av = a.name;  bv = b.name; }
+    else if (acccaSortCol === 'rank')   { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
+    else if (acccaSortCol === 'y25')    { av = a.y25 ?? -Infinity; bv = b.y25 ?? -Infinity; }
+    else if (acccaSortCol === 'ccfshw') { av = acfs; bv = bcfs; }
+    else if (acccaSortCol === 'diff')   { av = a.y25 != null ? a.y25 - acfs : -Infinity; bv = b.y25 != null ? b.y25 - bcfs : -Infinity; }
+    else if (acccaSortCol === 'y22')    { av = a.y22 ?? -Infinity; bv = b.y22 ?? -Infinity; }
+    else if (acccaSortCol === 'change') { av = (a.y25 != null && a.y22 != null) ? a.y25 - a.y22 : -Infinity; bv = (b.y25 != null && b.y22 != null) ? b.y25 - b.y22 : -Infinity; }
+    else if (acccaSortCol === 'y19')    { av = a.y19 ?? -Infinity; bv = b.y19 ?? -Infinity; }
+    else { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
+    return av < bv ? -acccaSortDir : av > bv ? acccaSortDir : 0;
+  });
+
+  const tbody = document.getElementById('acccaBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  data.forEach(d => {
+    const isFoc = d.ccfs === focusedDistrict;
+    const ccfsHw = d.ccfs ? (ccfsMap[d.ccfs] ?? null) : null;
+    const stale = acccaIsStale(d);
+    const rank = rankMap[d.name] ?? null;
+    const diff = d.y25 != null && ccfsHw != null ? d.y25 - ccfsHw : null;
+    const change = d.y25 != null && d.y22 != null ? d.y25 - d.y22 : null;
+
+    const y25Html = d.y25 != null
+      ? (stale ? '<span title="Same as 2022 — likely not updated" style="color:#d97706">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
+      : '<span class="no-data">—</span>';
+    const ccfsHtml = ccfsHw != null ? fmt(ccfsHw) : '<span class="no-data">—</span>';
+    const diffHtml = diff != null
+      ? '<span style="color:' + (diff > 200 ? '#c0392b' : diff < -200 ? '#1e8449' : '#888') + ';font-weight:600">' + (diff >= 0 ? '+' : '') + fmt(diff) + '</span>'
+      : '<span class="no-data">—</span>';
+    const changeHtml = change != null
+      ? '<span style="color:' + (change > 0 ? '#1e8449' : change < 0 ? '#c0392b' : '#888') + '">' + (change >= 0 ? '+' : '') + fmt(change) + '</span>'
+      : '<span class="no-data">—</span>';
+
+    const tr = document.createElement('tr');
+    if (isFoc) tr.className = 'yosemite';
+    tr.innerHTML =
+      '<td class="rank">' + (rank != null ? '#' + rank : '—') + '</td>' +
+      '<td class="district-name">' + d.name + (isFoc ? '<span class="yosemite-badge">SELECTED</span>' : '') + '</td>' +
+      '<td class="num">' + y25Html + '</td>' +
+      '<td class="num">' + ccfsHtml + '</td>' +
+      '<td class="num">' + diffHtml + '</td>' +
+      '<td class="num">' + (d.y22 != null ? fmt(d.y22) : '<span class="no-data">—</span>') + '</td>' +
+      '<td class="num">' + changeHtml + '</td>' +
+      '<td class="num">' + (d.y19 != null ? fmt(d.y19) : '<span class="no-data">—</span>') + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  const countEl = document.getElementById('acccaCount');
+  if (countEl) countEl.textContent = data.length + ' of ' + ACCCA_DATA.length + ' districts';
+
+  // Update sort indicators
+  ['rank','name','y25','ccfshw','diff','y22','change','y19'].forEach(c => {
+    const el = document.getElementById('as-' + c);
+    if (!el) return;
+    if (c === acccaSortCol) {
+      el.textContent = acccaSortDir === 1 ? '▲' : '▼';
+      el.closest('th').classList.add('sorted');
+    } else {
+      el.textContent = '⇅';
+      el.closest('th').classList.remove('sorted');
+    }
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────
 document.getElementById('yfaTabBtn').textContent = `YFA Benefits Survey — ${yfaData.length} Districts`;
 
@@ -1072,6 +1330,9 @@ setScenario('full');
 initChart();
 buildYfaCards();
 renderYfa();
+buildAcccaCards();
+renderAccca();
+document.getElementById('acccaTabBtn').textContent = 'ACCCA Admin Benefits — ' + ACCCA_DATA.length + ' Districts';
 </script>
 </body>
 </html>
