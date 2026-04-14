@@ -1330,7 +1330,7 @@ buildYfaCards();
 renderYfa();
 buildAcccaCards();
 renderAccca();
-document.getElementById('acccaTabBtn').textContent = 'ACCCA Admin Benefits — ' + ACCCA_DATA.length + ' Districts';
+document.getElementById('acccaTabBtn').textContent = 'ACCCA Admin Benefits — ' + ACCCA_DATA.filter(d => d.y25 != null).length + ' Districts';
 </script>
 </body>
 </html>
