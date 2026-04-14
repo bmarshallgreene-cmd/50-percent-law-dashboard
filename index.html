@@ -424,7 +424,6 @@
           <th onclick="setAcccaSort('diff')" id="ath4" style="text-align:right" title="2025 Admin H&W minus Faculty H&W. Negative = faculty receive more than admin (typical). Positive = admin receives more than faculty (unusual — may indicate faculty data is understated).">Admin vs. Faculty <span id="as-diff">⇅</span></th>
           <th onclick="setAcccaSort('y22')" id="ath5" style="text-align:right">2022 <span id="as-y22">⇅</span></th>
           <th onclick="setAcccaSort('change')" id="ath6" style="text-align:right" title="Change in admin H&W from 2022 to 2025. Zero means the 2025 figure was not updated.">Change 22→25 <span id="as-change">⇅</span></th>
-          <th onclick="setAcccaSort('y19')" id="ath7" style="text-align:right">2019 <span id="as-y19">⇅</span></th>
         </tr>
       </thead>
       <tbody id="acccaBody"></tbody>
@@ -1278,8 +1277,7 @@ function renderAccca() {
       '<td class="num">' + ccfsHtml + '</td>' +
       '<td class="num">' + diffHtml + '</td>' +
       '<td class="num">' + (d.y22 != null ? fmt(d.y22) : '<span class="no-data">—</span>') + '</td>' +
-      '<td class="num">' + changeHtml + '</td>' +
-      '<td class="num">' + (d.y19 != null ? fmt(d.y19) : '<span class="no-data">—</span>') + '</td>';
+      '<td class="num">' + changeHtml + '</td>';
     tbody.appendChild(tr);
   });
 
@@ -1287,7 +1285,7 @@ function renderAccca() {
   if (countEl) countEl.textContent = data.length + ' of ' + ACCCA_DATA.length + ' districts';
 
   // Update sort indicators
-  ['rank','name','y25','ccfshw','diff','y22','change','y19'].forEach(c => {
+  ['rank','name','y25','ccfshw','diff','y22','change'].forEach(c => {
     const el = document.getElementById('as-' + c);
     if (!el) return;
     if (c === acccaSortCol) {
