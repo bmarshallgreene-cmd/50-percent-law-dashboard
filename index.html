@@ -215,8 +215,7 @@
 <body>
 
 <header>
-  <h1>Faculty Health Benefits — CA Community College Districts</h1>
-  <p id="headerSub">Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data</p>
+  <h1>Faculty Health Benefits Expenditures — CA Community College Districts</h1>
 </header>
 
 <div class="tab-bar">
@@ -226,6 +225,9 @@
   <button class="tab-btn" onclick="showTab('accca')" id="acccaTabBtn">ACCCA Admin Benefits</button>
   <span class="tab-bar-label" style="margin-left:auto">Selected District:</span>
   <select id="districtSelector" class="ctrl-select" style="background:rgba(255,255,255,0.1);color:white;border-color:rgba(255,255,255,0.3);font-size:0.82rem;padding:6px 10px" onchange="setFocusedDistrict(this.value)"></select>
+</div>
+<div style="background:#15304e;border-top:1px solid rgba(255,255,255,0.1);padding:5px 32px">
+  <span id="headerSub" style="font-size:0.75rem;color:rgba(255,255,255,0.5)">Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data</span>
 </div>
 
 <!-- ══════════════════════════════════════════ TAB 1: CCFS-311 ══ -->
@@ -411,6 +413,15 @@
       <h2>ACCCA Admin H&amp;W — District Comparison</h2>
       <div class="controls">
         <input class="search-box" type="text" id="acccaSearch" placeholder="Search district…" oninput="renderAccca()">
+        <select class="ctrl-select" id="acccaYearSelect" onchange="setAcccaYear(this.value)">
+          <option value="y25">2025</option>
+          <option value="y22">2022</option>
+          <option value="y21">2021</option>
+          <option value="y20">2020</option>
+          <option value="y19">2019</option>
+          <option value="y16">2016</option>
+          <option value="y14">2014</option>
+        </select>
         <select class="ctrl-select" id="acccaDistrictSelect" onchange="setFocusedDistrict(this.value)"></select>
       </div>
     </div>
@@ -504,15 +515,18 @@ function setFocusedDistrict(name) {
 const TAB_SUBTITLES = {
   ccfs:  'Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data',
   yfa:   'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
-  accca: 'Survey Years 2014–2025 &nbsp;|&nbsp; Source: ACCCA Salary &amp; Benefits Survey',
 };
+const ACCCA_YEAR_MAP = {y14:'2014', y16:'2016', y19:'2019', y20:'2020', y21:'2021', y22:'2022', y25:'2025'};
+function acccaSubtitle() {
+  return 'Survey Year: ' + ACCCA_YEAR_MAP[acccaYear] + ' &nbsp;|&nbsp; Source: ACCCA Salary &amp; Benefits Survey';
+}
 
 function showTab(id) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   event.currentTarget.classList.add('active');
-  document.getElementById('headerSub').innerHTML = TAB_SUBTITLES[id];
+  document.getElementById('headerSub').innerHTML = id === 'accca' ? acccaSubtitle() : TAB_SUBTITLES[id];
   if (id === 'ccfs' && !chartInitialized) initChart();
 }
 
@@ -1170,12 +1184,22 @@ const ACCCA_DATA = [
   {name:"Yuba CCD",                   ccfs:"Yuba",                 y14:21273, y16:20602, y19:24273, y20:24273, y21:24476, y22:24487, y25:28534},
 ];
 
-function acccaIsStale(d) { return d.y25 !== null && d.y25 === d.y22; }
+let acccaYear = 'y25';
+
+function acccaIsStale(d) { return acccaYear === 'y25' && d.y25 !== null && d.y25 === d.y22; }
+
+function setAcccaYear(yk) {
+  acccaYear = yk;
+  document.getElementById('headerSub').innerHTML = acccaSubtitle();
+  buildAcccaCards();
+  renderAccca();
+}
 
 function getAcccaRankMap() {
-  const withY25 = [...ACCCA_DATA].filter(d => d.y25 != null).sort((a, b) => b.y25 - a.y25);
+  const yk = acccaYear;
+  const withData = [...ACCCA_DATA].filter(d => d[yk] != null).sort((a, b) => b[yk] - a[yk]);
   const m = {};
-  withY25.forEach((d, i) => { m[d.name] = i + 1; });
+  withData.forEach((d, i) => { m[d.name] = i + 1; });
   return m;
 }
 
@@ -1188,32 +1212,38 @@ function setAcccaSort(col) {
 }
 
 function buildAcccaCards() {
-  const withY25 = ACCCA_DATA.filter(d => d.y25 != null);
-  const vals = [...withY25].map(d => d.y25).sort((a, b) => a - b);
+  const yk = acccaYear;
+  const yr = ACCCA_YEAR_MAP[yk];
+  const withData = ACCCA_DATA.filter(d => d[yk] != null);
+  const vals = [...withData].map(d => d[yk]).sort((a, b) => a - b);
   const n = vals.length;
   const mean = Math.round(vals.reduce((s, v) => s + v, 0) / n);
   const median = n % 2 === 0 ? (vals[n/2-1] + vals[n/2]) / 2 : vals[Math.floor(n/2)];
-  const staleCount = ACCCA_DATA.filter(d => acccaIsStale(d)).length;
-  const noData = ACCCA_DATA.filter(d => d.y25 == null).length;
+  const staleCount = yk === 'y25' ? ACCCA_DATA.filter(d => acccaIsStale(d)).length : 0;
+  const noData = yk === 'y25' ? ACCCA_DATA.filter(d => d.y25 == null).length : 0;
   const focused = ACCCA_DATA.find(d => d.ccfs === focusedDistrict);
   let focCard;
-  if (focused && focused.y25 != null) {
+  if (focused && focused[yk] != null) {
     const stale = acccaIsStale(focused);
-    const diff = focused.y25 - median;
+    const diff = focused[yk] - median;
     const diffStr = (diff >= 0 ? '+' : '') + fmt(diff) + ' vs. median';
-    focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: fmt(focused.y25),
+    focCard = { label: focusedDistrict + ' Admin H&amp;W (' + yr + ')', value: fmt(focused[yk]),
       sub: (stale ? '⚠ No change from previous survey &nbsp;·&nbsp; ' : '') + diffStr,
       extra: 'highlight' };
   } else {
-    focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: '—',
-      sub: focused ? 'No 2025 data submitted' : 'Not in ACCCA data', extra: 'highlight' };
+    focCard = { label: focusedDistrict + ' Admin H&amp;W (' + yr + ')', value: '—',
+      sub: focused ? 'No ' + yr + ' data submitted' : 'Not in ACCCA data', extra: 'highlight' };
   }
+  const fourthCard = yk === 'y25'
+    ? { label: 'Stale / Missing 2025 Data', value: String(staleCount + noData),
+        sub: staleCount + ' stale · ' + noData + ' missing', extra: 'accent-amber' }
+    : { label: 'Districts Reporting (' + yr + ')', value: String(n),
+        sub: 'of ' + ACCCA_DATA.length + ' total', extra: '' };
   const cards = [
-    { label: 'ACCCA Survey Mean (2025)',   value: fmt(mean),   sub: n + ' reporting districts', extra: '' },
-    { label: 'ACCCA Survey Median (2025)', value: fmt(median), sub: '50th percentile', extra: '' },
+    { label: 'ACCCA Survey Mean (' + yr + ')',   value: fmt(mean),   sub: n + ' reporting districts', extra: '' },
+    { label: 'ACCCA Survey Median (' + yr + ')', value: fmt(median), sub: '50th percentile', extra: '' },
     focCard,
-    { label: 'Stale / Missing 2025 Data', value: String(staleCount + noData),
-      sub: staleCount + ' stale · ' + noData + ' missing', extra: 'accent-amber' },
+    fourthCard,
   ];
   document.getElementById('acccaCards').innerHTML = cards.map(c =>
     '<div class="card ' + c.extra + '"><label>' + c.label + '</label><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
@@ -1232,21 +1262,24 @@ function renderAccca() {
     return true;
   });
 
+  const yk = acccaYear;
+
   data = [...data].sort((a, b) => {
     const acfs = a.ccfs ? (ccfsMap[a.ccfs] ?? -Infinity) : -Infinity;
     const bcfs = b.ccfs ? (ccfsMap[b.ccfs] ?? -Infinity) : -Infinity;
     let av, bv;
     if (acccaSortCol === 'name')   { av = a.name;  bv = b.name; }
     else if (acccaSortCol === 'rank')   { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
-    else if (acccaSortCol === 'y25')    { av = a.y25 ?? -Infinity; bv = b.y25 ?? -Infinity; }
+    else if (acccaSortCol === 'y25')    { av = a[yk] ?? -Infinity; bv = b[yk] ?? -Infinity; }
     else if (acccaSortCol === 'ccfshw') { av = acfs; bv = bcfs; }
-    else if (acccaSortCol === 'diff')   { av = a.y25 != null ? a.y25 - acfs : -Infinity; bv = b.y25 != null ? b.y25 - bcfs : -Infinity; }
-    else if (acccaSortCol === 'y22')    { av = a.y22 ?? -Infinity; bv = b.y22 ?? -Infinity; }
-    else if (acccaSortCol === 'change') { av = (a.y25 != null && a.y22 != null) ? a.y25 - a.y22 : -Infinity; bv = (b.y25 != null && b.y22 != null) ? b.y25 - b.y22 : -Infinity; }
-    else if (acccaSortCol === 'y19')    { av = a.y19 ?? -Infinity; bv = b.y19 ?? -Infinity; }
+    else if (acccaSortCol === 'diff')   { av = a[yk] != null ? a[yk] - acfs : -Infinity; bv = b[yk] != null ? b[yk] - bcfs : -Infinity; }
     else { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
     return av < bv ? -acccaSortDir : av > bv ? acccaSortDir : 0;
   });
+
+  // Update column header to reflect selected year
+  const ath2 = document.getElementById('ath2');
+  if (ath2) ath2.childNodes[0].textContent = ACCCA_YEAR_MAP[yk] + ' Admin H\u0026W ';
 
   const tbody = document.getElementById('acccaBody');
   if (!tbody) return;
@@ -1257,26 +1290,23 @@ function renderAccca() {
     const ccfsHw = d.ccfs ? (ccfsMap[d.ccfs] ?? null) : null;
     const stale = acccaIsStale(d);
     const rank = rankMap[d.name] ?? null;
-    const diff = d.y25 != null && ccfsHw != null ? d.y25 - ccfsHw : null;
-    const change = d.y25 != null && d.y22 != null ? d.y25 - d.y22 : null;
+    const val = d[yk];
+    const diff = val != null && ccfsHw != null ? val - ccfsHw : null;
 
-    const y25Html = d.y25 != null
-      ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
+    const valHtml = val != null
+      ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(val) + '</em>' : '<strong>' + fmt(val) + '</strong>')
       : '<span class="no-data">—</span>';
     const ccfsHtml = ccfsHw != null ? fmt(ccfsHw) : '<span class="no-data">—</span>';
     const diffHtml = diff != null
       ? '<span style="color:' + (diff > 200 ? '#c0392b' : diff < -200 ? '#1e8449' : '#888') + ';font-weight:600">' + (diff >= 0 ? '+' : '') + fmt(diff) + '</span>'
-      : '<span class="no-data">—</span>';
-    const changeHtml = change != null
-      ? '<span style="color:' + (change > 0 ? '#1e8449' : change < 0 ? '#c0392b' : '#888') + '">' + (change >= 0 ? '+' : '') + fmt(change) + '</span>'
       : '<span class="no-data">—</span>';
 
     const tr = document.createElement('tr');
     if (isFoc) tr.className = 'yosemite';
     tr.innerHTML =
       '<td class="rank">' + (rank != null ? '#' + rank : '—') + '</td>' +
-      '<td class="district-name">' + d.name + (isFoc ? '<span class="yosemite-badge">SELECTED</span>' : '') + '</td>' +
-      '<td class="num">' + y25Html + '</td>' +
+      '<td class="district-name">' + d.ccfs + (isFoc ? '<span class="yosemite-badge">SELECTED</span>' : '') + '</td>' +
+      '<td class="num">' + valHtml + '</td>' +
       '<td class="num">' + ccfsHtml + '</td>' +
       '<td class="num">' + diffHtml + '</td>';
     tbody.appendChild(tr);
