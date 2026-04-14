@@ -977,8 +977,8 @@ function buildYfaCards() {
 
   const cards = [
     { label: distLabel + ' Rank', value: yosYfa ? `#${yosYfa.rank}` : '—', sub:`of ${withMax.length} districts by max medical`, extra:'highlight' },
-    { label: distLabel + ' Max Medical', value: yosYfa ? fmt(yosYfa.max) : '—', sub: yosYfa ? `${above} districts pay more · ${below} pay less` : 'Not in survey data', extra:'' },
     { label:'Peer Average Max Medical', value:fmt(peerAvg), sub: diff != null ? `${distLabel} pays ${fmt(Math.abs(diff))} ${diff >= 0 ? 'more than' : 'less than'} the peer average` : 'Selected district not in survey', extra: diff != null ? (diff >= 0 ? 'accent-green' : 'accent-amber') : '' },
+    { label: distLabel + ' Max Medical', value: yosYfa ? fmt(yosYfa.max) : '—', sub: yosYfa ? `${above} districts pay more · ${below} pay less` : 'Not in survey data', extra:'' },
     { label:'Fully Paid Plan', value:`${paidYes} of ${yfaData.length}`, sub:`${Math.round(paidYes/yfaData.length*100)}% of surveyed districts offer fully paid coverage`, extra:'accent-green' },
   ];
   document.getElementById('yfaCards').innerHTML = cards.map(c =>
