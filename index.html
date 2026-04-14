@@ -1259,7 +1259,7 @@ function renderAccca() {
     const change = d.y25 != null && d.y22 != null ? d.y25 - d.y22 : null;
 
     const y25Html = d.y25 != null
-      ? (stale ? '<span title="Same as 2022 — likely not updated" style="color:#d97706">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
+      ? (stale ? '<span title="This 2025 figure is identical to the 2022 figure, which typically means the district did not submit updated data for the 2025 ACCCA survey. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
       : '<span class="no-data">—</span>';
     const ccfsHtml = ccfsHw != null ? fmt(ccfsHw) : '<span class="no-data">—</span>';
     const diffHtml = diff != null
