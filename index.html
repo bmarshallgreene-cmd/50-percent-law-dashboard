@@ -411,6 +411,7 @@
       <h2>ACCCA Admin H&amp;W — District Comparison</h2>
       <div class="controls">
         <input class="search-box" type="text" id="acccaSearch" placeholder="Search district…" oninput="renderAccca()">
+        <select class="ctrl-select" id="acccaDistrictSelect" onchange="setFocusedDistrict(this.value)"></select>
       </div>
     </div>
     <div class="table-scroll">
@@ -419,7 +420,7 @@
         <tr>
           <th onclick="setAcccaSort('rank')" id="ath0">Rank <span id="as-rank">▼</span></th>
           <th onclick="setAcccaSort('name')" id="ath1">District <span id="as-name">⇅</span></th>
-          <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Mean employer-paid H&W contribution across all administrative/management positions reported by the institution in the 2025 ACCCA Salary &amp; Benefits Survey. ⚠ = 2025 figure same as 2022 — district likely did not submit updated data.">2025 Admin H&amp;W <span id="as-y25">▼</span></th>
+          <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Mean employer-paid H&W contribution across all administrative/management positions reported by the institution in the 2025 ACCCA Salary &amp; Benefits Survey. ⚠ = no change from previous survey — district likely did not submit updated data.">2025 Admin H&amp;W <span id="as-y25">▼</span></th>
           <th onclick="setAcccaSort('ccfshw')" id="ath3" style="text-align:right" title="Estimated employer-paid H&W per FT faculty from CCFS-311 Tab 1 (full methodology). Shown for direct comparison.">Faculty H&amp;W (CCFS) <span id="as-ccfshw">⇅</span></th>
           <th onclick="setAcccaSort('diff')" id="ath4" style="text-align:right" title="2025 Admin H&W minus Faculty H&W. Negative = faculty receive more than admin (typical). Positive = admin receives more than faculty (unusual — may indicate faculty data is understated).">Admin vs. Faculty <span id="as-diff">⇅</span></th>
         </tr>
@@ -429,13 +430,13 @@
     </div>
     <div class="table-footer">
       <span id="acccaCount"></span>
-      <span>⚠ italic = 2025 same as 2022, likely stale &nbsp;·&nbsp; Click column headers to sort</span>
+      <span>⚠ italic = no change from previous survey, likely stale &nbsp;·&nbsp; Click column headers to sort</span>
     </div>
   </div>
 
 </div>
 <footer>
-  Data compiled from annual <strong>ACCCA (Association of California Community College Administrators) Salary &amp; Benefits Surveys</strong>. Each figure is the <strong>mean employer-paid H&amp;W contribution across all administrative/management positions</strong> reported by that institution for the applicable survey year. It does <strong>not</strong> include faculty or classified positions. Italic 2025 entries are stale (same as 2022 value); the district did not submit updated data. Several districts reported reductions from the 2022 survey.
+  Data compiled from annual <strong>ACCCA (Association of California Community College Administrators) Salary &amp; Benefits Surveys</strong>. Each figure is the <strong>mean employer-paid H&amp;W contribution across all administrative/management positions</strong> reported by that institution for the applicable survey year. It does <strong>not</strong> include faculty or classified positions. Italic 2025 entries show no change from the previous survey; the district likely did not submit updated data. Several districts reported reductions from the previous survey.
   <br><br><strong>Note:</strong> The "Faculty H&amp;W" column is drawn from Tab 1 (CCFS-311 full methodology) for the same district. Faculty H&amp;W typically exceeds admin H&amp;W; where admin exceeds faculty, the faculty figure may be understated or there may be a data issue.
   <br><br><strong>Sources:</strong>
   &nbsp;(1) <a href="https://accca.org/benefits/accca-salary-survey/" target="_blank" style="color:#1a3a5c">ACCCA Salary &amp; Benefits Survey — accca.org</a>
@@ -489,6 +490,8 @@ function setFocusedDistrict(name) {
   document.getElementById('jumpSelect').value = name;
   const yfaSel = document.getElementById('yfaDistrictSelect');
   if (yfaSel) yfaSel.value = name;
+  const acccaSel = document.getElementById('acccaDistrictSelect');
+  if (acccaSel) acccaSel.value = name;
   // Re-render all tabs
   setScenario(currentScenario);
   buildYfaCards();
@@ -1196,8 +1199,10 @@ function buildAcccaCards() {
   let focCard;
   if (focused && focused.y25 != null) {
     const stale = acccaIsStale(focused);
+    const diff = focused.y25 - median;
+    const diffStr = (diff >= 0 ? '+' : '') + fmt(diff) + ' vs. median';
     focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: fmt(focused.y25),
-      sub: stale ? '⚠ Same as 2022 — likely stale' : 'Changed from ' + fmt(focused.y22) + ' in 2022',
+      sub: (stale ? '⚠ No change from previous survey &nbsp;·&nbsp; ' : '') + diffStr,
       extra: 'highlight' };
   } else {
     focCard = { label: focusedDistrict + ' Admin H&amp;W (2025)', value: '—',
@@ -1256,7 +1261,7 @@ function renderAccca() {
     const change = d.y25 != null && d.y22 != null ? d.y25 - d.y22 : null;
 
     const y25Html = d.y25 != null
-      ? (stale ? '<span title="This 2025 figure is identical to the 2022 figure, which typically means the district did not submit updated data for the 2025 ACCCA survey. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
+      ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(d.y25) + '</em>' : '<strong>' + fmt(d.y25) + '</strong>')
       : '<span class="no-data">—</span>';
     const ccfsHtml = ccfsHw != null ? fmt(ccfsHw) : '<span class="no-data">—</span>';
     const diffHtml = diff != null
@@ -1327,6 +1332,16 @@ renderYfa();
 buildAcccaCards();
 renderAccca();
 document.getElementById('acccaTabBtn').textContent = 'ACCCA Admin Benefits — ' + ACCCA_DATA.filter(d => d.y25 != null).length + ' Districts';
+
+// Populate ACCCA district selector
+const acccaSel = document.getElementById('acccaDistrictSelect');
+[...districts].sort((a, b) => a.name.localeCompare(b.name)).forEach(d => {
+  const opt = document.createElement('option');
+  opt.value = d.name;
+  opt.textContent = d.name;
+  if (d.name === focusedDistrict) opt.selected = true;
+  acccaSel.appendChild(opt);
+});
 </script>
 </body>
 </html>
