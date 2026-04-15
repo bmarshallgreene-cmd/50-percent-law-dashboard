@@ -408,6 +408,12 @@
 
   <div class="cards" id="acccaCards"></div>
 
+  <div class="chart-wrap">
+    <h2 id="acccaChartTitle" style="margin-bottom:6px">Admin H&amp;W Rank Over Time — <span id="acccaChartDistrict">Yosemite</span></h2>
+    <p style="font-size:0.78rem;color:#888;margin-bottom:14px">Rank among all ACCCA survey respondents for each survey year. Rank 1 = highest reported admin H&amp;W. Gaps indicate no data for that year.</p>
+    <div style="height:260px"><canvas id="acccaRankChart"></canvas></div>
+  </div>
+
   <div class="table-wrap">
     <div class="table-header">
       <h2>ACCCA Admin H&amp;W — District Comparison</h2>
@@ -1248,6 +1254,97 @@ function buildAcccaCards() {
   document.getElementById('acccaCards').innerHTML = cards.map(c =>
     '<div class="card ' + c.extra + '"><label>' + c.label + '</label><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
   ).join('');
+  buildAcccaChart();
+}
+
+let acccaRankChart = null;
+const ACCCA_YK_ALL   = ['y14','y16','y19','y20','y21','y22','y25'];
+const ACCCA_YR_ALL   = ['2014','2016','2019','2020','2021','2022','2025'];
+
+function buildAcccaChart() {
+  const focused = ACCCA_DATA.find(d => d.ccfs === focusedDistrict);
+
+  // Compute rank and total for each year
+  const rankData   = [];
+  const totals     = [];
+  ACCCA_YK_ALL.forEach(yk => {
+    const sorted = [...ACCCA_DATA].filter(d => d[yk] != null).sort((a, b) => b[yk] - a[yk]);
+    totals.push(sorted.length);
+    if (!focused || focused[yk] == null) {
+      rankData.push(null);
+    } else {
+      rankData.push(sorted.findIndex(d => d.ccfs === focusedDistrict) + 1);
+    }
+  });
+
+  // Update title
+  const distEl = document.getElementById('acccaChartDistrict');
+  if (distEl) distEl.textContent = focusedDistrict;
+
+  const ctx = document.getElementById('acccaRankChart');
+  if (!ctx) return;
+
+  if (acccaRankChart) {
+    acccaRankChart.data.datasets[0].data   = rankData;
+    acccaRankChart.data.datasets[0].label  = focusedDistrict;
+    acccaRankChart.options.plugins.tooltip.callbacks.label = rankTooltip(totals);
+    acccaRankChart.update();
+    return;
+  }
+
+  function rankTooltip(tots) {
+    return ctx => {
+      if (ctx.raw == null) return ' No data for this year';
+      return ' Rank #' + ctx.raw + ' of ' + tots[ctx.dataIndex];
+    };
+  }
+
+  acccaRankChart = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: ACCCA_YR_ALL,
+      datasets: [{
+        label: focusedDistrict,
+        data: rankData,
+        borderColor: '#e67e22',
+        backgroundColor: 'rgba(230,126,34,0.08)',
+        pointBackgroundColor: '#e67e22',
+        pointBorderColor: '#b85c00',
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        borderWidth: 2.5,
+        tension: 0.25,
+        spanGaps: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: rankTooltip(totals),
+            title: ctx => ctx[0].label + ' ACCCA Survey',
+          }
+        }
+      },
+      scales: {
+        y: {
+          reverse: true,
+          min: 1,
+          suggestedMax: 72,
+          title: { display: true, text: 'Rank  (1 = highest admin H&W)', font: { size: 11 }, color: '#888' },
+          ticks: { stepSize: 10, callback: v => '#' + v, font: { size: 11 } },
+          grid: { color: '#eee' },
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } },
+        }
+      }
+    }
+  });
 }
 
 function renderAccca() {
