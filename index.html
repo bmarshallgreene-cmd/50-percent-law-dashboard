@@ -259,9 +259,6 @@
   <div class="chart-wrap">
     <div style="display:flex;align-items:center;margin-bottom:12px">
       <h2 id="chartTitle" style="margin:0">Comparative Health &amp; Wellness Cost per FT Faculty &mdash; All Districts, Ranked</h2>
-      <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
-        <select id="jumpSelect" class="ctrl-select" style="font-size:0.78rem;padding:5px 8px" onchange="jumpToSelected()"></select>
-      </div>
     </div>
     <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap">
       <span style="font-size:0.75rem;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.05em">Color key:</span>
@@ -368,7 +365,6 @@
           <option value="yes">Fully paid plan only</option>
           <option value="no">No fully paid plan</option>
         </select>
-        <select class="ctrl-select" id="yfaDistrictSelect" onchange="setFocusedDistrict(this.value)"></select>
       </div>
     </div>
     <table>
@@ -428,7 +424,6 @@
           <option value="y16">2016</option>
           <option value="y14">2014</option>
         </select>
-        <select class="ctrl-select" id="acccaDistrictSelect" onchange="setFocusedDistrict(this.value)"></select>
       </div>
     </div>
     <div class="table-scroll">
@@ -502,13 +497,8 @@ function setFocusedDistrict(name) {
   document.getElementById('cardFocusName').textContent = name;
   document.getElementById('colorKeyFocus').textContent = name;
   document.getElementById('yfaDeltaHdr').innerHTML = 'vs. ' + name + ' <span id="si-delta">⇅</span>';
-  // Sync all selectors
+  // Sync global selector
   document.getElementById('districtSelector').value = name;
-  document.getElementById('jumpSelect').value = name;
-  const yfaSel = document.getElementById('yfaDistrictSelect');
-  if (yfaSel) yfaSel.value = name;
-  const acccaSel = document.getElementById('acccaDistrictSelect');
-  if (acccaSel) acccaSel.value = name;
   // Re-render all tabs
   setScenario(currentScenario);
   buildYfaCards();
@@ -1103,14 +1093,6 @@ function toggleSecretCol() {
   document.getElementById('ccfsTable').classList.toggle('show-secret');
 }
 
-function jumpToSelected() {
-  const name = document.getElementById('jumpSelect').value;
-  // Update focused district — re-renders chart, cards, table
-  setFocusedDistrict(name);
-  // Sync the header "Your district:" selector
-  document.getElementById('districtSelector').value = name;
-  // Scroll to the now-highlighted row
-}
 
 // ══════════════════════════════════════════════════════════════
 // TAB 3 — ACCCA ADMIN BENEFITS SURVEY
@@ -1429,27 +1411,14 @@ function renderAccca() {
 // ── Init ──────────────────────────────────────────────────────
 document.getElementById('yfaTabBtn').textContent = `YFA Benefits Survey — ${yfaData.length} Districts`;
 
-// Populate district selector and jump dropdown
+// Populate global district selector
 const sel = document.getElementById('districtSelector');
-const jumpSel = document.getElementById('jumpSelect');
 [...districts].sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
-  [sel, jumpSel].forEach(el => {
-    const opt = document.createElement('option');
-    opt.value = d.name;
-    opt.textContent = d.name;
-    if (d.name === 'Yosemite') opt.selected = true;
-    el.appendChild(opt);
-  });
-});
-
-// Populate YFA tab district selector with YFA survey districts only
-const yfaSel = document.getElementById('yfaDistrictSelect');
-[...yfaData].sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
   const opt = document.createElement('option');
   opt.value = d.name;
   opt.textContent = d.name;
-  if (d.name === focusedDistrict) opt.selected = true;
-  yfaSel.appendChild(opt);
+  if (d.name === 'Yosemite') opt.selected = true;
+  sel.appendChild(opt);
 });
 
 setScenario('full');
@@ -1459,16 +1428,6 @@ renderYfa();
 buildAcccaCards();
 renderAccca();
 document.getElementById('acccaTabBtn').textContent = 'ACCCA Admin Benefits — ' + ACCCA_DATA.filter(d => d.y25 != null).length + ' Districts';
-
-// Populate ACCCA district selector
-const acccaSel = document.getElementById('acccaDistrictSelect');
-[...districts].sort((a, b) => a.name.localeCompare(b.name)).forEach(d => {
-  const opt = document.createElement('option');
-  opt.value = d.name;
-  opt.textContent = d.name;
-  if (d.name === focusedDistrict) opt.selected = true;
-  acccaSel.appendChild(opt);
-});
 </script>
 </body>
 </html>
