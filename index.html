@@ -1368,14 +1368,19 @@ function renderAccca() {
     const val = d[yk];
     const diff = val != null ? val - acccaMedian : null;
     const pct = val != null ? (val / maxVal * 100).toFixed(1) : 0;
-    const diffColor = isFoc ? '#e67e22' : (diff != null && diff >= 0 ? '#1e8449' : '#c0392b');
-    const barColor  = isFoc ? '#e67e22' : (diff != null && diff >= 0 ? '#27ae60' : '#e74c3c');
+
+    // Quartile: based on rank within this year's reporting districts
+    const t = rank != null ? (rank <= Math.ceil(n/4) ? 1 : rank <= Math.ceil(n/2) ? 2 : rank <= Math.ceil(3*n/4) ? 3 : 4) : 0;
+    const tierTextColors = ['#1e8449','#7aaa30','#d48800','#c0392b'];
+    const valColor  = isFoc ? '#e67e22' : (t ? tierTextColors[t-1] : '#888');
+    const barColor  = isFoc ? '#e67e22' : (t ? TIER_COLORS[t-1]    : '#ccc');
 
     const valHtml = val != null
-      ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(val) + '</em>' : '<strong>' + fmt(val) + '</strong>')
+      ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> ' : '') +
+        '<strong style="color:' + valColor + '">' + fmt(val) + '</strong>'
       : '<span class="no-data">—</span>';
     const vsMedianHtml = diff != null
-      ? '<div style="font-size:0.8rem;color:' + diffColor + ';font-weight:600;margin-bottom:3px">' + (diff >= 0 ? '+' : '') + fmt(diff) + ' vs. median</div>' +
+      ? '<div style="font-size:0.8rem;color:' + valColor + ';font-weight:600;margin-bottom:3px">' + (diff >= 0 ? '+' : '') + fmt(diff) + ' vs. median</div>' +
         '<div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>'
       : '<span class="no-data">—</span>';
 
