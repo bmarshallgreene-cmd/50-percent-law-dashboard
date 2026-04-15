@@ -432,9 +432,8 @@
         <tr>
           <th onclick="setAcccaSort('rank')" id="ath0">Rank <span id="as-rank">▼</span></th>
           <th onclick="setAcccaSort('name')" id="ath1">District <span id="as-name">⇅</span></th>
-          <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Mean employer-paid H&W contribution across all administrative/management positions reported by the institution in the 2025 ACCCA Salary &amp; Benefits Survey. ⚠ = no change from previous survey — district likely did not submit updated data.">2025 Admin H&amp;W <span id="as-y25">▼</span></th>
-          <th onclick="setAcccaSort('ccfshw')" id="ath3" style="text-align:right" title="Estimated employer-paid H&W per FT faculty from CCFS-311 Tab 1 (full methodology). Shown for direct comparison.">Faculty H&amp;W (CCFS) <span id="as-ccfshw">⇅</span></th>
-          <th onclick="setAcccaSort('diff')" id="ath4" style="text-align:right" title="2025 Admin H&W minus Faculty H&W. Negative = faculty receive more than admin (typical). Positive = admin receives more than faculty (unusual — may indicate faculty data is understated).">Admin vs. Faculty <span id="as-diff">⇅</span></th>
+          <th onclick="setAcccaSort('y25')" id="ath2" style="text-align:right" title="Mean employer-paid H&W contribution across all administrative/management positions reported by the institution in the applicable ACCCA survey year. ⚠ = no change from previous survey — district likely did not submit updated data.">Admin H&amp;W <span id="as-y25">▼</span></th>
+          <th id="ath3">vs. Median</th>
         </tr>
       </thead>
       <tbody id="acccaBody"></tbody>
@@ -1332,27 +1331,25 @@ function buildAcccaChart() {
 function renderAccca() {
   const q = (document.getElementById('acccaSearch') || {value:''}).value.toLowerCase();
   const rankMap = getAcccaRankMap();
-  const ranked = computeRanked(currentScenario);
-  const ccfsMap = {};
-  ranked.forEach(d => { ccfsMap[d.name] = d.scenarioValue; });
+  const yk = acccaYear;
+
+  // Compute median for the current year (for vs. median column)
+  const withData = ACCCA_DATA.filter(d => d[yk] != null);
+  const sorted = [...withData].map(d => d[yk]).sort((a, b) => a - b);
+  const n = sorted.length;
+  const acccaMedian = n % 2 === 0 ? (sorted[n/2-1] + sorted[n/2]) / 2 : sorted[Math.floor(n/2)];
+  const maxVal = sorted[n - 1];
 
   let data = ACCCA_DATA.filter(d => {
     if (q && !d.name.toLowerCase().includes(q) && !(d.ccfs && d.ccfs.toLowerCase().includes(q))) return false;
     return true;
   });
 
-  const yk = acccaYear;
-
   data = [...data].sort((a, b) => {
-    const acfs = a.ccfs ? (ccfsMap[a.ccfs] ?? -Infinity) : -Infinity;
-    const bcfs = b.ccfs ? (ccfsMap[b.ccfs] ?? -Infinity) : -Infinity;
     let av, bv;
-    if (acccaSortCol === 'name')   { av = a.name;  bv = b.name; }
-    else if (acccaSortCol === 'rank')   { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
-    else if (acccaSortCol === 'y25')    { av = a[yk] ?? -Infinity; bv = b[yk] ?? -Infinity; }
-    else if (acccaSortCol === 'ccfshw') { av = acfs; bv = bcfs; }
-    else if (acccaSortCol === 'diff')   { av = a[yk] != null ? a[yk] - acfs : -Infinity; bv = b[yk] != null ? b[yk] - bcfs : -Infinity; }
-    else { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
+    if (acccaSortCol === 'name') { av = a.name; bv = b.name; }
+    else if (acccaSortCol === 'rank') { av = rankMap[a.name] ?? 999; bv = rankMap[b.name] ?? 999; }
+    else { av = a[yk] ?? -Infinity; bv = b[yk] ?? -Infinity; }
     return av < bv ? -acccaSortDir : av > bv ? acccaSortDir : 0;
   });
 
@@ -1366,18 +1363,20 @@ function renderAccca() {
 
   data.forEach(d => {
     const isFoc = d.ccfs === focusedDistrict;
-    const ccfsHw = d.ccfs ? (ccfsMap[d.ccfs] ?? null) : null;
     const stale = acccaIsStale(d);
     const rank = rankMap[d.name] ?? null;
     const val = d[yk];
-    const diff = val != null && ccfsHw != null ? val - ccfsHw : null;
+    const diff = val != null ? val - acccaMedian : null;
+    const pct = val != null ? (val / maxVal * 100).toFixed(1) : 0;
+    const diffColor = isFoc ? '#e67e22' : (diff != null && diff >= 0 ? '#1e8449' : '#c0392b');
+    const barColor  = isFoc ? '#e67e22' : (diff != null && diff >= 0 ? '#27ae60' : '#e74c3c');
 
     const valHtml = val != null
       ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> <em>' + fmt(val) + '</em>' : '<strong>' + fmt(val) + '</strong>')
       : '<span class="no-data">—</span>';
-    const ccfsHtml = ccfsHw != null ? fmt(ccfsHw) : '<span class="no-data">—</span>';
-    const diffHtml = diff != null
-      ? '<span style="color:' + (diff > 200 ? '#c0392b' : diff < -200 ? '#1e8449' : '#888') + ';font-weight:600">' + (diff >= 0 ? '+' : '') + fmt(diff) + '</span>'
+    const vsMedianHtml = diff != null
+      ? '<div style="font-size:0.8rem;color:' + diffColor + ';font-weight:600;margin-bottom:3px">' + (diff >= 0 ? '+' : '') + fmt(diff) + ' vs. median</div>' +
+        '<div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>'
       : '<span class="no-data">—</span>';
 
     const tr = document.createElement('tr');
@@ -1386,8 +1385,7 @@ function renderAccca() {
       '<td class="rank">' + (rank != null ? '#' + rank : '—') + '</td>' +
       '<td class="district-name">' + d.ccfs + (isFoc ? '<span class="yosemite-badge">SELECTED</span>' : '') + '</td>' +
       '<td class="num">' + valHtml + '</td>' +
-      '<td class="num">' + ccfsHtml + '</td>' +
-      '<td class="num">' + diffHtml + '</td>';
+      '<td class="bar-cell">' + vsMedianHtml + '</td>';
     tbody.appendChild(tr);
   });
 
@@ -1395,7 +1393,7 @@ function renderAccca() {
   if (countEl) countEl.textContent = data.length + ' of ' + ACCCA_DATA.length + ' districts';
 
   // Update sort indicators
-  ['rank','name','y25','ccfshw','diff'].forEach(c => {
+  ['rank','name','y25'].forEach(c => {
     const el = document.getElementById('as-' + c);
     if (!el) return;
     if (c === acccaSortCol) {
