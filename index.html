@@ -786,9 +786,11 @@ function renderCorrTable() {
       <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, corrShowAll ? 71 : 30, isF)}${ccfs72Note}</td>
       ${yfaCell}
       <td class="num">${fmt(Math.round(d.acccaVal))}${badge(acccaRank, corrShowAll ? 71 : 30, isF)}</td>
-      <td style="text-align:center" title="${spreadTip}">
-        <span style="color:${spreadColor};font-weight:700;font-size:1rem">${spreadVal}</span>
-        <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
+      <td style="text-align:center">
+        <div title="${spreadTip}" style="cursor:help;display:inline-block">
+          <span style="color:${spreadColor};font-weight:700;font-size:1rem">${spreadVal}</span>
+          <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
+        </div>
       </td>
     </tr>`;
   }).join('');
