@@ -470,32 +470,37 @@
   </div>
 
   <div class="table-wrap">
-    <div class="table-header">
-      <h2>Three-Method Rank Comparison — 30 Districts</h2>
+    <div class="table-header" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <h2 id="corrTableHeading">Three-Method Rank Comparison — 30 Districts</h2>
+      <button class="comp-toggle-btn" id="corrToggleBtn" onclick="toggleCorrPool()"
+        title="Toggle between YFA-only (30 districts with all three sources) and all 71 districts with CCFS + ACCCA data">
+        Show All 71 Districts
+      </button>
     </div>
     <div class="table-scroll">
     <table id="corrTable">
       <thead>
         <tr>
           <th onclick="setCorrSort('name')">District <span>⇅</span></th>
-          <th onclick="setCorrSort('ccfsRank')" style="text-align:right" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge = rank among these 30 districts.">CCFS H&amp;W/FT</th>
-          <th onclick="setCorrSort('yfaRank')" style="text-align:right" title="Maximum annual medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026.">YFA Max Medical</th>
+          <th onclick="setCorrSort('ccfsRank')" style="text-align:right" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge updates to reflect active pool size.">CCFS H&amp;W/FT</th>
+          <th id="corrYfaHeader" onclick="setCorrSort('yfaRank')" style="text-align:right" title="Maximum annual medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey.">YFA Max Medical</th>
           <th onclick="setCorrSort('acccaRank')" style="text-align:right" title="Mean employer-paid H&W across all admin/management positions. Source: ACCCA 2025 Survey.">ACCCA Admin</th>
-          <th onclick="setCorrSort('spread')" style="text-align:center" title="Max rank minus min rank across the three methods. 0 = all three agree exactly. Lower is more consistent.">Agreement ↕</th>
+          <th id="corrAgreeHeader" onclick="setCorrSort('spread')" style="text-align:center" title="YFA mode: max rank minus min rank across all three methods. All-71 mode: |CCFS rank − ACCCA rank|. Lower = more consistent. Hover a row for details.">Agreement&nbsp;↕</th>
         </tr>
       </thead>
       <tbody id="corrBody"></tbody>
     </table>
     </div>
     <div class="table-footer">
-      <span>30 districts with all three data sources &nbsp;·&nbsp; Rank badges = rank within this peer group of 30 &nbsp;·&nbsp; Small grey text under CCFS = rank among all 72 CA districts &nbsp;·&nbsp; Hover the Agreement score for individual ranks &nbsp;·&nbsp; Click headers to sort</span>
+      <span id="corrFooterNote">30 districts with all three data sources &nbsp;·&nbsp; Rank badges = rank within this peer group of 30 &nbsp;·&nbsp; Small grey text under CCFS = rank among all 72 CA districts &nbsp;·&nbsp; Hover the Agreement score for individual ranks &nbsp;·&nbsp; Click headers to sort</span>
     </div>
   </div>
 
 </div>
 <footer>
-  Cross-method comparison for the 30 districts included in all three datasets. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: maximum annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
-  <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). The YFA–ACCCA correlation is strongest (ρ = 0.82) because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with YFA (ρ = 0.68) and more weakly with ACCCA (ρ = 0.49), reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure.
+  Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: maximum annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
+  <br><br><span id="corrFooterAll71" style="display:none"><strong>All 71 Districts view:</strong> Shows every district with both CCFS-311 and ACCCA 2025 data. Districts also in the YFA Benefits Survey are marked ✦ and show their YFA value with rank out of 30. Agreement column = absolute difference between CCFS and ACCCA ranks (both out of 71). Hover any row's Agreement score for detail. The scatter chart above always shows the 30-district YFA overlap.<br><br></span>
+  <strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). The YFA–ACCCA correlation is strongest (ρ = 0.82) because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with YFA (ρ = 0.68) and more weakly with ACCCA (ρ = 0.49), reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure.
 </footer>
 </div>
 
@@ -558,7 +563,10 @@ function setFocusedDistrict(name) {
 // YFA survey uses slightly different names for two districts
 const YFA_TO_CCFS = { "Gavilan": "Gavilan Joint", "Mira Costa": "MiraCosta" };
 
-let corrData = [];
+let corrData = [];        // alias — points to corrDataYfa (used by chart functions)
+let corrDataYfa = [];     // 30 districts with all three methods
+let corrDataAll = [];     // 71 districts with CCFS + ACCCA y25 data
+let corrShowAll = false;  // false = YFA-only (30), true = all CCFS+ACCCA (71)
 let corrSortCol = 'ccfsRank', corrSortDir = 1;
 let corrChart = null;
 let corrRhos = { cv: 0, ya: 0, ca: 0 };
@@ -571,48 +579,62 @@ function spearmanRho(ranks1, ranks2) {
 }
 
 function buildCorrData() {
-  const overlap = [];
-  // Full-72 CCFS ranking for context (rank 1 = highest spender among all 72)
+  // Full-72 ranking for context labels
   const all72Sorted = [...districts].sort((a, b) => (b.hw/b.adjFtef) - (a.hw/a.adjFtef));
 
-  yfaData.forEach(yfa => {
-    if (yfa.max == null) return;
-    const ccfsName = YFA_TO_CCFS[yfa.name] || yfa.name;
-    const ccfsDist  = districts.find(d => d.name === ccfsName);
-    const acccaDist = ACCCA_DATA.find(d => d.ccfs === ccfsName);
-    if (!ccfsDist || !acccaDist || acccaDist.y25 == null) return;
-    overlap.push({
-      name:     ccfsName,
-      ccfsVal:  ccfsDist.hw / ccfsDist.adjFtef,
-      yfaVal:   yfa.max,
-      acccaVal: acccaDist.y25,
-      ccfs72Rank: all72Sorted.findIndex(x => x.name === ccfsName) + 1,
+  // ── Build 71-district pool: all CCFS districts that have ACCCA y25 data ──
+  const pool = [];
+  districts.forEach(d => {
+    const accca = ACCCA_DATA.find(a => a.ccfs === d.name);
+    if (!accca || accca.y25 == null) return; // excludes MiraCosta + any missing
+    const yfaEntry = yfaData.find(y => (YFA_TO_CCFS[y.name] || y.name) === d.name && y.max != null);
+    pool.push({
+      name:       d.name,
+      ccfsVal:    d.hw / d.adjFtef,
+      acccaVal:   accca.y25,
+      yfaVal:     yfaEntry ? yfaEntry.max : null,
+      inYfa:      !!yfaEntry,
+      ccfs72Rank: all72Sorted.findIndex(x => x.name === d.name) + 1,
     });
   });
 
-  // Rank each metric within the 30-district peer group (1 = highest)
-  ['ccfsVal','yfaVal','acccaVal'].forEach(key => {
-    const sorted = [...overlap].sort((a, b) => b[key] - a[key]);
-    overlap.forEach(d => { d[key + 'Rank'] = sorted.findIndex(x => x === d) + 1; });
-  });
-  overlap.forEach(d => {
-    d.spread = Math.max(d.ccfsValRank, d.yfaValRank, d.acccaValRank) -
-               Math.min(d.ccfsValRank, d.yfaValRank, d.acccaValRank);
+  // Ranks within the 71-district pool
+  const ccfsSorted71  = [...pool].sort((a, b) => b.ccfsVal  - a.ccfsVal);
+  const acccaSorted71 = [...pool].sort((a, b) => b.acccaVal - a.acccaVal);
+  pool.forEach(d => {
+    d.ccfsRank71  = ccfsSorted71.findIndex(x  => x === d) + 1;
+    d.acccaRank71 = acccaSorted71.findIndex(x => x === d) + 1;
+    d.spread71    = Math.abs(d.ccfsRank71 - d.acccaRank71);
   });
 
-  corrData = overlap;
+  // ── Ranks within the 30-district YFA overlap ──
+  const yfa30 = pool.filter(d => d.inYfa);
+  const ccfsSorted30  = [...yfa30].sort((a, b) => b.ccfsVal  - a.ccfsVal);
+  const yfaSorted30   = [...yfa30].sort((a, b) => b.yfaVal   - a.yfaVal);
+  const acccaSorted30 = [...yfa30].sort((a, b) => b.acccaVal - a.acccaVal);
+  yfa30.forEach(d => {
+    d.ccfsValRank  = ccfsSorted30.findIndex(x  => x === d) + 1;
+    d.yfaValRank   = yfaSorted30.findIndex(x   => x === d) + 1;
+    d.acccaValRank = acccaSorted30.findIndex(x => x === d) + 1;
+    d.spread       = Math.max(d.ccfsValRank, d.yfaValRank, d.acccaValRank) -
+                     Math.min(d.ccfsValRank, d.yfaValRank, d.acccaValRank);
+  });
 
-  // Pre-compute correlations
-  const cr = corrData.map(d => d.ccfsValRank);
-  const yr = corrData.map(d => d.yfaValRank);
-  const ar = corrData.map(d => d.acccaValRank);
+  corrDataAll = pool;
+  corrDataYfa = yfa30;
+  corrData    = corrDataYfa; // chart functions reference corrData
+
+  // Pre-compute Spearman ρ (always based on 30-district overlap)
+  const cr = corrDataYfa.map(d => d.ccfsValRank);
+  const yr = corrDataYfa.map(d => d.yfaValRank);
+  const ar = corrDataYfa.map(d => d.acccaValRank);
   corrRhos = { cv: spearmanRho(cr, yr), ya: spearmanRho(yr, ar), ca: spearmanRho(cr, ar) };
 }
 
 function buildCorrCards() {
-  if (!corrData.length) return;
-  const n = corrData.length;
-  const foc = corrData.find(d => d.name === focusedDistrict);
+  if (!corrDataYfa.length) return;
+  const focYfa = corrDataYfa.find(d => d.name === focusedDistrict);
+  const focAll = corrDataAll.find(d => d.name === focusedDistrict);
 
   const rhoColor = r => r >= 0.75 ? '#27ae60' : r >= 0.55 ? '#f0a500' : '#e74c3c';
   const rhoLabel = r => r >= 0.75 ? 'Strong' : r >= 0.55 ? 'Moderate–Strong' : r >= 0.40 ? 'Moderate' : 'Weak';
@@ -623,15 +645,22 @@ function buildCorrCards() {
     `<div class="sub">${rhoLabel(r)} correlation</div></div>`;
 
   let focCard = `<div class="card"><label>Selected District</label>`;
-  if (foc) {
-    focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${foc.name}</div>` +
+  if (corrShowAll && focAll) {
+    focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${focAll.name}</div>` +
       `<div class="sub">` +
-        `CCFS #${foc.ccfsValRank}/30 <span style="color:#aaa">(#${foc.ccfs72Rank} of all 72)</span>` +
-        ` · YFA #${foc.yfaValRank}/30 · ACCCA #${foc.acccaValRank}/30` +
+        `CCFS #${focAll.ccfsRank71}/71 <span style="color:#aaa">(#${focAll.ccfs72Rank} of all 72)</span>` +
+        ` · ACCCA #${focAll.acccaRank71}/71` +
+        (focAll.inYfa ? ` · YFA #${focAll.yfaValRank}/30` : '') +
+      `</div>`;
+  } else if (focYfa) {
+    focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${focYfa.name}</div>` +
+      `<div class="sub">` +
+        `CCFS #${focYfa.ccfsValRank}/30 <span style="color:#aaa">(#${focYfa.ccfs72Rank} of all 72)</span>` +
+        ` · YFA #${focYfa.yfaValRank}/30 · ACCCA #${focYfa.acccaValRank}/30` +
       `</div>`;
   } else {
     focCard += `<div class="value" style="font-size:0.95rem;color:#aaa">${focusedDistrict}</div>` +
-      `<div class="sub" style="color:#aaa">Not in 3-method overlap</div>`;
+      `<div class="sub" style="color:#aaa">Not in ${corrShowAll ? 'CCFS+ACCCA dataset' : '3-method overlap'}</div>`;
   }
   focCard += '</div>';
 
@@ -641,9 +670,22 @@ function buildCorrCards() {
     rhoCard('CCFS ↔ ACCCA', corrRhos.ca) +
     focCard;
 
-  // Update scatter subtitle label
   const rhoEl = document.getElementById('corrScatterRhoLabel');
   if (rhoEl) rhoEl.textContent = 'Spearman ρ = ' + corrRhos.cv.toFixed(2);
+}
+
+function toggleCorrPool() {
+  corrShowAll = !corrShowAll;
+  const btn = document.getElementById('corrToggleBtn');
+  btn.textContent = corrShowAll ? 'YFA Survey Only ✓' : 'Show All 71 Districts';
+  btn.classList.toggle('active', corrShowAll);
+  const footerAll = document.getElementById('corrFooterAll71');
+  if (footerAll) footerAll.style.display = corrShowAll ? '' : 'none';
+  // Refresh subtitle strip
+  const subEl = document.getElementById('headerSub');
+  if (subEl) subEl.innerHTML = corrSubtitle();
+  buildCorrCards();
+  renderCorrTable();
 }
 
 function setCorrSort(col) {
@@ -653,41 +695,99 @@ function setCorrSort(col) {
 }
 
 function renderCorrTable() {
-  if (!corrData.length) return;
-  const n = corrData.length;
+  const activeData = corrShowAll ? corrDataAll : corrDataYfa;
+  if (!activeData.length) return;
+  const n = activeData.length;
   const q = Math.ceil(n / 4);
   const TIER_TC = ['#1e8449','#7aaa30','#d48800','#c0392b'];
   const tierColor = rank => TIER_TC[rank <= q ? 0 : rank <= 2*q ? 1 : rank <= 3*q ? 2 : 3];
 
-  const data = [...corrData].sort((a, b) => {
-    if (corrSortCol === 'name')      return corrSortDir * a.name.localeCompare(b.name);
-    if (corrSortCol === 'ccfsRank')  return corrSortDir * (a.ccfsValRank - b.ccfsValRank);
-    if (corrSortCol === 'yfaRank')   return corrSortDir * (a.yfaValRank  - b.yfaValRank);
-    if (corrSortCol === 'acccaRank') return corrSortDir * (a.acccaValRank - b.acccaValRank);
-    if (corrSortCol === 'spread')    return corrSortDir * (a.spread - b.spread);
+  const data = [...activeData].sort((a, b) => {
+    if (corrSortCol === 'name') return corrSortDir * a.name.localeCompare(b.name);
+    if (corrSortCol === 'ccfsRank') {
+      return corrSortDir * ((corrShowAll ? a.ccfsRank71 : a.ccfsValRank) -
+                            (corrShowAll ? b.ccfsRank71 : b.ccfsValRank));
+    }
+    if (corrSortCol === 'yfaRank') {
+      // Non-YFA districts sort to the end when ascending
+      if (!a.inYfa && !b.inYfa) return 0;
+      if (!a.inYfa) return corrSortDir;
+      if (!b.inYfa) return -corrSortDir;
+      return corrSortDir * (a.yfaValRank - b.yfaValRank);
+    }
+    if (corrSortCol === 'acccaRank') {
+      return corrSortDir * ((corrShowAll ? a.acccaRank71 : a.acccaValRank) -
+                            (corrShowAll ? b.acccaRank71 : b.acccaValRank));
+    }
+    if (corrSortCol === 'spread') {
+      return corrSortDir * ((corrShowAll ? a.spread71 : a.spread) -
+                            (corrShowAll ? b.spread71 : b.spread));
+    }
     return 0;
   });
 
-  const badge = (rank, isF) => {
+  const badge = (rank, total, isF) => {
     const col = isF ? '#e67e22' : tierColor(rank);
     return `<span style="display:inline-block;background:${col};color:#fff;border-radius:3px;` +
-           `padding:1px 6px;font-size:0.72rem;font-weight:700;margin-left:5px">#${rank}</span>`;
+           `padding:1px 6px;font-size:0.72rem;font-weight:700;margin-left:5px">#${rank}` +
+           `<span style="font-weight:400;opacity:0.75">/${total}</span></span>`;
   };
+
+  // Update dynamic heading, column headers, footer note
+  const headingEl = document.getElementById('corrTableHeading');
+  if (headingEl) headingEl.textContent = corrShowAll
+    ? `CCFS + ACCCA Rank Comparison — ${n} Districts`
+    : `Three-Method Rank Comparison — ${n} Districts`;
+
+  const yfaHdr = document.getElementById('corrYfaHeader');
+  if (yfaHdr) yfaHdr.innerHTML = corrShowAll
+    ? 'YFA Max Medical <span style="font-size:0.7rem;font-weight:400;color:#999">(30 districts)</span>'
+    : 'YFA Max Medical';
+
+  const agreeHdr = document.getElementById('corrAgreeHeader');
+  if (agreeHdr) agreeHdr.innerHTML = corrShowAll ? 'CCFS↔ACCCA&nbsp;↕' : 'Agreement&nbsp;↕';
+
+  const footerNote = document.getElementById('corrFooterNote');
+  if (footerNote) footerNote.innerHTML = corrShowAll
+    ? `71 districts with CCFS + ACCCA 2025 data &nbsp;·&nbsp; ✦ = also in YFA survey &nbsp;·&nbsp; CCFS/ACCCA rank badges out of 71 &nbsp;·&nbsp; YFA ranks out of 30 &nbsp;·&nbsp; Agreement = |CCFS rank − ACCCA rank|`
+    : `30 districts with all three data sources &nbsp;·&nbsp; Rank badges = rank within this peer group of 30 &nbsp;·&nbsp; Small grey text under CCFS = rank among all 72 CA districts &nbsp;·&nbsp; Hover the Agreement score for individual ranks &nbsp;·&nbsp; Click headers to sort`;
 
   document.getElementById('corrBody').innerHTML = data.map(d => {
     const isF = d.name === focusedDistrict;
     const rowStyle = isF ? 'background:#fff8f0;font-weight:600' : '';
-    const spreadColor = d.spread <= 3 ? '#27ae60' : d.spread <= 8 ? '#f0a500' : '#e74c3c';
-    const spreadLabel = d.spread <= 3 ? 'Strong agreement' : d.spread <= 8 ? 'Moderate agreement' : 'Methods diverge';
-    const spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}`;
-    const ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
+    let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell;
+
+    if (corrShowAll) {
+      ccfsRank  = d.ccfsRank71;
+      acccaRank = d.acccaRank71;
+      spreadVal = d.spread71;
+      spreadColor = spreadVal <= 5 ? '#27ae60' : spreadVal <= 15 ? '#f0a500' : '#e74c3c';
+      spreadLabel = spreadVal <= 5 ? 'Close' : spreadVal <= 15 ? 'Moderate' : 'Diverge';
+      spreadTip = `CCFS: #${ccfsRank}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}` +
+        (d.inYfa ? `\n3-method spread (out of 30): ${d.spread} — CCFS #${d.ccfsValRank} · YFA #${d.yfaValRank} · ACCCA #${d.acccaValRank}` : '');
+      ccfs72Note = ''; // redundant — /71 pool already covers nearly all districts
+      yfaCell = d.inYfa
+        ? `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, 30, isF)}</td>`
+        : `<td class="num" style="color:#ccc;text-align:right;font-style:italic">—</td>`;
+    } else {
+      ccfsRank  = d.ccfsValRank;
+      acccaRank = d.acccaValRank;
+      spreadVal = d.spread;
+      spreadColor = spreadVal <= 3 ? '#27ae60' : spreadVal <= 8 ? '#f0a500' : '#e74c3c';
+      spreadLabel = spreadVal <= 3 ? 'Strong agreement' : spreadVal <= 8 ? 'Moderate agreement' : 'Methods diverge';
+      spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}`;
+      ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
+      yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, 30, isF)}</td>`;
+    }
+
+    const yfaMark = (corrShowAll && d.inYfa) ? ' <span style="font-size:0.7rem;color:#888">✦</span>' : '';
     return `<tr style="${rowStyle}">
-      <td class="district-name">${isF ? '▶ ' : ''}${d.name}</td>
-      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(d.ccfsValRank, isF)}${ccfs72Note}</td>
-      <td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, isF)}</td>
-      <td class="num">${fmt(Math.round(d.acccaVal))}${badge(d.acccaValRank, isF)}</td>
+      <td class="district-name">${isF ? '▶ ' : ''}${d.name}${yfaMark}</td>
+      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, corrShowAll ? 71 : 30, isF)}${ccfs72Note}</td>
+      ${yfaCell}
+      <td class="num">${fmt(Math.round(d.acccaVal))}${badge(acccaRank, corrShowAll ? 71 : 30, isF)}</td>
       <td style="text-align:center" title="${spreadTip}">
-        <span style="color:${spreadColor};font-weight:700;font-size:1rem">${d.spread}</span>
+        <span style="color:${spreadColor};font-weight:700;font-size:1rem">${spreadVal}</span>
         <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
       </td>
     </tr>`;
@@ -773,8 +873,11 @@ function renderCorrTab() {
 const TAB_SUBTITLES = {
   ccfs:  'Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data',
   yfa:   'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
-  corr:  '30 districts with all three data sources &nbsp;|&nbsp; Spearman ρ: CCFS↔YFA 0.68 &nbsp;·&nbsp; YFA↔ACCCA 0.82 &nbsp;·&nbsp; CCFS↔ACCCA 0.49',
 };
+function corrSubtitle() {
+  const pool = corrShowAll ? corrDataAll.length + ' districts (CCFS + ACCCA)' : '30 districts (all three sources)';
+  return pool + ' &nbsp;|&nbsp; Spearman ρ: CCFS↔YFA 0.68 &nbsp;·&nbsp; YFA↔ACCCA 0.82 &nbsp;·&nbsp; CCFS↔ACCCA 0.49';
+}
 const ACCCA_YEAR_MAP = {y14:'2014', y16:'2016', y19:'2019', y20:'2020', y21:'2021', y22:'2022', y25:'2025'};
 function acccaSubtitle() {
   return 'Survey Year: ' + ACCCA_YEAR_MAP[acccaYear] + ' &nbsp;|&nbsp; Source: ACCCA Salary &amp; Benefits Survey';
@@ -785,7 +888,7 @@ function showTab(id) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   event.currentTarget.classList.add('active');
-  document.getElementById('headerSub').innerHTML = id === 'accca' ? acccaSubtitle() : TAB_SUBTITLES[id];
+  document.getElementById('headerSub').innerHTML = id === 'accca' ? acccaSubtitle() : id === 'corr' ? corrSubtitle() : TAB_SUBTITLES[id];
   if (id === 'ccfs' && !chartInitialized) initChart();
   if (id === 'corr') renderCorrTab();
 }
