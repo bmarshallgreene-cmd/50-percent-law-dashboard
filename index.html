@@ -187,10 +187,10 @@
   .table-footer { padding: 9px 0 0; font-size: 0.75rem; color: #999; display: flex; justify-content: space-between; }
 
   /* ── Column visibility toggles ── */
-  #ccfsTable .comp-col   { display: none; }
-  #ccfsTable .secret-col { display: none; }
-  #ccfsTable.show-comp   .comp-col   { display: table-cell; }
-  #ccfsTable.show-secret .secret-col { display: table-cell; }
+  #ccfsTable .comp-col    { display: none; }
+  #ccfsTable .col-adj-col { display: none; }
+  #ccfsTable.show-comp    .comp-col    { display: table-cell; }
+  #ccfsTable.show-col-adj .col-adj-col { display: table-cell; }
   .comp-toggle-btn {
     font-size: 0.75rem; padding: 4px 10px; border: 1px solid #ccd3de;
     background: #f4f6f9; color: #555; border-radius: 4px; cursor: pointer;
@@ -274,7 +274,7 @@
 
   <div class="table-wrap">
     <div class="table-header">
-      <h2 onclick="toggleSecretCol()" style="cursor:default">District Detail</h2>
+      <h2>District Detail</h2>
         <button class="comp-toggle-btn" id="indexToggleBtn" onclick="toggleIndexView()" title="Replace dollar amounts with a relative index where the statewide median = 100" style="margin-left:10px;vertical-align:middle">Index View</button>
       <div class="controls">
         <input type="text" class="search-box" id="ccfsSearch" placeholder="Search district…" oninput="filterCcfsTable()">
@@ -296,6 +296,7 @@
           <option value="ccci">CCCI Members</option>
         </select>
         <button class="comp-toggle-btn" id="compToggleBtn" onclick="toggleCompCols()">Salary &amp; Comp</button>
+        <button class="comp-toggle-btn" id="colAdjToggleBtn" onclick="toggleColAdj()" title="Show COL-adjusted total compensation — normalizes each district's Total Comp to California-average purchasing power using MIT Living Wage Calculator county data. Enables Salary &amp; Comp automatically.">COL-Adj. Comp</button>
       </div>
     </div>
     <div class="table-scroll">
@@ -311,7 +312,7 @@
           <th onclick="sortCcfs(6)" id="cth6" class="comp-col" style="text-align:right" title="CFT 2024-25 Survey: MA+60 units, 20 years (Step 21)">Step 21 Salary</th>
           <th onclick="sortCcfs(7)" id="cth7" class="comp-col" style="text-align:right" title="H&amp;W per FT + CFT Step 21 salary — rough estimate only">Total Comp</th>
           <th id="cth8" class="comp-col">vs. Median (Comp)</th>
-          <th onclick="sortCcfs(9)" id="cth9" class="secret-col" style="text-align:right;white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
+          <th onclick="sortCcfs(9)" id="cth9" class="col-adj-col" style="text-align:right;white-space:normal;min-width:95px" title="Total Comp divided by the district's COL Index, normalized to CA-average purchasing power. Small text shows the COL index and county. Source: MIT Living Wage Calculator, Feb 2026.">COL-Adj. Comp <span style="font-weight:400;font-size:0.72em;opacity:0.65;display:block">(CA avg = 100)</span></th>
         </tr>
       </thead>
       <tbody id="ccfsBody"></tbody>
@@ -1059,7 +1060,7 @@ function buildCcfsTable(data) {
         <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffLabel} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
       </div></td>
-      <td class="num secret-col" style="padding-top:6px;padding-bottom:6px">${colAdj != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${indexView && medColAdj ? fmtIdx(colAdj, medColAdj) : fmt(colAdj)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
+      <td class="num col-adj-col" style="padding-top:6px;padding-bottom:6px">${colAdj != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${indexView && medColAdj ? fmtIdx(colAdj, medColAdj) : fmt(colAdj)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
     tr.dataset.ftef = d.scenarioFtef; tr.dataset.hw = d.scenarioHw; tr.dataset.hwPer = d.scenarioValue;
     tr.dataset.step21 = d.step21; tr.dataset.totalComp = totalComp;
@@ -1340,9 +1341,19 @@ function downloadCsv() {
   a.click();
 }
 
-function toggleSecretCol() {
-  if (!focusedDistrict.toLowerCase().includes('pasadena')) return;
-  document.getElementById('ccfsTable').classList.toggle('show-secret');
+function toggleColAdj() {
+  const tbl = document.getElementById('ccfsTable');
+  const btn = document.getElementById('colAdjToggleBtn');
+  const on = tbl.classList.toggle('show-col-adj');
+  btn.textContent = on ? 'COL-Adj. Comp ✓' : 'COL-Adj. Comp';
+  btn.classList.toggle('active', on);
+  // Also enable Salary & Comp so Total Comp is visible for context
+  if (on && !tbl.classList.contains('show-comp')) {
+    tbl.classList.add('show-comp');
+    const compBtn = document.getElementById('compToggleBtn');
+    compBtn.textContent = 'Salary & Comp ✓';
+    compBtn.classList.add('active');
+  }
 }
 
 
