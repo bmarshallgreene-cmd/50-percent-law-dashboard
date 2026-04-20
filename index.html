@@ -1313,11 +1313,10 @@ function toggleCompCols() {
 function downloadCsv() {
   const ranked = computeRanked(currentScenario);
   const stats = computeStats(ranked);
-  const headers = ['Rank','District','Region','Multi-College','CCCI Member','Self-Insured','FON FT','Adj. FON FT','Total H&W','H&W per FT','vs. Median','Step 21 Salary','Total Comp','COL Index','COL County','COL-Adj. Comp'];
+  const headers = ['Rank','District','Region','Multi-College','CCCI Member','Self-Insured','FON FT','Adj. FON FT','Total H&W','H&W per FT','vs. Median','Step 21 Salary','Total Comp'];
   const rows = ranked.map((d, i) => {
     const totalComp = d.step21 + d.scenarioValue;
     const diff = d.scenarioValue - stats.median;
-    const colAdj = d.col != null ? Math.round(totalComp * 100 / d.col) : '';
     return [
       i + 1,
       d.name,
@@ -1332,9 +1331,6 @@ function downloadCsv() {
       Math.round(diff),
       d.step21,
       Math.round(totalComp),
-      d.col != null ? d.col : '',
-      d.colCounty || '',
-      colAdj
     ].map(v => typeof v === 'string' && v.includes(',') ? `"${v}"` : v);
   });
   const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
