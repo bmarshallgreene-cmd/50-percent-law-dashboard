@@ -755,7 +755,7 @@ function renderCorrTable() {
   document.getElementById('corrBody').innerHTML = data.map(d => {
     const isF = d.name === focusedDistrict;
     const rowStyle = isF ? 'background:#fff8f0;font-weight:600' : '';
-    let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell;
+    let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell, outlier;
 
     if (corrShowAll) {
       ccfsRank  = d.ccfsRank71;
@@ -775,12 +775,29 @@ function renderCorrTable() {
       spreadVal = d.spread;
       spreadColor = spreadVal <= 3 ? '#27ae60' : spreadVal <= 8 ? '#f0a500' : '#e74c3c';
       spreadLabel = spreadVal <= 3 ? 'Strong agreement' : spreadVal <= 8 ? 'Moderate agreement' : 'Methods diverge';
-      spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}`;
+
+      // When methods diverge: detect which single method is the outlier by finding
+      // which removal produces the best pairwise agreement between the remaining two.
+      outlier = (() => {
+        if (spreadVal <= 8) return null;
+        const pairs = [
+          { out: 'CCFS',  pairSpread: Math.abs(d.yfaValRank - d.acccaValRank), pairLabel: 'YFA↔ACCCA' },
+          { out: 'YFA',   pairSpread: Math.abs(d.ccfsValRank - d.acccaValRank), pairLabel: 'CCFS↔ACCCA' },
+          { out: 'ACCCA', pairSpread: Math.abs(d.ccfsValRank - d.yfaValRank),   pairLabel: 'CCFS↔YFA' },
+        ].sort((a, b) => a.pairSpread - b.pairSpread);
+        return pairs[0]; // method whose removal leaves the two most-agreeing methods
+      })();
+
+      spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}` +
+        (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '');
       ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
       yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, 30, isF)}</td>`;
     }
 
     const yfaMark = (corrShowAll && d.inYfa) ? ' <span style="font-size:0.7rem;color:#888">✦</span>' : '';
+    const outlierNote = (!corrShowAll && outlier)
+      ? `<div style="font-size:0.63rem;color:#999;margin-top:2px">${outlier.out} outlier · ${outlier.pairLabel}: ${outlier.pairSpread}</div>`
+      : '';
     return `<tr style="${rowStyle}">
       <td class="district-name">${isF ? '▶ ' : ''}${d.name}${yfaMark}</td>
       <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, corrShowAll ? 71 : 30, isF)}${ccfs72Note}</td>
@@ -790,6 +807,7 @@ function renderCorrTable() {
         <div title="${spreadTip}" style="cursor:help;display:inline-block">
           <span style="color:${spreadColor};font-weight:700;font-size:1rem">${spreadVal}</span>
           <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
+          ${outlierNote}
         </div>
       </td>
     </tr>`;
