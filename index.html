@@ -465,7 +465,7 @@
 
   <div class="chart-wrap">
     <h2>CCFS vs. YFA Survey — District Scatter</h2>
-    <p style="font-size:0.78rem;color:#888;margin-bottom:14px">Each point is one of the 30 districts with data in all three sources. X-axis = CCFS H&amp;W per FT faculty (full methodology). Y-axis = YFA maximum medical benefit. Points colored by CCFS quartile. Hover for values. <strong id="corrScatterRhoLabel">Spearman ρ = 0.68</strong> between these two methods.</p>
+    <p style="font-size:0.78rem;color:#888;margin-bottom:14px">Compares the two largest-sample sources: CCFS-311 H&amp;W per FT faculty (x-axis) vs. YFA maximum medical benefit (y-axis). Each point is one of the 30 peer districts. Hover for district name, values, and full state-wide rank context. Orange = selected district. <strong id="corrScatterRhoLabel">Spearman ρ = 0.68</strong> — moderate-strong agreement, but note the visible outliers (high CCFS / low YFA and vice versa).</p>
     <div style="height:300px"><canvas id="corrScatter"></canvas></div>
   </div>
 
@@ -488,7 +488,7 @@
     </table>
     </div>
     <div class="table-footer">
-      <span>30 districts with all three data sources &nbsp;·&nbsp; Rank badge: #1 = highest H&W among these 30 &nbsp;·&nbsp; Agreement = rank spread (0 = consistent, ≥9 = divergent) &nbsp;·&nbsp; Click headers to sort</span>
+      <span>30 districts with all three data sources &nbsp;·&nbsp; Rank badges = rank within this peer group of 30 &nbsp;·&nbsp; Small grey text under CCFS = rank among all 72 CA districts &nbsp;·&nbsp; Hover the Agreement score for individual ranks &nbsp;·&nbsp; Click headers to sort</span>
     </div>
   </div>
 
@@ -572,6 +572,9 @@ function spearmanRho(ranks1, ranks2) {
 
 function buildCorrData() {
   const overlap = [];
+  // Full-72 CCFS ranking for context (rank 1 = highest spender among all 72)
+  const all72Sorted = [...districts].sort((a, b) => (b.hw/b.adjFtef) - (a.hw/a.adjFtef));
+
   yfaData.forEach(yfa => {
     if (yfa.max == null) return;
     const ccfsName = YFA_TO_CCFS[yfa.name] || yfa.name;
@@ -579,14 +582,15 @@ function buildCorrData() {
     const acccaDist = ACCCA_DATA.find(d => d.ccfs === ccfsName);
     if (!ccfsDist || !acccaDist || acccaDist.y25 == null) return;
     overlap.push({
-      name:    ccfsName,
-      ccfsVal: ccfsDist.hw / ccfsDist.adjFtef,
-      yfaVal:  yfa.max,
+      name:     ccfsName,
+      ccfsVal:  ccfsDist.hw / ccfsDist.adjFtef,
+      yfaVal:   yfa.max,
       acccaVal: acccaDist.y25,
+      ccfs72Rank: all72Sorted.findIndex(x => x.name === ccfsName) + 1,
     });
   });
 
-  // Rank each metric (1 = highest)
+  // Rank each metric within the 30-district peer group (1 = highest)
   ['ccfsVal','yfaVal','acccaVal'].forEach(key => {
     const sorted = [...overlap].sort((a, b) => b[key] - a[key]);
     overlap.forEach(d => { d[key + 'Rank'] = sorted.findIndex(x => x === d) + 1; });
@@ -621,7 +625,10 @@ function buildCorrCards() {
   let focCard = `<div class="card"><label>Selected District</label>`;
   if (foc) {
     focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${foc.name}</div>` +
-      `<div class="sub">CCFS #${foc.ccfsValRank} · YFA #${foc.yfaValRank} · ACCCA #${foc.acccaValRank} of ${n}</div>`;
+      `<div class="sub">` +
+        `CCFS #${foc.ccfsValRank}/30 <span style="color:#aaa">(#${foc.ccfs72Rank} of all 72)</span>` +
+        ` · YFA #${foc.yfaValRank}/30 · ACCCA #${foc.acccaValRank}/30` +
+      `</div>`;
   } else {
     focCard += `<div class="value" style="font-size:0.95rem;color:#aaa">${focusedDistrict}</div>` +
       `<div class="sub" style="color:#aaa">Not in 3-method overlap</div>`;
@@ -671,13 +678,17 @@ function renderCorrTable() {
     const isF = d.name === focusedDistrict;
     const rowStyle = isF ? 'background:#fff8f0;font-weight:600' : '';
     const spreadColor = d.spread <= 3 ? '#27ae60' : d.spread <= 8 ? '#f0a500' : '#e74c3c';
+    const spreadLabel = d.spread <= 3 ? 'Strong agreement' : d.spread <= 8 ? 'Moderate agreement' : 'Methods diverge';
+    const spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}`;
+    const ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
     return `<tr style="${rowStyle}">
       <td class="district-name">${isF ? '▶ ' : ''}${d.name}</td>
-      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(d.ccfsValRank, isF)}</td>
+      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(d.ccfsValRank, isF)}${ccfs72Note}</td>
       <td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, isF)}</td>
       <td class="num">${fmt(Math.round(d.acccaVal))}${badge(d.acccaValRank, isF)}</td>
-      <td style="text-align:center">
+      <td style="text-align:center" title="${spreadTip}">
         <span style="color:${spreadColor};font-weight:700;font-size:1rem">${d.spread}</span>
+        <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
       </td>
     </tr>`;
   }).join('');
@@ -691,12 +702,9 @@ function buildCorrChart() {
     y: Math.round(d.yfaVal),
     label: d.name,
   }));
-  const pointColor = d =>
-    d.name === focusedDistrict ? '#e67e22' :
-    TIER_COLORS[d.ccfsValRank <= q ? 0 : d.ccfsValRank <= 2*q ? 1 : d.ccfsValRank <= 3*q ? 2 : 3];
-  const colors  = corrData.map(d => pointColor(d));
+  const colors  = corrData.map(d => d.name === focusedDistrict ? '#e67e22' : 'rgba(41,128,185,0.65)');
   const radii   = corrData.map(d => d.name === focusedDistrict ? 9 : 5);
-  const borders = corrData.map(d => d.name === focusedDistrict ? '#b85c00' : 'rgba(0,0,0,0.25)');
+  const borders = corrData.map(d => d.name === focusedDistrict ? '#b85c00' : 'rgba(21,64,110,0.5)');
 
   const ctx = document.getElementById('corrScatter');
   if (!ctx) return;
@@ -705,6 +713,7 @@ function buildCorrChart() {
     corrChart.data.datasets[0].pointBackgroundColor = colors;
     corrChart.data.datasets[0].pointBorderColor     = borders;
     corrChart.data.datasets[0].pointRadius          = radii;
+    corrChart.data.datasets[0].pointHoverRadius     = radii.map(r => r + 3);
     corrChart.update();
     return;
   }
@@ -730,7 +739,12 @@ function buildCorrChart() {
           callbacks: {
             label: ctx => {
               const p = ctx.raw;
-              return ` ${p.label}: CCFS ${fmt(p.x)}, YFA ${fmt(p.y)}`;
+              const d = corrData.find(x => x.name === p.label);
+              return [
+                ` ${p.label}`,
+                ` CCFS H&W/FT: ${fmt(p.x)}  (#${d?.ccfsValRank}/30, #${d?.ccfs72Rank} of all 72)`,
+                ` YFA Max Medical: ${fmt(p.y)}  (#${d?.yfaValRank}/30)`,
+              ];
             }
           }
         }
