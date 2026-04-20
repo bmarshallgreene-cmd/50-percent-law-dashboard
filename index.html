@@ -755,17 +755,27 @@ function renderCorrTable() {
   document.getElementById('corrBody').innerHTML = data.map(d => {
     const isF = d.name === focusedDistrict;
     const rowStyle = isF ? 'background:#fff8f0;font-weight:600' : '';
-    let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell, outlier;
+    let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell, outlier, conclusionLine;
+
+    // Tier helpers — precision scales with confidence
+    // Precise (strong agreement): distinguish all four quartiles
+    const tierQ = (rank, n) => rank <= n/4 ? 'top quartile' : rank <= n/2 ? 'top half' : rank <= 3*n/4 ? 'bottom half' : 'bottom quartile';
+    // Coarse (moderate agreement): just top vs bottom half
+    const tierH = (rank, n) => rank <= n/2 ? 'top half' : 'bottom half';
 
     if (corrShowAll) {
       ccfsRank  = d.ccfsRank71;
       acccaRank = d.acccaRank71;
       spreadVal = d.spread71;
       spreadColor = spreadVal <= 7 ? '#27ae60' : spreadVal <= 19 ? '#f0a500' : '#e74c3c';
-      spreadLabel = spreadVal <= 7 ? 'Strong agreement' : spreadVal <= 19 ? 'Moderate agreement' : 'Methods diverge';
-      spreadTip = `CCFS: #${ccfsRank}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}` +
-        (d.inYfa ? `\n3-method spread (out of 30): ${d.spread} — CCFS #${d.ccfsValRank} · YFA #${d.yfaValRank} · ACCCA #${d.acccaValRank}` : '');
-      ccfs72Note = ''; // redundant — /71 pool already covers nearly all districts
+      const meanRank71 = (ccfsRank + acccaRank) / 2;
+      conclusionLine = spreadVal <= 7  ? `All agree: ${tierQ(meanRank71, 71)}` :
+                       spreadVal <= 19 ? `Moderate agreement, ${tierH(meanRank71, 71)}` :
+                                         `Ranking unclear`;
+      spreadTip = `CCFS: #${ccfsRank}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}\n${conclusionLine}` +
+        (d.inYfa ? `\n\n3-method detail (out of 30): CCFS #${d.ccfsValRank} · YFA #${d.yfaValRank} · ACCCA #${d.acccaValRank} · spread ${d.spread}` : '');
+      spreadColor = spreadVal <= 7 ? '#27ae60' : spreadVal <= 19 ? '#f0a500' : '#e74c3c';
+      ccfs72Note = '';
       yfaCell = d.inYfa
         ? `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, 30, isF)}</td>`
         : `<td class="num" style="color:#ccc;text-align:right;font-style:italic">—</td>`;
@@ -774,10 +784,8 @@ function renderCorrTable() {
       acccaRank = d.acccaValRank;
       spreadVal = d.spread;
       spreadColor = spreadVal <= 3 ? '#27ae60' : spreadVal <= 8 ? '#f0a500' : '#e74c3c';
-      spreadLabel = spreadVal <= 3 ? 'Strong agreement' : spreadVal <= 8 ? 'Moderate agreement' : 'Methods diverge';
 
-      // When methods diverge: detect which single method is the outlier by finding
-      // which removal produces the best pairwise agreement between the remaining two.
+      // Find the outlier — method whose removal leaves the two best-agreeing methods
       outlier = (() => {
         if (spreadVal <= 8) return null;
         const pairs = [
@@ -785,19 +793,34 @@ function renderCorrTable() {
           { out: 'YFA',   pairSpread: Math.abs(d.ccfsValRank - d.acccaValRank), pairLabel: 'CCFS↔ACCCA' },
           { out: 'ACCCA', pairSpread: Math.abs(d.ccfsValRank - d.yfaValRank),   pairLabel: 'CCFS↔YFA' },
         ].sort((a, b) => a.pairSpread - b.pairSpread);
-        return pairs[0]; // method whose removal leaves the two most-agreeing methods
+        return pairs[0];
       })();
 
-      spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${spreadLabel}` +
+      // Conclusion: what the agreeing methods say about WHERE this district sits
+      if (!outlier) {
+        // Agree (spread ≤ 8): use median of three ranks
+        const med = [d.ccfsValRank, d.yfaValRank, d.acccaValRank].sort((a, b) => a - b)[1];
+        conclusionLine = spreadVal <= 3
+          ? `All 3 agree: ${tierQ(med, 30)}`
+          : `Moderate agreement, ${tierH(med, 30)}`;
+      } else if (outlier.pairSpread <= 8) {
+        // Clear outlier: two surveys agree — show where they place the district
+        const agreeRanks = [d.ccfsValRank, d.yfaValRank, d.acccaValRank]
+          .filter((_, i) => ['CCFS','YFA','ACCCA'][i] !== outlier.out);
+        const pairMean = (agreeRanks[0] + agreeRanks[1]) / 2;
+        conclusionLine = `${outlier.out} diverges · surveys: ${tierH(pairMean, 30)}`;
+      } else {
+        // All three genuinely disagree — no clear conclusion
+        conclusionLine = 'Ranking unclear';
+      }
+
+      spreadTip = `CCFS: #${d.ccfsValRank}/30 · YFA: #${d.yfaValRank}/30 · ACCCA: #${d.acccaValRank}/30\nSpread = ${d.spread} (max rank − min rank)\n${conclusionLine}` +
         (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '');
       ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
       yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, 30, isF)}</td>`;
     }
 
     const yfaMark = (corrShowAll && d.inYfa) ? ' <span style="font-size:0.7rem;color:#888">✦</span>' : '';
-    const outlierNote = (!corrShowAll && outlier)
-      ? `<div style="font-size:0.63rem;color:#999;margin-top:2px">${outlier.out} outlier · ${outlier.pairLabel}: ${outlier.pairSpread}</div>`
-      : '';
     return `<tr style="${rowStyle}">
       <td class="district-name">${isF ? '▶ ' : ''}${d.name}${yfaMark}</td>
       <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, corrShowAll ? 71 : 30, isF)}${ccfs72Note}</td>
@@ -806,8 +829,7 @@ function renderCorrTable() {
       <td style="text-align:center">
         <div title="${spreadTip}" style="cursor:help;display:inline-block">
           <span style="color:${spreadColor};font-weight:700;font-size:1rem">${spreadVal}</span>
-          <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${spreadLabel}</div>
-          ${outlierNote}
+          <div style="font-size:0.68rem;color:${spreadColor};margin-top:1px">${conclusionLine}</div>
         </div>
       </td>
     </tr>`;
@@ -884,6 +906,18 @@ function buildCorrChart() {
 }
 
 function renderCorrTab() {
+  // Auto-expand to all-71 view if the selected district isn't in the YFA survey
+  const inYfa = corrDataYfa.some(d => d.name === focusedDistrict);
+  if (!inYfa && !corrShowAll) {
+    corrShowAll = true;
+    const btn = document.getElementById('corrToggleBtn');
+    if (btn) { btn.textContent = 'YFA Survey Only ✓'; btn.classList.add('active'); }
+    const footerAll = document.getElementById('corrFooterAll71');
+    if (footerAll) footerAll.style.display = '';
+    const subEl = document.getElementById('headerSub');
+    if (subEl && document.getElementById('tab-corr').classList.contains('active'))
+      subEl.innerHTML = corrSubtitle();
+  }
   buildCorrCards();
   renderCorrTable();
   buildCorrChart();
