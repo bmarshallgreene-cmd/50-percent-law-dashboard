@@ -236,10 +236,10 @@
 <div class="container">
 
   <div class="cards">
-    <div class="card"><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
-    <div class="card"><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
-    <div class="card"><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
-    <div class="card highlight"><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
+    <div class="card" title="H&amp;W per FT faculty — lowest to highest across all 72 districts. 'H&amp;W' = employer-paid Health &amp; Welfare benefits derived from CCFS-311."><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
+    <div class="card" title="Average estimated employer-paid H&amp;W per FT faculty across all 72 California Community College districts."><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
+    <div class="card" title="Middle value of estimated H&amp;W per FT faculty — half of the 72 districts spend more per faculty member, half spend less. Less affected by extreme outliers than the mean."><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
+    <div class="card highlight" title="This district's estimated employer-paid H&amp;W per FT faculty — the primary comparison figure in this analysis."><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
   </div>
   <div style="text-align:right;margin:-8px 0 12px">
     <button class="comp-toggle-btn" onclick="downloadCsv()" title="Download full dataset as CSV">⬇ Download CSV</button>
@@ -1036,12 +1036,19 @@ function buildCcfsTable(data) {
     const compDiffLabel = indexView ? fmtIdxDiff(totalComp, medComp) : ((compDiff >= 0 ? '+' : '') + fmt(compDiff));
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     const colAdj = d.col != null ? totalComp * 100 / d.col : null;
+    const hwDeduction = Math.round(d.instrBenefits - d.hw);
+    const hwCellTip = currentScenario === 'full'
+      ? `Col 10 instruction benefits: ${fmt(d.instrBenefits)}\n\u2212 est. STRS & Medicare: ${fmt(hwDeduction)}\n= Net H&W (this figure): ${fmt(d.hw)}${indexView ? '\n\nShown as index: ' + fmtIdx(d.scenarioHw, medHw) + ' (statewide median = 100)' : ''}`
+      : `Raw Col 10 instruction benefits (no deductions): ${fmt(d.instrBenefits)}${indexView ? '\n\nShown as index: ' + fmtIdx(d.scenarioHw, medHw) + ' (statewide median = 100)' : ''}`;
+    const hwPerTip = currentScenario === 'full'
+      ? `${fmt(d.hw)} (net H&W) \u00F7 ${d.adjFtef} (adj. FON FT) = ${fmt(d.hw / d.adjFtef)}${indexView ? '\n\nShown as index: ' + fmtIdx(d.scenarioValue, stats.median) + ' (statewide median = 100)' : ''}`
+      : `${fmt(d.instrBenefits)} (raw benefits) \u00F7 ${d.ftef} (FON FT) = ${fmt(d.instrBenefits / d.ftef)}${indexView ? '\n\nShown as index: ' + fmtIdx(d.scenarioValue, stats.median) + ' (statewide median = 100)' : ''}`;
     tr.innerHTML = `
       <td class="rank">#${i + 1}</td>
       <td class="district-name">${d.name}${d.selfInsured ? ' <span title="Self-insured — may be understated. See footnote.">*</span>' : ''}${isFocused(d) ? '<span class="yosemite-badge">SELECTED DISTRICT</span>' : ''}</td>
-      <td class="num">${indexView ? fmtIdx(d.scenarioHw, medHw) : fmt(d.scenarioHw)}</td>
+      <td class="num" title="${hwCellTip}" style="cursor:help">${indexView ? fmtIdx(d.scenarioHw, medHw) : fmt(d.scenarioHw)}</td>
       <td class="num" title="${(() => { const adj = Math.round((d.ftef - d.adjFtef) * 10) / 10; if (d.scenarioFtef === d.ftef) return `Raw FON FT: ${d.ftef} — no adjustment in Basic mode`; if (adj === 0) return `FON FT: ${d.ftef} — no counselor/librarian data available`; return `${d.ftef} (FON FT) \u2212 ${adj} (counselors & librarians) = ${d.adjFtef}`; })()}" style="cursor:help">${d.scenarioFtef.toLocaleString()}</td>
-      <td class="hw-value">${indexView ? fmtIdx(d.scenarioValue, stats.median) : fmt(d.scenarioValue)}</td>
+      <td class="hw-value" title="${hwPerTip}" style="cursor:help">${indexView ? fmtIdx(d.scenarioValue, stats.median) : fmt(d.scenarioValue)}</td>
       <td><div class="bar-cell">
         <div style="font-size:0.8rem;color:${diffColor};font-weight:600;margin-bottom:3px">${diffLabel} vs. median</div>
         <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
