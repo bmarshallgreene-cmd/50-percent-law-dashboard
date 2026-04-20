@@ -761,8 +761,8 @@ function renderCorrTable() {
       ccfsRank  = d.ccfsRank71;
       acccaRank = d.acccaRank71;
       spreadVal = d.spread71;
-      spreadColor = spreadVal <= 5 ? '#27ae60' : spreadVal <= 15 ? '#f0a500' : '#e74c3c';
-      spreadLabel = spreadVal <= 5 ? 'Close' : spreadVal <= 15 ? 'Moderate' : 'Diverge';
+      spreadColor = spreadVal <= 7 ? '#27ae60' : spreadVal <= 19 ? '#f0a500' : '#e74c3c';
+      spreadLabel = spreadVal <= 7 ? 'Strong agreement' : spreadVal <= 19 ? 'Moderate agreement' : 'Methods diverge';
       spreadTip = `CCFS: #${ccfsRank}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}` +
         (d.inYfa ? `\n3-method spread (out of 30): ${d.spread} — CCFS #${d.ccfsValRank} · YFA #${d.yfaValRank} · ACCCA #${d.acccaValRank}` : '');
       ccfs72Note = ''; // redundant — /71 pool already covers nearly all districts
