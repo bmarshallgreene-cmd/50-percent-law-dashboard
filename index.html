@@ -197,6 +197,7 @@
   }
   .comp-toggle-btn:hover { background: #e4e9f0; }
   .comp-toggle-btn.active { background: #1a3a5c; color: white; border-color: #1a3a5c; }
+  #corrTable.yfa-hidden .yfa-col { display: none; }
 
   footer {
     text-align: center; padding: 24px;
@@ -471,10 +472,10 @@
 
   <div class="table-wrap">
     <div class="table-header" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <h2 id="corrTableHeading">Three-Method Rank Comparison — 30 Districts</h2>
-      <button class="comp-toggle-btn active" id="corrToggleBtn" onclick="toggleCorrPool()"
-        title="Toggle between all 71 districts with CCFS + ACCCA data and YFA-only (30 districts with all three sources)">
-        YFA Survey Only ✓
+      <h2 id="corrTableHeading">CCFS + ACCCA Rank Comparison — 71 Districts</h2>
+      <button class="comp-toggle-btn" id="corrToggleBtn" onclick="toggleYfaLayer()"
+        title="Add YFA avg medical data where available. Districts with YFA data will show a third source and get a 3-method confidence conclusion.">
+        Include YFA Data
       </button>
     </div>
     <div class="table-scroll">
@@ -483,7 +484,7 @@
         <tr>
           <th onclick="setCorrSort('name')">District <span>⇅</span></th>
           <th onclick="setCorrSort('ccfsRank')" style="text-align:right" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge updates to reflect active pool size.">CCFS H&amp;W/FT</th>
-          <th id="corrYfaHeader" onclick="setCorrSort('yfaRank')" style="text-align:right" title="Average (mean) annual employer-paid medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey or without avg data.">YFA Avg Medical</th>
+          <th id="corrYfaHeader" class="yfa-col" onclick="setCorrSort('yfaRank')" style="text-align:right" title="Average (mean) annual employer-paid medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey or without avg data.">YFA Avg Medical</th>
           <th onclick="setCorrSort('acccaRank')" style="text-align:right" title="Mean employer-paid H&W across all admin/management positions. Source: ACCCA 2025 Survey.">ACCCA Admin</th>
           <th id="corrAgreeHeader" onclick="setCorrSort('spread')" style="text-align:center" title="How much the available data sources agree on this district's position. Click to sort most-to-least confident.">Confidence</th>
         </tr>
@@ -499,7 +500,7 @@
 </div>
 <footer>
   Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: average (mean) annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
-  <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion using statewide (71-district) ranks for CCFS and ACCCA, with YFA scaled to the same statewide basis, so conclusions are consistent with the rank badges you see. All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart always shows all 71 districts (CCFS vs. ACCCA). Hover any Confidence cell for full rank detail.<br><br></span>
+  <br><br><span id="corrFooterAll71"><strong>Default view (CCFS + ACCCA, 71 districts):</strong> All rows show a 2-method CCFS+ACCCA confidence conclusion using ranks out of 71. Click <em>Include YFA Data</em> to add a YFA Avg Medical column — districts marked ✦ then display a 3-method confidence conclusion, with YFA ranks scaled to the same 71-district basis so conclusions match the rank badges. The scatter chart always shows all 71 districts (CCFS vs. ACCCA). Hover any Confidence cell for full rank detail.<br><br></span>
   <strong>Confidence column logic</strong> — Labels step down from strongest to weakest: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile. <em>"Moderate agreement: [quartile]"</em> = two of three methods agree on the same quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"Likely [tier]"</em> = methods lean toward a tier but one is a clear outlier, or the two-method spread is moderate; check hover for detail. Tier labels: <em>top/bottom quartile</em> = all agreeing methods fall in Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary. <em>"Leans top/bottom half"</em> = methods spread too widely to name a quartile or third, but most point the same direction. <em>"Unclear"</em> (2-method only) = CCFS and ACCCA point to opposite halves. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
   <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). Current ρ values are shown in the subtitle above the table. YFA–ACCCA is typically the strongest pair because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with survey sources, reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure. Switching from YFA max to YFA avg medical narrows the 3-method pool to districts that reported avg data.
 </footer>
@@ -564,10 +565,11 @@ function setFocusedDistrict(name) {
 // YFA survey uses slightly different names for two districts
 const YFA_TO_CCFS = { "Gavilan": "Gavilan Joint", "Mira Costa": "MiraCosta" };
 
-let corrData = [];        // alias — points to corrDataYfa (used by chart functions)
-let corrDataYfa = [];     // 30 districts with all three methods
+let corrData = [];        // alias → corrDataAll (scatter chart)
+let corrDataYfa = [];     // districts with YFA avg data (dynamic pool)
 let corrDataAll = [];     // 71 districts with CCFS + ACCCA y25 data
-let corrShowAll = true;   // false = YFA-only (30), true = all CCFS+ACCCA (71)
+let corrShowAll = true;   // always true — kept for internal logic
+let corrShowYfa = false;  // false = CCFS+ACCCA only; true = add YFA layer
 let corrSortCol = 'spread', corrSortDir = 1;  // default: confidence sort, strong first
 let corrChart = null;
 let corrRhos = { cv: 0, ya: 0, ca: 0 };
@@ -651,43 +653,36 @@ function buildCorrCards() {
     `<div class="sub">${rhoLabel(r)} correlation</div></div>`;
 
   let focCard = `<div class="card"><label>Selected District</label>`;
-  if (corrShowAll && focAll) {
+  if (focAll) {
     focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${focAll.name}</div>` +
       `<div class="sub">` +
         `CCFS #${focAll.ccfsRank71}/71 <span style="color:#aaa">(#${focAll.ccfs72Rank} of all 72)</span>` +
         ` · ACCCA #${focAll.acccaRank71}/71` +
-        (focAll.inYfa ? ` · YFA #${focAll.yfaValRank}/${corrDataYfa.length}` : '') +
-      `</div>`;
-  } else if (focYfa) {
-    focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${focYfa.name}</div>` +
-      `<div class="sub">` +
-        `CCFS #${focYfa.ccfsValRank}/${corrDataYfa.length} <span style="color:#aaa">(#${focYfa.ccfs72Rank} of all 72)</span>` +
-        ` · YFA #${focYfa.yfaValRank}/${corrDataYfa.length} · ACCCA #${focYfa.acccaValRank}/${corrDataYfa.length}` +
+        (corrShowYfa && focAll.inYfa ? ` · YFA #${focAll.yfaValRank}/${corrDataYfa.length}` : '') +
       `</div>`;
   } else {
     focCard += `<div class="value" style="font-size:0.95rem;color:#aaa">${focusedDistrict}</div>` +
-      `<div class="sub" style="color:#aaa">Not in ${corrShowAll ? 'CCFS+ACCCA dataset' : '3-method overlap'}</div>`;
+      `<div class="sub" style="color:#aaa">Not in CCFS+ACCCA dataset</div>`;
   }
   focCard += '</div>';
 
-  document.getElementById('corrCards').innerHTML =
-    rhoCard('CCFS ↔ YFA Survey', corrRhos.cv) +
-    rhoCard('YFA ↔ ACCCA', corrRhos.ya) +
-    rhoCard('CCFS ↔ ACCCA', corrRhos.ca) +
-    focCard;
+  const rhoCards = corrShowYfa
+    ? rhoCard('CCFS ↔ YFA Survey', corrRhos.cv) +
+      rhoCard('YFA ↔ ACCCA', corrRhos.ya) +
+      rhoCard('CCFS ↔ ACCCA', corrRhos.ca)
+    : rhoCard('CCFS ↔ ACCCA (71 districts)', corrRhos.ca71);
+
+  document.getElementById('corrCards').innerHTML = rhoCards + focCard;
 
   const rhoEl = document.getElementById('corrScatterRhoLabel');
   if (rhoEl) rhoEl.textContent = 'Spearman ρ = ' + corrRhos.ca71.toFixed(2);
 }
 
-function toggleCorrPool() {
-  corrShowAll = !corrShowAll;
+function toggleYfaLayer() {
+  corrShowYfa = !corrShowYfa;
   const btn = document.getElementById('corrToggleBtn');
-  btn.textContent = corrShowAll ? 'YFA Survey Only ✓' : 'Show All 71 Districts';
-  btn.classList.toggle('active', corrShowAll);
-  const footerAll = document.getElementById('corrFooterAll71');
-  if (footerAll) footerAll.style.display = corrShowAll ? '' : 'none';
-  // Refresh subtitle strip
+  btn.textContent = corrShowYfa ? 'YFA Included ✓' : 'Include YFA Data';
+  btn.classList.toggle('active', corrShowYfa);
   const subEl = document.getElementById('headerSub');
   if (subEl) subEl.innerHTML = corrSubtitle();
   buildCorrCards();
@@ -716,21 +711,19 @@ function renderCorrTable() {
   // 4: Leans [half]
   // 5: Unclear
   const confScore = d => {
-    if (corrShowAll && !d.inYfa) {
-      // 2-method only — shifted up by 1 so "Both agree" (2) sorts below "Strong agreement" (1)
+    if (!corrShowYfa || !d.inYfa) {
+      // 2-method: CCFS + ACCCA only
       const tierOf71 = r => Math.min(4, Math.ceil(r / (71 / 4)));
       if (tierOf71(d.ccfsRank71) === tierOf71(d.acccaRank71) || d.spread71 <= 7) return 2;
       if (d.spread71 <= 19) return 3;
       return (d.ccfsRank71 <= 35) === (d.acccaRank71 <= 35) ? 4 : 5;
     } else {
-      // 3-method (YFA-overlap, or ✦ in all-71 mode)
+      // 3-method: YFA layer active and district has YFA data
       const yNc = corrDataYfa.length;
-      // Use the same rank scale as the rendered conclusion:
-      // all-71 mode → statewide 71-scale; YFA-only mode → pool-internal scale
-      const scale = corrShowAll ? 71 : yNc;
-      const r_ccfs  = corrShowAll ? d.ccfsRank71  : d.ccfsValRank;
-      const r_yfa   = corrShowAll ? Math.round(d.yfaValRank / yNc * 71) : d.yfaValRank;
-      const r_accca = corrShowAll ? d.acccaRank71 : d.acccaValRank;
+      const scale = 71;
+      const r_ccfs  = d.ccfsRank71;
+      const r_yfa   = Math.round(d.yfaValRank / yNc * 71);
+      const r_accca = d.acccaRank71;
       const tierOf = r => Math.min(4, Math.ceil(r / (scale / 4)));
       const tiers = [r_ccfs, r_yfa, r_accca].map(tierOf);
       const maxCount = Math.max(...[1,2,3,4].map(t => tiers.filter(x => x === t).length));
@@ -779,14 +772,12 @@ function renderCorrTable() {
 
   // Update dynamic heading, column headers, footer note
   const headingEl = document.getElementById('corrTableHeading');
-  if (headingEl) headingEl.textContent = corrShowAll
-    ? `CCFS + ACCCA Rank Comparison — ${n} Districts`
-    : `Three-Method Rank Comparison — ${n} Districts`;
+  if (headingEl) headingEl.textContent = corrShowYfa
+    ? `CCFS + ACCCA + YFA Rank Comparison — ${n} Districts`
+    : `CCFS + ACCCA Rank Comparison — ${n} Districts`;
 
   const yfaHdr = document.getElementById('corrYfaHeader');
-  if (yfaHdr) yfaHdr.innerHTML = corrShowAll
-    ? `YFA Avg Medical <span style="font-size:0.7rem;font-weight:400;color:#999">(${yN} districts)</span>`
-    : 'YFA Avg Medical';
+  if (yfaHdr) yfaHdr.innerHTML = `YFA Avg Medical <span style="font-size:0.7rem;font-weight:400;color:#999">(${yN} districts)</span>`;
 
   const agreeHdr = document.getElementById('corrAgreeHeader');
   if (agreeHdr) agreeHdr.innerHTML = 'Confidence';
@@ -799,9 +790,9 @@ function renderCorrTable() {
   });
 
   const footerNote = document.getElementById('corrFooterNote');
-  if (footerNote) footerNote.innerHTML = corrShowAll
-    ? `71 districts (CCFS + ACCCA 2025) &nbsp;·&nbsp; ✦ = in YFA survey: <strong>3-method</strong> confidence shown &nbsp;·&nbsp; Other rows: 2-method (CCFS+ACCCA only) &nbsp;·&nbsp; Rank badges /71 (YFA ranks /${yN}) &nbsp;·&nbsp; Click Confidence to sort &nbsp;·&nbsp; Hover any row for rank detail`
-    : `${yN} districts with all three sources &nbsp;·&nbsp; Rank badges = rank within this peer group of ${yN} &nbsp;·&nbsp; Small grey text under CCFS = rank among all 72 CA districts &nbsp;·&nbsp; Click Confidence to sort &nbsp;·&nbsp; Hover for rank detail`;
+  if (footerNote) footerNote.innerHTML = corrShowYfa
+    ? `71 districts (CCFS + ACCCA + YFA) &nbsp;·&nbsp; ✦ = districts with YFA data: <strong>3-method</strong> confidence shown &nbsp;·&nbsp; Other rows: 2-method (CCFS+ACCCA only) &nbsp;·&nbsp; Rank badges /71 (YFA ranks /${yN}) &nbsp;·&nbsp; Click Confidence to sort &nbsp;·&nbsp; Hover any row for rank detail`
+    : `71 districts (CCFS + ACCCA 2025) &nbsp;·&nbsp; All rows use 2-method confidence (CCFS+ACCCA) &nbsp;·&nbsp; Rank badges /71 &nbsp;·&nbsp; Click Confidence to sort &nbsp;·&nbsp; Hover any row for rank detail`;
 
   document.getElementById('corrBody').innerHTML = data.map(d => {
     const isF = d.name === focusedDistrict;
@@ -829,7 +820,7 @@ function renderCorrTable() {
       acccaRank = d.acccaRank71;
       ccfs72Note = '';
 
-      if (d.inYfa) {
+      if (d.inYfa && corrShowYfa) {
         // ✦ district: has all three methods — tier conclusion uses statewide (71-scale) ranks
         // so conclusions match what the CCFS and ACCCA badges display.
         // YFA rank is scaled: pool rank / yN * 71 → statewide equivalent.
@@ -873,7 +864,7 @@ function renderCorrTable() {
         }
         spreadTip = `3-method conclusion (statewide ranks)\nCCFS: #${ccfsRank}/71 · YFA: #${d.yfaValRank}/${yN} ≈ #${yfaRank71}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}\n${conclusionLine}` +
           (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '');
-        yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, yN, isF)}</td>`;
+        yfaCell = `<td class="num yfa-col">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, yN, isF)}</td>`;
       } else {
         // Non-YFA district: 2-method conclusion (CCFS + ACCCA ranks out of 71)
         spreadVal = d.spread71;
@@ -898,7 +889,7 @@ function renderCorrTable() {
           }
         }
         spreadTip = `CCFS: #${ccfsRank}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}\n${conclusionLine}`;
-        yfaCell = `<td class="num" style="color:#ccc;text-align:right;font-style:italic">—</td>`;
+        yfaCell = `<td class="num yfa-col" style="color:#ccc;text-align:right;font-style:italic">—</td>`;
       }
     } else {
       ccfsRank  = d.ccfsValRank;
@@ -944,15 +935,15 @@ function renderCorrTable() {
       spreadTip = `CCFS: #${d.ccfsValRank}/${yN} · YFA: #${d.yfaValRank}/${yN} · ACCCA: #${d.acccaValRank}/${yN}\nSpread = ${d.spread} (max rank − min rank)\n${conclusionLine}` +
         (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '');
       ccfs72Note = `<div style="font-size:0.68rem;color:#999;margin-top:2px">#${d.ccfs72Rank} of all 72</div>`;
-      yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, yN, isF)}</td>`;
+      yfaCell = `<td class="num yfa-col">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, yN, isF)}</td>`;
     }
 
-    const yfaMark = (corrShowAll && d.inYfa) ? ' <span style="font-size:0.7rem;color:#888">✦</span>' : '';
+    const yfaMark = corrShowYfa && d.inYfa ? ' <span style="font-size:0.7rem;color:#888">✦</span>' : '';
     return `<tr style="${rowStyle}">
       <td class="district-name">${isF ? '▶ ' : ''}${d.name}${yfaMark}</td>
-      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, corrShowAll ? 71 : 30, isF)}${ccfs72Note}</td>
+      <td class="num">${fmt(Math.round(d.ccfsVal))}${badge(ccfsRank, 71, isF)}${ccfs72Note}</td>
       ${yfaCell}
-      <td class="num">${fmt(Math.round(d.acccaVal))}${badge(acccaRank, corrShowAll ? 71 : 30, isF)}</td>
+      <td class="num">${fmt(Math.round(d.acccaVal))}${badge(acccaRank, 71, isF)}</td>
       <td style="text-align:center;padding:4px 8px">
         <div title="${spreadTip}" style="cursor:help">
           <div style="font-size:0.72rem;color:${spreadColor};font-weight:600;line-height:1.4">${conclusionLine}</div>
@@ -960,6 +951,7 @@ function renderCorrTable() {
       </td>
     </tr>`;
   }).join('');
+  document.getElementById('corrTable').classList.toggle('yfa-hidden', !corrShowYfa);
 }
 
 function buildCorrChart() {
@@ -1032,18 +1024,6 @@ function buildCorrChart() {
 }
 
 function renderCorrTab() {
-  // Auto-expand to all-71 view if the selected district isn't in the YFA survey
-  const inYfa = corrDataYfa.some(d => d.name === focusedDistrict);
-  if (!inYfa && !corrShowAll) {
-    corrShowAll = true;
-    const btn = document.getElementById('corrToggleBtn');
-    if (btn) { btn.textContent = 'YFA Survey Only ✓'; btn.classList.add('active'); }
-    const footerAll = document.getElementById('corrFooterAll71');
-    if (footerAll) footerAll.style.display = '';
-    const subEl = document.getElementById('headerSub');
-    if (subEl && document.getElementById('tab-corr').classList.contains('active'))
-      subEl.innerHTML = corrSubtitle();
-  }
   buildCorrCards();
   renderCorrTable();
   buildCorrChart();
@@ -1055,10 +1035,11 @@ const TAB_SUBTITLES = {
   yfa:   'Fiscal Year 2025-26 &nbsp;|&nbsp; Source: YFA Benefits Survey, Spring 2026',
 };
 function corrSubtitle() {
-  const pool = corrShowAll
-    ? corrDataAll.length + ' districts (CCFS + ACCCA)'
-    : corrDataYfa.length + ' districts (all three sources)';
-  return pool + ` &nbsp;|&nbsp; Spearman ρ: CCFS↔YFA ${corrRhos.cv.toFixed(2)} &nbsp;·&nbsp; YFA↔ACCCA ${corrRhos.ya.toFixed(2)} &nbsp;·&nbsp; CCFS↔ACCCA ${corrRhos.ca.toFixed(2)}`;
+  const base = corrDataAll.length + ' districts (CCFS + ACCCA)';
+  const rho = corrShowYfa
+    ? `Spearman ρ: CCFS↔YFA ${corrRhos.cv.toFixed(2)} &nbsp;·&nbsp; YFA↔ACCCA ${corrRhos.ya.toFixed(2)} &nbsp;·&nbsp; CCFS↔ACCCA ${corrRhos.ca.toFixed(2)}`
+    : `Spearman ρ (CCFS↔ACCCA): ${corrRhos.ca71.toFixed(2)}`;
+  return base + ` &nbsp;|&nbsp; ` + rho;
 }
 const ACCCA_YEAR_MAP = {y14:'2014', y16:'2016', y19:'2019', y20:'2020', y21:'2021', y22:'2022', y25:'2025'};
 function acccaSubtitle() {
