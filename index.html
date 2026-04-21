@@ -669,7 +669,7 @@ function buildCorrCards() {
   const rhoCards = corrShowYfa
     ? rhoCard('CCFS ↔ YFA Survey', corrRhos.cv) +
       rhoCard('YFA ↔ ACCCA', corrRhos.ya) +
-      rhoCard('CCFS ↔ ACCCA', corrRhos.ca)
+      rhoCard('CCFS ↔ ACCCA (71 districts)', corrRhos.ca71)
     : rhoCard('CCFS ↔ ACCCA (71 districts)', corrRhos.ca71);
 
   document.getElementById('corrCards').innerHTML = rhoCards + focCard;
@@ -1038,7 +1038,7 @@ const TAB_SUBTITLES = {
 function corrSubtitle() {
   const base = corrDataAll.length + ' districts (CCFS + ACCCA)';
   const rho = corrShowYfa
-    ? `Spearman ρ: CCFS↔YFA ${corrRhos.cv.toFixed(2)} &nbsp;·&nbsp; YFA↔ACCCA ${corrRhos.ya.toFixed(2)} &nbsp;·&nbsp; CCFS↔ACCCA ${corrRhos.ca.toFixed(2)}`
+    ? `Spearman ρ: CCFS↔YFA ${corrRhos.cv.toFixed(2)} &nbsp;·&nbsp; YFA↔ACCCA ${corrRhos.ya.toFixed(2)} &nbsp;·&nbsp; CCFS↔ACCCA ${corrRhos.ca71.toFixed(2)} (71 districts)`
     : `Spearman ρ (CCFS↔ACCCA): ${corrRhos.ca71.toFixed(2)}`;
   return base + ` &nbsp;|&nbsp; ` + rho;
 }
