@@ -709,14 +709,19 @@ function renderCorrTable() {
   const TIER_TC = ['#1e8449','#7aaa30','#d48800','#c0392b'];
   const tierColor = rank => TIER_TC[rank <= q ? 0 : rank <= 2*q ? 1 : rank <= 3*q ? 2 : 3];
 
-  // Confidence score: 1 = highest, 4 = lowest — drives Confidence column sort
+  // Confidence score: 1 = highest, 5 = lowest — drives Confidence column sort
+  // 1: Strong agreement (3-method all agree)
+  // 2: Moderate agreement (2 of 3) OR Both agree (2-method)
+  // 3: Likely [tier]
+  // 4: Leans [half]
+  // 5: Unclear
   const confScore = d => {
     if (corrShowAll && !d.inYfa) {
-      // 2-method only (no YFA data)
+      // 2-method only — shifted up by 1 so "Both agree" (2) sorts below "Strong agreement" (1)
       const tierOf71 = r => Math.min(4, Math.ceil(r / (71 / 4)));
-      if (tierOf71(d.ccfsRank71) === tierOf71(d.acccaRank71) || d.spread71 <= 7) return 1;
-      if (d.spread71 <= 19) return 2;
-      return (d.ccfsRank71 <= 35) === (d.acccaRank71 <= 35) ? 3 : 4;
+      if (tierOf71(d.ccfsRank71) === tierOf71(d.acccaRank71) || d.spread71 <= 7) return 2;
+      if (d.spread71 <= 19) return 3;
+      return (d.ccfsRank71 <= 35) === (d.acccaRank71 <= 35) ? 4 : 5;
     } else {
       // 3-method (YFA-overlap, or ✦ in all-71 mode)
       const yNc = corrDataYfa.length;
@@ -736,7 +741,7 @@ function renderCorrTable() {
         Math.abs(r_ccfs  - r_accca),
         Math.abs(r_ccfs  - r_yfa)
       );
-      return bestPair <= Math.round(scale * 12 / yNc) ? 3 : 4;
+      return bestPair <= Math.round(scale * 12 / yNc) ? 3 : 4;  // Likely=3, Leans=4
     }
   };
 
