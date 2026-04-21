@@ -483,9 +483,9 @@
       <thead>
         <tr>
           <th onclick="setCorrSort('name')">District <span>⇅</span></th>
-          <th onclick="setCorrSort('ccfsRank')" style="text-align:right" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge updates to reflect active pool size.">CCFS H&amp;W/FT</th>
-          <th id="corrYfaHeader" class="yfa-col" onclick="setCorrSort('yfaRank')" style="text-align:right" title="Average (mean) annual employer-paid medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey or without avg data.">YFA Avg Medical</th>
-          <th onclick="setCorrSort('acccaRank')" style="text-align:right" title="Mean employer-paid H&W across all admin/management positions. Source: ACCCA 2025 Survey.">ACCCA Admin</th>
+          <th onclick="setCorrSort('ccfsRank')" style="text-align:right;white-space:nowrap" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge updates to reflect active pool size.">CCFS H&amp;W/FT</th>
+          <th id="corrYfaHeader" class="yfa-col" onclick="setCorrSort('yfaRank')" style="text-align:right;white-space:nowrap" title="Average (mean) annual employer-paid medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey or without avg data.">YFA Avg Medical</th>
+          <th onclick="setCorrSort('acccaRank')" style="text-align:right;white-space:nowrap" title="Mean employer-paid H&W across all admin/management positions. Source: ACCCA 2025 Survey.">ACCCA Admin</th>
           <th id="corrAgreeHeader" onclick="setCorrSort('spread')" style="text-align:center" title="How much the available data sources agree on this district's position. Click to sort most-to-least confident.">Confidence</th>
         </tr>
       </thead>
@@ -778,7 +778,7 @@ function renderCorrTable() {
     : `CCFS + ACCCA Rank Comparison — ${n} Districts`;
 
   const yfaHdr = document.getElementById('corrYfaHeader');
-  if (yfaHdr) yfaHdr.innerHTML = `YFA Avg Medical <span style="font-size:0.7rem;font-weight:400;color:#999">(${yN} districts)</span>`;
+  if (yfaHdr) yfaHdr.textContent = 'YFA Avg Medical';
 
   const agreeHdr = document.getElementById('corrAgreeHeader');
   if (agreeHdr) agreeHdr.innerHTML = 'Confidence';
