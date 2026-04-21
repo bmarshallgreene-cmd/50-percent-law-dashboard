@@ -500,7 +500,7 @@
 <footer>
   Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: average (mean) annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
   <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion using statewide (71-district) ranks for CCFS and ACCCA, with YFA scaled to the same statewide basis, so conclusions are consistent with the rank badges you see. All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart always shows all 71 districts (CCFS vs. ACCCA). Hover any Confidence cell for full rank detail.<br><br></span>
-  <strong>Confidence column logic</strong> — The label steps down from the strongest defensible claim: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile (highest confidence). <em>"2 of 3 agree: [quartile]"</em> = two of three methods agree on quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"[Method] diverges · [tier]"</em> = one method is a clear outlier; the other two agree on a tier. Tier labels: <em>top/bottom quartile</em> = solid Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary (roughly top 33%, middle 33%, or bottom 33%). <em>"[Method] diverges · leans [half]"</em> = methods scatter across quartiles but majority point toward the same half. <em>"Ranking unclear"</em> (2-method only) = the two methods disagree on which half. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
+  <strong>Confidence column logic</strong> — Labels step down from strongest to weakest: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile. <em>"Moderate agreement: [quartile]"</em> = two of three methods agree on the same quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"Likely [tier]"</em> = methods lean toward a tier but one is a clear outlier, or the two-method spread is moderate; check hover for detail. Tier labels: <em>top/bottom quartile</em> = all agreeing methods fall in Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary. <em>"Leans top/bottom half"</em> = methods spread too widely to name a quartile or third, but most point the same direction. <em>"Unclear"</em> (2-method only) = CCFS and ACCCA point to opposite halves. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
   <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). Current ρ values are shown in the subtitle above the table. YFA–ACCCA is typically the strongest pair because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with survey sources, reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure. Switching from YFA max to YFA avg medical narrows the 3-method pool to districts that reported avg data.
 </footer>
 </div>
@@ -568,7 +568,7 @@ let corrData = [];        // alias — points to corrDataYfa (used by chart func
 let corrDataYfa = [];     // 30 districts with all three methods
 let corrDataAll = [];     // 71 districts with CCFS + ACCCA y25 data
 let corrShowAll = true;   // false = YFA-only (30), true = all CCFS+ACCCA (71)
-let corrSortCol = 'ccfsRank', corrSortDir = 1;
+let corrSortCol = 'spread', corrSortDir = 1;  // default: confidence sort, strong first
 let corrChart = null;
 let corrRhos = { cv: 0, ya: 0, ca: 0 };
 
@@ -844,19 +844,16 @@ function renderCorrTable() {
             conclusionLine = `Strong agreement: ${tierNames4[majIdx]}`;
             spreadColor = '#27ae60';
           } else if (maxCount === 2) {
-            conclusionLine = `2 of 3 agree: ${tierNames4[majIdx]}`;
+            conclusionLine = `Moderate agreement: ${tierNames4[majIdx]}`;
             spreadColor = '#7aaa30';
           } else if (outlier && outlier.pairSpread <= pairSpreadThresh) {
             const agreeRanks = [ccfsRank, yfaRank71, acccaRank]
               .filter((_, i) => ['CCFS','YFA','ACCCA'][i] !== outlier.out);
-            conclusionLine = `${outlier.out} diverges · ${tierDesc(agreeRanks, 71)}`;
+            conclusionLine = `Likely ${tierDesc(agreeRanks, 71)}`;
             spreadColor = '#f0a500';
           } else {
             const topN = [ccfsRank, yfaRank71, acccaRank].filter(r => r <= 35.5).length;
-            const halfLbl = topN >= 2 ? 'top half' : 'bottom half';
-            conclusionLine = outlier
-              ? `${outlier.out} diverges · leans ${halfLbl}`
-              : `Methods lean: ${halfLbl}`;
+            conclusionLine = `Leans ${topN >= 2 ? 'top' : 'bottom'} half`;
             spreadColor = '#e74c3c';
           }
         }
@@ -873,16 +870,16 @@ function renderCorrTable() {
           conclusionLine = `Both agree: ${t71}`;
           spreadColor = '#27ae60';
         } else if (spreadVal <= 19) {
-          conclusionLine = `Moderate agreement, ${t71}`;
+          conclusionLine = `Likely ${t71}`;
           spreadColor = '#f0a500';
         } else {
           const bothTop = ccfsRank <= 35 && acccaRank <= 35;
           const bothBot = ccfsRank >  35 && acccaRank >  35;
           if (bothTop || bothBot) {
-            conclusionLine = `Both lean: ${bothTop ? 'top' : 'bottom'} half`;
+            conclusionLine = `Leans ${bothTop ? 'top' : 'bottom'} half`;
             spreadColor = '#e74c3c';
           } else {
-            conclusionLine = 'Ranking unclear';
+            conclusionLine = 'Unclear';
             spreadColor = '#e74c3c';
           }
         }
@@ -913,26 +910,19 @@ function renderCorrTable() {
         const majIdx = tierCounts.indexOf(maxCount); // 0-indexed (0=Q1 … 3=Q4)
         const tierNames4 = ['top quartile', '2nd quartile', '3rd quartile', 'bottom quartile'];
         if (maxCount === 3) {
-          // All 3 methods place district in same quartile — highest confidence
           conclusionLine = `Strong agreement: ${tierNames4[majIdx]}`;
           spreadColor = '#27ae60';
         } else if (maxCount === 2) {
-          // 2 of 3 methods agree on quartile — moderate-high confidence
-          conclusionLine = `2 of 3 agree: ${tierNames4[majIdx]}`;
+          conclusionLine = `Moderate agreement: ${tierNames4[majIdx]}`;
           spreadColor = '#7aaa30';
         } else if (outlier && outlier.pairSpread <= 12) {
-          // One method is clear outlier; remaining two agree on a tier (relaxed threshold vs. old 8)
           const agreeRanks = [d.ccfsValRank, d.yfaValRank, d.acccaValRank]
             .filter((_, i) => ['CCFS','YFA','ACCCA'][i] !== outlier.out);
-          conclusionLine = `${outlier.out} diverges · ${tierDesc(agreeRanks, yN)}`;
+          conclusionLine = `Likely ${tierDesc(agreeRanks, yN)}`;
           spreadColor = '#f0a500';
         } else {
-          // Half-consensus fallback — methods scatter across quartiles; which half do most agree on?
           const topN = [d.ccfsValRank, d.yfaValRank, d.acccaValRank].filter(r => r <= yN / 2).length;
-          const halfLbl = topN >= 2 ? 'top half' : 'bottom half';
-          conclusionLine = outlier
-            ? `${outlier.out} diverges · leans ${halfLbl}`
-            : `Methods lean: ${halfLbl}`;
+          conclusionLine = `Leans ${topN >= 2 ? 'top' : 'bottom'} half`;
           spreadColor = '#e74c3c';
         }
       }
