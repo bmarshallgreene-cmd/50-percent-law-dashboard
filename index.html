@@ -499,7 +499,7 @@
 </div>
 <footer>
   Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: average (mean) annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
-  <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion (same logic as the YFA-only view, ranks within that YFA overlap group). All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart above always shows the YFA overlap districts. Hover any Confidence cell for full rank detail.<br><br></span>
+  <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion using statewide (71-district) ranks for CCFS and ACCCA, with YFA scaled to the same statewide basis, so conclusions are consistent with the rank badges you see. All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart always shows the YFA overlap districts. Hover any Confidence cell for full rank detail.<br><br></span>
   <strong>Confidence column logic</strong> — The label steps down from the strongest defensible claim: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile (highest confidence). <em>"2 of 3 agree: [quartile]"</em> = two of three methods agree on quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"[Method] diverges · [tier]"</em> = one method is a clear outlier; the other two agree on a tier. Tier labels: <em>top/bottom quartile</em> = solid Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary (roughly top 33%, middle 33%, or bottom 33%). <em>"[Method] diverges · leans [half]"</em> = methods scatter across quartiles but majority point toward the same half. <em>"Ranking unclear"</em> (2-method only) = the two methods disagree on which half. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
   <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). Current ρ values are shown in the subtitle above the table. YFA–ACCCA is typically the strongest pair because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with survey sources, reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure. Switching from YFA max to YFA avg medical narrows the 3-method pool to districts that reported avg data.
 </footer>
@@ -715,17 +715,23 @@ function renderCorrTable() {
     } else {
       // 3-method (YFA-overlap, or ✦ in all-71 mode)
       const yNc = corrDataYfa.length;
-      const tierOf = r => Math.min(4, Math.ceil(r / (yNc / 4)));
-      const tiers = [d.ccfsValRank, d.yfaValRank, d.acccaValRank].map(tierOf);
+      // Use the same rank scale as the rendered conclusion:
+      // all-71 mode → statewide 71-scale; YFA-only mode → pool-internal scale
+      const scale = corrShowAll ? 71 : yNc;
+      const r_ccfs  = corrShowAll ? d.ccfsRank71  : d.ccfsValRank;
+      const r_yfa   = corrShowAll ? Math.round(d.yfaValRank / yNc * 71) : d.yfaValRank;
+      const r_accca = corrShowAll ? d.acccaRank71 : d.acccaValRank;
+      const tierOf = r => Math.min(4, Math.ceil(r / (scale / 4)));
+      const tiers = [r_ccfs, r_yfa, r_accca].map(tierOf);
       const maxCount = Math.max(...[1,2,3,4].map(t => tiers.filter(x => x === t).length));
       if (maxCount === 3) return 1;
       if (maxCount === 2) return 2;
       const bestPair = Math.min(
-        Math.abs(d.yfaValRank - d.acccaValRank),
-        Math.abs(d.ccfsValRank - d.acccaValRank),
-        Math.abs(d.ccfsValRank - d.yfaValRank)
+        Math.abs(r_yfa   - r_accca),
+        Math.abs(r_ccfs  - r_accca),
+        Math.abs(r_ccfs  - r_yfa)
       );
-      return bestPair <= 12 ? 3 : 4;
+      return bestPair <= Math.round(scale * 12 / yNc) ? 3 : 4;
     }
   };
 
@@ -805,20 +811,26 @@ function renderCorrTable() {
       ccfs72Note = '';
 
       if (d.inYfa) {
-        // ✦ district: has all three methods — use full 3-method tier-count conclusion
-        spreadVal = d.spread;
+        // ✦ district: has all three methods — tier conclusion uses statewide (71-scale) ranks
+        // so conclusions match what the CCFS and ACCCA badges display.
+        // YFA rank is scaled: pool rank / yN * 71 → statewide equivalent.
+        const yfaRank71 = Math.round(d.yfaValRank / yN * 71);
+        spreadVal = Math.max(ccfsRank, yfaRank71, acccaRank) - Math.min(ccfsRank, yfaRank71, acccaRank);
+        // Outlier thresholds scaled from pool-size to 71
+        const noOutlierThresh  = Math.round(71 * 8  / yN);
+        const pairSpreadThresh = Math.round(71 * 12 / yN);
         outlier = (() => {
-          if (spreadVal <= 8) return null;
+          if (spreadVal <= noOutlierThresh) return null;
           const pairs = [
-            { out: 'CCFS',  pairSpread: Math.abs(d.yfaValRank - d.acccaValRank), pairLabel: 'YFA↔ACCCA' },
-            { out: 'YFA',   pairSpread: Math.abs(d.ccfsValRank - d.acccaValRank), pairLabel: 'CCFS↔ACCCA' },
-            { out: 'ACCCA', pairSpread: Math.abs(d.ccfsValRank - d.yfaValRank),   pairLabel: 'CCFS↔YFA' },
+            { out: 'CCFS',  pairSpread: Math.abs(yfaRank71 - acccaRank), pairLabel: 'YFA↔ACCCA' },
+            { out: 'YFA',   pairSpread: Math.abs(ccfsRank  - acccaRank), pairLabel: 'CCFS↔ACCCA' },
+            { out: 'ACCCA', pairSpread: Math.abs(ccfsRank  - yfaRank71), pairLabel: 'CCFS↔YFA' },
           ].sort((a, b) => a.pairSpread - b.pairSpread);
           return pairs[0];
         })();
         {
-          const tierOfY = r => Math.min(4, Math.ceil(r / (yN / 4)));
-          const tiersY = [d.ccfsValRank, d.yfaValRank, d.acccaValRank].map(tierOfY);
+          const tierOf71c = r => Math.min(4, Math.ceil(r / (71 / 4)));
+          const tiersY = [ccfsRank, yfaRank71, acccaRank].map(tierOf71c);
           const tierCounts = [1,2,3,4].map(t => tiersY.filter(x => x === t).length);
           const maxCount = Math.max(...tierCounts);
           const majIdx = tierCounts.indexOf(maxCount);
@@ -829,13 +841,13 @@ function renderCorrTable() {
           } else if (maxCount === 2) {
             conclusionLine = `2 of 3 agree: ${tierNames4[majIdx]}`;
             spreadColor = '#7aaa30';
-          } else if (outlier && outlier.pairSpread <= 12) {
-            const agreeRanks = [d.ccfsValRank, d.yfaValRank, d.acccaValRank]
+          } else if (outlier && outlier.pairSpread <= pairSpreadThresh) {
+            const agreeRanks = [ccfsRank, yfaRank71, acccaRank]
               .filter((_, i) => ['CCFS','YFA','ACCCA'][i] !== outlier.out);
-            conclusionLine = `${outlier.out} diverges · ${tierDesc(agreeRanks, yN)}`;
+            conclusionLine = `${outlier.out} diverges · ${tierDesc(agreeRanks, 71)}`;
             spreadColor = '#f0a500';
           } else {
-            const topN = [d.ccfsValRank, d.yfaValRank, d.acccaValRank].filter(r => r <= yN / 2).length;
+            const topN = [ccfsRank, yfaRank71, acccaRank].filter(r => r <= 35.5).length;
             const halfLbl = topN >= 2 ? 'top half' : 'bottom half';
             conclusionLine = outlier
               ? `${outlier.out} diverges · leans ${halfLbl}`
@@ -843,9 +855,8 @@ function renderCorrTable() {
             spreadColor = '#e74c3c';
           }
         }
-        spreadTip = `3-method conclusion (within ${yN}-district overlap)\nCCFS: #${d.ccfsValRank}/${yN} · YFA: #${d.yfaValRank}/${yN} · ACCCA: #${d.acccaValRank}/${yN}\nSpread = ${d.spread}\n${conclusionLine}` +
-          (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '') +
-          `\n\nState ranks: CCFS #${ccfsRank}/71 · ACCCA #${acccaRank}/71`;
+        spreadTip = `3-method conclusion (statewide ranks)\nCCFS: #${ccfsRank}/71 · YFA: #${d.yfaValRank}/${yN} ≈ #${yfaRank71}/71 · ACCCA: #${acccaRank}/71\nSpread = ${spreadVal}\n${conclusionLine}` +
+          (outlier ? `\n${outlier.out} is the outlier — ${outlier.pairLabel} spread: ${outlier.pairSpread}` : '');
         yfaCell = `<td class="num">${fmt(Math.round(d.yfaVal))}${badge(d.yfaValRank, yN, isF)}</td>`;
       } else {
         // Non-YFA district: 2-method conclusion (CCFS + ACCCA ranks out of 71)
