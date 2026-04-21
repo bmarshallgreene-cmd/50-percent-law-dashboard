@@ -1801,7 +1801,7 @@ function buildAcccaCards() {
       label: focusedDistrict + ' vs. Mean (' + yr + ')',
       value: diffStr,
       sub: diff >= 0 ? 'above survey mean' : 'below survey mean',
-      extra: diff >= 0 ? 'accent-green' : 'accent-amber'
+      extra: 'highlight'
     };
   } else {
     fourthCard = { label: 'Districts Reporting (' + yr + ')', value: String(n),
@@ -1809,9 +1809,9 @@ function buildAcccaCards() {
   }
   const cards = [
     { label: 'ACCCA Survey Mean (' + yr + ')',   value: fmt(mean),   sub: n + ' reporting districts', extra: '' },
+    fourthCard,
     { label: 'ACCCA Survey Median (' + yr + ')', value: fmt(median), sub: '50th percentile', extra: '' },
     focCard,
-    fourthCard,
   ];
   document.getElementById('acccaCards').innerHTML = cards.map(c =>
     '<div class="card ' + c.extra + '"><label>' + c.label + '</label><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
