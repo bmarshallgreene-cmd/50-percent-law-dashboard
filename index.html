@@ -465,7 +465,7 @@
 
   <div class="chart-wrap">
     <h2>CCFS vs. YFA Survey — District Scatter</h2>
-    <p style="font-size:0.78rem;color:#888;margin-bottom:14px">Compares the two largest-sample sources: CCFS-311 H&amp;W per FT faculty (x-axis) vs. YFA average (mean) medical benefit (y-axis). Each point is one of the peer districts with avg medical data. Hover for district name, values, and full state-wide rank context. Orange = selected district. <strong id="corrScatterRhoLabel">Spearman ρ = —</strong> — moderate-strong agreement, but note the visible outliers (high CCFS / low YFA and vice versa).</p>
+    <p style="font-size:0.78rem;color:#888;margin-bottom:14px">Compares the two largest-sample sources: CCFS-311 H&amp;W per FT faculty (x-axis) vs. ACCCA admin H&amp;W (y-axis), all 71 districts. Hover for district name, values, and statewide rank. Orange = selected district. <strong id="corrScatterRhoLabel">Spearman ρ = —</strong> (CCFS↔ACCCA, n=71) — note visible outliers where formula and survey diverge.</p>
     <div style="height:300px"><canvas id="corrScatter"></canvas></div>
   </div>
 
@@ -499,7 +499,7 @@
 </div>
 <footer>
   Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: average (mean) annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
-  <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion using statewide (71-district) ranks for CCFS and ACCCA, with YFA scaled to the same statewide basis, so conclusions are consistent with the rank badges you see. All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart always shows the YFA overlap districts. Hover any Confidence cell for full rank detail.<br><br></span>
+  <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion using statewide (71-district) ranks for CCFS and ACCCA, with YFA scaled to the same statewide basis, so conclusions are consistent with the rank badges you see. All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart always shows all 71 districts (CCFS vs. ACCCA). Hover any Confidence cell for full rank detail.<br><br></span>
   <strong>Confidence column logic</strong> — The label steps down from the strongest defensible claim: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile (highest confidence). <em>"2 of 3 agree: [quartile]"</em> = two of three methods agree on quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"[Method] diverges · [tier]"</em> = one method is a clear outlier; the other two agree on a tier. Tier labels: <em>top/bottom quartile</em> = solid Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary (roughly top 33%, middle 33%, or bottom 33%). <em>"[Method] diverges · leans [half]"</em> = methods scatter across quartiles but majority point toward the same half. <em>"Ranking unclear"</em> (2-method only) = the two methods disagree on which half. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
   <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). Current ρ values are shown in the subtitle above the table. YFA–ACCCA is typically the strongest pair because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with survey sources, reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure. Switching from YFA max to YFA avg medical narrows the 3-method pool to districts that reported avg data.
 </footer>
@@ -623,13 +623,18 @@ function buildCorrData() {
 
   corrDataAll = pool;
   corrDataYfa = yfa30;
-  corrData    = corrDataYfa; // chart functions reference corrData
+  corrData    = corrDataAll; // chart uses full 71-district CCFS vs ACCCA scatter
 
-  // Pre-compute Spearman ρ (always based on 30-district overlap)
+  // Spearman ρ for 3-method overlap (yN-district pool, for correlation cards)
   const cr = corrDataYfa.map(d => d.ccfsValRank);
   const yr = corrDataYfa.map(d => d.yfaValRank);
   const ar = corrDataYfa.map(d => d.acccaValRank);
   corrRhos = { cv: spearmanRho(cr, yr), ya: spearmanRho(yr, ar), ca: spearmanRho(cr, ar) };
+
+  // Spearman ρ for CCFS↔ACCCA over full 71-district pool (for scatter chart label)
+  const cr71 = corrDataAll.map(d => d.ccfsRank71);
+  const ar71 = corrDataAll.map(d => d.acccaRank71);
+  corrRhos.ca71 = spearmanRho(cr71, ar71);
 }
 
 function buildCorrCards() {
@@ -672,7 +677,7 @@ function buildCorrCards() {
     focCard;
 
   const rhoEl = document.getElementById('corrScatterRhoLabel');
-  if (rhoEl) rhoEl.textContent = 'Spearman ρ = ' + corrRhos.cv.toFixed(2);
+  if (rhoEl) rhoEl.textContent = 'Spearman ρ = ' + corrRhos.ca71.toFixed(2);
 }
 
 function toggleCorrPool() {
@@ -958,7 +963,7 @@ function buildCorrChart() {
   const q = Math.ceil(n / 4);
   const pts = corrData.map(d => ({
     x: Math.round(d.ccfsVal),
-    y: Math.round(d.yfaVal),
+    y: Math.round(d.acccaVal),
     label: d.name,
   }));
   const colors  = corrData.map(d => d.name === focusedDistrict ? '#e67e22' : 'rgba(41,128,185,0.65)');
@@ -1001,8 +1006,8 @@ function buildCorrChart() {
               const d = corrData.find(x => x.name === p.label);
               return [
                 ` ${p.label}`,
-                ` CCFS H&W/FT: ${fmt(p.x)}  (#${d?.ccfsValRank}/${corrData.length}, #${d?.ccfs72Rank} of all 72)`,
-                ` YFA Avg Medical: ${fmt(p.y)}  (#${d?.yfaValRank}/${corrData.length})`,
+                ` CCFS H&W/FT: ${fmt(p.x)}  (#${d?.ccfsRank71}/71, #${d?.ccfs72Rank} of all 72)`,
+                ` ACCCA Admin: ${fmt(p.y)}  (#${d?.acccaRank71}/71)`,
               ];
             }
           }
@@ -1014,7 +1019,7 @@ function buildCorrChart() {
           ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' }
         },
         y: {
-          title: { display: true, text: 'YFA Avg Medical ($)' },
+          title: { display: true, text: 'ACCCA Admin H&W ($)' },
           ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' }
         }
       }
