@@ -1602,6 +1602,7 @@ function toggleCompCols() {
   const on = tbl.classList.toggle('show-comp');
   btn.textContent = on ? 'Salary & Comp ✓' : 'Salary & Comp';
   btn.classList.toggle('active', on);
+  sortCcfs(on ? 7 : 4);  // Total Comp when on; H&W per FT when off
 }
 
 function downloadCsv() {
@@ -1647,6 +1648,7 @@ function toggleColAdj() {
     compBtn.textContent = 'Salary & Comp ✓';
     compBtn.classList.add('active');
   }
+  sortCcfs(on ? 9 : 7);  // COL-Adj. when on; Total Comp when off (Salary & Comp remains visible)
 }
 
 
