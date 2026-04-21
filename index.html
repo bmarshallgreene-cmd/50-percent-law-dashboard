@@ -232,8 +232,9 @@
   <span id="headerSub" style="font-size:0.75rem;color:rgba(255,255,255,0.5)">Fiscal Year 2024-25 &nbsp;|&nbsp; Source: CCFS-311 Annual Reports &amp; Fall 2024 FON Data</span>
 </div>
 
-<div style="background:#fffbeb;border-bottom:1px solid #fcd34d;padding:7px 32px;font-size:0.78rem;color:#78350f;line-height:1.5">
-  <strong>Data limitations:</strong> All figures are estimates derived from formula-based calculations (CCFS-311) or self-reported survey data. Structural differences between districts — funding models, object code allocation, benefit plan design, and staffing mix — can affect comparability. These figures are best used for <strong>directional comparisons and relative positioning</strong>, not as precise dollar measurements. See the methodology notes in each tab for known data issues.
+<div id="limitationsBanner" style="background:#fffbeb;border-bottom:1px solid #fcd34d;padding:7px 32px 7px 32px;font-size:0.78rem;color:#78350f;line-height:1.5;display:flex;align-items:center;gap:16px;transition:opacity 1s ease">
+  <span><strong>Data limitations:</strong> All figures are estimates derived from formula-based calculations (CCFS-311) or self-reported survey data. Structural differences between districts — funding models, object code allocation, benefit plan design, and staffing mix — can affect comparability. These figures are best used for <strong>directional comparisons and relative positioning</strong>, not as precise dollar measurements. See the methodology notes in each tab for known data issues.</span>
+  <button onclick="dismissBanner()" style="flex-shrink:0;margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.1rem;color:#92400e;opacity:0.55;padding:2px 6px;line-height:1" title="Dismiss">✕</button>
 </div>
 
 <!-- ══════════════════════════════════════════ TAB 1: CCFS-311 ══ -->
@@ -512,6 +513,15 @@
 
 <!-- ══════════════════════════════════════════ SCRIPTS ══ -->
 <script>
+// ── Limitations banner ─────────────────────────────────────────
+function dismissBanner() {
+  const b = document.getElementById('limitationsBanner');
+  if (!b) return;
+  b.style.opacity = '0';
+  setTimeout(() => b.style.display = 'none', 1000);
+}
+setTimeout(dismissBanner, 15000);
+
 // ── Focused district ───────────────────────────────────────────
 let focusedDistrict = 'Yosemite';
 let indexView = false;
