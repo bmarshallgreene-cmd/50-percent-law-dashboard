@@ -500,7 +500,7 @@
 <footer>
   Cross-method comparison for districts with data in multiple sources. <strong>CCFS-311</strong>: formula-based estimate (employer benefits minus STRS/Medicare est., divided by adjusted FON FT faculty count). <strong>YFA Survey</strong>: average (mean) annual employer-paid medical benefit per FT faculty member, collected by the Yosemite Faculty Association, Spring 2026. <strong>ACCCA Admin</strong>: mean employer-paid H&amp;W across all administrative/management positions, 2025 ACCCA Salary &amp; Benefits Survey. MiraCosta excluded (no 2025 ACCCA data). Rank badge colors follow quartile convention: green (top quartile), yellow-green, amber, red (bottom quartile).
   <br><br><span id="corrFooterAll71"><strong>All 71 Districts view:</strong> Districts marked ✦ appear in the YFA survey and have <em>all three methods</em> — their Confidence column shows a 3-method conclusion (same logic as the YFA-only view, ranks within that YFA overlap group). All other rows show a 2-method CCFS+ACCCA conclusion (ranks out of 71). The scatter chart above always shows the YFA overlap districts. Hover any Confidence cell for full rank detail.<br><br></span>
-  <strong>Confidence column logic</strong> — The label steps down from the strongest defensible claim: <em>"All 3 agree: [quartile]"</em> = all three methods place the district in the same quartile (highest confidence). <em>"2 of 3 agree: [quartile]"</em> = two methods agree on quartile; one differs. <em>"[Method] diverges · [tier]"</em> = one method is a clear outlier; the other two agree on a tier. Tier labels: <em>top/bottom quartile</em> = solid Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary (roughly top 33%, middle 33%, or bottom 33%). <em>"[Method] diverges · leans [half]"</em> = all three methods scatter across quartiles, but majority point toward the same half. <em>"Ranking unclear"</em> (2-method only) = the two methods disagree on which half. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
+  <strong>Confidence column logic</strong> — The label steps down from the strongest defensible claim: <em>"Strong agreement: [quartile]"</em> = all three methods place the district in the same quartile (highest confidence). <em>"2 of 3 agree: [quartile]"</em> = two of three methods agree on quartile; one differs. <em>"Both agree: [tier]"</em> = two-method districts (CCFS + ACCCA only) where both methods agree. <em>"[Method] diverges · [tier]"</em> = one method is a clear outlier; the other two agree on a tier. Tier labels: <em>top/bottom quartile</em> = solid Q1 or Q4; <em>upper/middle/lower third</em> = methods straddle a quartile boundary (roughly top 33%, middle 33%, or bottom 33%). <em>"[Method] diverges · leans [half]"</em> = methods scatter across quartiles but majority point toward the same half. <em>"Ranking unclear"</em> (2-method only) = the two methods disagree on which half. Click the Confidence header to sort from most to least confident. Hover any cell for individual rank detail. Known CCFS biases: self-funded ISF structures may understate CCFS for some districts (Pasadena, Riverside); instructional aide benefit bleed-in may overstate CCFS for others (West Kern, Lake Tahoe, Shasta-Tehama-Trinity).
   <br><br><strong>Spearman rank correlation</strong> measures agreement in <em>ordering</em> — whether districts that rank high on one measure also rank high on another (1.0 = perfect agreement, 0 = no relationship). Current ρ values are shown in the subtitle above the table. YFA–ACCCA is typically the strongest pair because both are survey-based measures of actual per-employee contributions. CCFS correlates moderately with survey sources, reflecting that the formula-based approach captures additional structural factors (staffing ratios, part-time coverage, object-code allocation differences) beyond what surveys directly measure. Switching from YFA max to YFA avg medical narrows the 3-method pool to districts that reported avg data.
 </footer>
 </div>
@@ -824,7 +824,7 @@ function renderCorrTable() {
           const majIdx = tierCounts.indexOf(maxCount);
           const tierNames4 = ['top quartile', '2nd quartile', '3rd quartile', 'bottom quartile'];
           if (maxCount === 3) {
-            conclusionLine = `All 3 agree: ${tierNames4[majIdx]}`;
+            conclusionLine = `Strong agreement: ${tierNames4[majIdx]}`;
             spreadColor = '#27ae60';
           } else if (maxCount === 2) {
             conclusionLine = `2 of 3 agree: ${tierNames4[majIdx]}`;
@@ -854,7 +854,7 @@ function renderCorrTable() {
         const tierOf71 = r => Math.min(4, Math.ceil(r / (71 / 4)));
         const sameTier71 = tierOf71(ccfsRank) === tierOf71(acccaRank);
         if (sameTier71 || spreadVal <= 7) {
-          conclusionLine = `All agree: ${t71}`;
+          conclusionLine = `Both agree: ${t71}`;
           spreadColor = '#27ae60';
         } else if (spreadVal <= 19) {
           conclusionLine = `Moderate agreement, ${t71}`;
@@ -898,7 +898,7 @@ function renderCorrTable() {
         const tierNames4 = ['top quartile', '2nd quartile', '3rd quartile', 'bottom quartile'];
         if (maxCount === 3) {
           // All 3 methods place district in same quartile — highest confidence
-          conclusionLine = `All 3 agree: ${tierNames4[majIdx]}`;
+          conclusionLine = `Strong agreement: ${tierNames4[majIdx]}`;
           spreadColor = '#27ae60';
         } else if (maxCount === 2) {
           // 2 of 3 methods agree on quartile — moderate-high confidence
