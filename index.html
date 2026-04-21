@@ -764,8 +764,10 @@ function renderCorrTable() {
   });
 
   const badge = (rank, total, isF) => {
-    const col = isF ? '#e67e22' : tierColor(rank);
-    return `<span style="display:inline-block;background:${col};color:#fff;border-radius:3px;` +
+    // Color reflects quartile within `total` (the displayed denominator), not the active pool size
+    const qb = Math.ceil(total / 4);
+    const badgeColor = isF ? '#e67e22' : TIER_TC[rank <= qb ? 0 : rank <= 2*qb ? 1 : rank <= 3*qb ? 2 : 3];
+    return `<span style="display:inline-block;background:${badgeColor};color:#fff;border-radius:3px;` +
            `padding:1px 6px;font-size:0.72rem;font-weight:700;margin-left:5px">#${rank}` +
            `<span style="font-weight:400;opacity:0.75">/${total}</span></span>`;
   };
