@@ -65,7 +65,7 @@
     background: white; border-radius: 8px; padding: 20px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-top: 4px solid #1a3a5c;
   }
-  .card.highlight { border-top-color: #e67e22; }
+  .card.highlight { border-top-color: #2563eb; }
   .card.accent-green { border-top-color: #16a34a; }
   .card.accent-amber { border-top-color: #d97706; }
   .card label, .card .card-label {
@@ -73,7 +73,7 @@
   }
   .card .value, .card .card-value { font-size: 1.75rem; font-weight: 700; margin-top: 4px; }
   .card .sub, .card .card-sub { font-size: 0.8rem; color: #888; margin-top: 2px; }
-  .card.highlight .value { color: #e67e22; }
+  .card.highlight .value { color: #2563eb; }
   .card .card-value.blue  { color: #1d4ed8; }
   .card .card-value.green { color: #16a34a; }
   .card .card-value.amber { color: #b45309; }
@@ -95,17 +95,17 @@
   .jump-btn {
     margin-left: auto;
     padding: 6px 14px;
-    background: #fff3e6;
-    border: 2px solid #e67e22;
+    background: #eff6ff;
+    border: 2px solid #2563eb;
     border-radius: 6px;
-    color: #e67e22;
+    color: #2563eb;
     font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .jump-btn:hover { background: #ffe0c0; }
+  .jump-btn:hover { background: #dbeafe; }
 
   /* ── Chart (Tab 1) ── */
   .chart-wrap { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 28px; }
@@ -140,16 +140,16 @@
 
   tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
   tbody tr:hover { background: #fafbfc; }
-  tbody tr.yosemite, tbody tr.yos { background: #fff8f2; }
-  tbody tr.yosemite:hover, tbody tr.yos:hover { background: #fff2e4; }
+  tbody tr.yosemite, tbody tr.yos { background: #eff6ff; }
+  tbody tr.yosemite:hover, tbody tr.yos:hover { background: #dbeafe; }
 
   td { padding: 10px 12px; vertical-align: middle; }
   td.rank { font-weight: 600; color: #888; width: 60px; }
   td.district-name, .dname { font-weight: 500; }
-  .yos .dname { color: #e67e22; font-weight: 700; }
+  .yos .dname { color: #2563eb; font-weight: 700; }
 
   .yosemite-badge {
-    display: inline-block; background: #e67e22; color: white;
+    display: inline-block; background: #2563eb; color: white;
     font-size: 0.65rem; padding: 1px 5px; border-radius: 3px;
     margin-left: 6px; vertical-align: middle; font-weight: 600;
   }
@@ -167,7 +167,7 @@
   .tier-2 .hw-value { color: #7aaa30; }
   .tier-3 .hw-value { color: #d48800; }
   .tier-4 .hw-value { color: #c0392b; }
-  .yosemite .hw-value { color: #e67e22 !important; }
+  .yosemite .hw-value { color: #2563eb !important; }
 
   .num { text-align: right; color: #555; font-variant-numeric: tabular-nums; }
   .no-data { color: #ccc; }
@@ -240,7 +240,7 @@
     <div class="card" title="H&amp;W per FT faculty — lowest to highest across all 72 districts. 'H&amp;W' = employer-paid Health &amp; Welfare benefits derived from CCFS-311."><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
     <div class="card" title="Average estimated employer-paid H&amp;W per FT faculty across all 72 California Community College districts."><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
     <div class="card" title="Middle value of estimated H&amp;W per FT faculty — half of the 72 districts spend more per faculty member, half spend less. Less affected by extreme outliers than the mean."><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
-    <div class="card highlight" title="This district's estimated employer-paid H&amp;W per FT faculty — the primary comparison figure in this analysis."><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
+    <div class="card highlight" title="This district's estimated employer-paid H&amp;W per FT faculty — the primary comparison figure in this analysis."><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#2563eb;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div></div>
   </div>
   <div style="text-align:right;margin:-8px 0 12px">
     <button class="comp-toggle-btn" onclick="downloadCsv()" title="Download full dataset as CSV">⬇ Download CSV</button>
@@ -268,7 +268,7 @@
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#a8d06b;display:inline-block"></span>2nd quartile (ranks 19–36)</span>
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#f0a500;display:inline-block"></span>3rd quartile (ranks 37–54)</span>
       <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#333"><span style="width:14px;height:14px;border-radius:3px;background:#e74c3c;display:inline-block"></span>Bottom quartile (ranks 55–72)</span>
-      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#e67e22;font-weight:600"><span style="width:14px;height:14px;border-radius:3px;background:#e67e22;display:inline-block"></span><span id="colorKeyFocus">Yosemite CCD</span></span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#2563eb;font-weight:600"><span style="width:14px;height:14px;border-radius:3px;background:#2563eb;display:inline-block"></span><span id="colorKeyFocus">Yosemite CCD</span></span>
     </div>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
   </div>
@@ -654,7 +654,7 @@ function buildCorrCards() {
 
   let focCard = `<div class="card"><label>Selected District</label>`;
   if (focAll) {
-    focCard += `<div class="value" style="font-size:1.1rem;color:#e67e22">${focAll.name}</div>` +
+    focCard += `<div class="value" style="font-size:1.1rem;color:#2563eb">${focAll.name}</div>` +
       `<div class="sub">` +
         `CCFS #${focAll.ccfsRank71}/71 <span style="color:#aaa">(#${focAll.ccfs72Rank} of all 72)</span>` +
         ` · ACCCA #${focAll.acccaRank71}/71` +
@@ -765,7 +765,7 @@ function renderCorrTable() {
   const badge = (rank, total, isF) => {
     // Color reflects quartile within `total` (the displayed denominator), not the active pool size
     const qb = Math.ceil(total / 4);
-    const badgeColor = isF ? '#e67e22' : TIER_TC[rank <= qb ? 0 : rank <= 2*qb ? 1 : rank <= 3*qb ? 2 : 3];
+    const badgeColor = isF ? '#2563eb' : TIER_TC[rank <= qb ? 0 : rank <= 2*qb ? 1 : rank <= 3*qb ? 2 : 3];
     return `<span style="display:inline-block;background:${badgeColor};color:#fff;border-radius:3px;` +
            `padding:1px 6px;font-size:0.72rem;font-weight:700;margin-left:5px">#${rank}` +
            `<span style="font-weight:400;opacity:0.75">/${total}</span></span>`;
@@ -797,7 +797,7 @@ function renderCorrTable() {
 
   document.getElementById('corrBody').innerHTML = data.map(d => {
     const isF = d.name === focusedDistrict;
-    const rowStyle = isF ? 'background:#fff8f0;font-weight:600' : '';
+    const rowStyle = isF ? 'background:#eff6ff;font-weight:600' : '';
     let ccfsRank, acccaRank, spreadVal, spreadColor, spreadLabel, spreadTip, ccfs72Note, yfaCell, outlier, conclusionLine;
 
     // tierDesc(ranks, n): given an array of ranks within a pool of n,
@@ -963,9 +963,9 @@ function buildCorrChart() {
     y: Math.round(d.acccaVal),
     label: d.name,
   }));
-  const colors  = corrData.map(d => d.name === focusedDistrict ? '#e67e22' : 'rgba(41,128,185,0.65)');
+  const colors  = corrData.map(d => d.name === focusedDistrict ? '#2563eb' : 'rgba(41,128,185,0.65)');
   const radii   = corrData.map(d => d.name === focusedDistrict ? 9 : 5);
-  const borders = corrData.map(d => d.name === focusedDistrict ? '#b85c00' : 'rgba(21,64,110,0.5)');
+  const borders = corrData.map(d => d.name === focusedDistrict ? '#1e40af' : 'rgba(21,64,110,0.5)');
 
   const ctx = document.getElementById('corrScatter');
   if (!ctx) return;
@@ -1267,7 +1267,7 @@ function initChart() {
         y: {
           ticks: {
             font: ctx => { const lbl = ctx.tick.label.replace(/ \*$/, ''); return { size: lbl === focusedDistrict ? 13 : 11, weight: lbl === focusedDistrict ? 'bold' : 'normal' }; },
-            color: ctx => ctx.tick.label.replace(/ \*$/, '') === focusedDistrict ? '#e67e22' : '#333',
+            color: ctx => ctx.tick.label.replace(/ \*$/, '') === focusedDistrict ? '#2563eb' : '#333',
           },
           grid: { display: false }
         }
@@ -1283,12 +1283,12 @@ function updateChart(ranked) {
   const chartMedian = computeStats(ranked).median;
   chart.data.labels = ranked.map(d => d.selfInsured ? d.name + ' *' : d.name);
   chart.data.datasets[0].data = ranked.map(d => indexView ? d.scenarioValue / chartMedian * 100 : d.scenarioValue);
-  chart.data.datasets[0].backgroundColor = ranked.map(d => isFocused(d) ? '#e67e22' : TIER_COLORS[tier(d.rank)-1]);
-  chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#b85c00' : 'transparent');
+  chart.data.datasets[0].backgroundColor = ranked.map(d => isFocused(d) ? '#2563eb' : TIER_COLORS[tier(d.rank)-1]);
+  chart.data.datasets[0].borderColor = ranked.map(d => isFocused(d) ? '#1e40af' : 'transparent');
   chart.data.datasets[0].borderWidth = ranked.map(d => isFocused(d) ? 3 : 0);
   const fd = focusedDistrict;
   chart.options.scales.y.ticks.font  = ctx => { const lbl = ctx.tick.label.replace(/ \*$/, ''); return { size: lbl === fd ? 13 : 11, weight: lbl === fd ? 'bold' : 'normal' }; };
-  chart.options.scales.y.ticks.color = ctx => ctx.tick.label.replace(/ \*$/, '') === fd ? '#e67e22' : '#333';
+  chart.options.scales.y.ticks.color = ctx => ctx.tick.label.replace(/ \*$/, '') === fd ? '#2563eb' : '#333';
   chart.update();
 }
 
@@ -1306,15 +1306,15 @@ function buildCcfsTable(data) {
   data.forEach((d, i) => {
     const t = tier(d.rank);
     const diff = d.scenarioValue - stats.median;
-    const diffColor = isFocused(d) ? '#e67e22' : (diff >= 0 ? '#1e8449' : '#c0392b');
+    const diffColor = isFocused(d) ? '#2563eb' : (diff >= 0 ? '#1e8449' : '#c0392b');
     const diffLabel = indexView ? fmtIdxDiff(d.scenarioValue, stats.median) : ((diff >= 0 ? '+' : '') + fmt(diff));
     const pct = (d.scenarioValue / max * 100).toFixed(1);
-    const barColor = isFocused(d) ? '#e67e22' : TIER_COLORS[t-1];
+    const barColor = isFocused(d) ? '#2563eb' : TIER_COLORS[t-1];
     const tr = document.createElement('tr');
     tr.className = isFocused(d) ? 'yosemite' : 'tier-' + t;
     const totalComp = d.step21 + d.scenarioValue;
     const compDiff = totalComp - medComp;
-    const compDiffColor = isFocused(d) ? '#e67e22' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
+    const compDiffColor = isFocused(d) ? '#2563eb' : (compDiff >= 0 ? '#1e8449' : '#c0392b');
     const compDiffLabel = indexView ? fmtIdxDiff(totalComp, medComp) : ((compDiff >= 0 ? '+' : '') + fmt(compDiff));
     const compPct = (totalComp / data.reduce((m, x) => Math.max(m, x.step21 + x.scenarioValue), 0) * 100).toFixed(1);
     const colAdj = d.col != null ? totalComp * 100 / d.col : null;
@@ -1339,7 +1339,7 @@ function buildCcfsTable(data) {
       <td class="num comp-col" style="font-weight:600">${indexView ? fmtIdx(totalComp, medComp) : fmt(totalComp)}</td>
       <td class="comp-col"><div class="bar-cell">
         <div style="font-size:0.8rem;color:${compDiffColor};font-weight:600;margin-bottom:3px">${compDiffLabel} vs. median</div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#e67e22':'#6097c4'}"></div></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${compPct}%;background:${isFocused(d)?'#2563eb':'#6097c4'}"></div></div>
       </div></td>
       <td class="num col-adj-col" style="padding-top:6px;padding-bottom:6px">${colAdj != null ? `<div style="font-size:0.72em;color:${d.col<90?'#27ae60':d.col>115?'#c0392b':'#888'};margin-bottom:2px">COL ${d.col.toFixed(1)} &middot; ${d.colCounty}</div><div style="font-weight:600">${indexView && medColAdj ? fmtIdx(colAdj, medColAdj) : fmt(colAdj)}</div>` : '<span style="color:#aaa">—</span>'}</td>`;
     tr.dataset.rank = d.rank; tr.dataset.name = d.name;
@@ -1546,7 +1546,7 @@ function renderYfa() {
     const barFloor = useAvg ? YFA_AVG_MIN : YFA_MIN;
     const delta = d.max != null && yosYfa ? d.max - yosYfa.max : null;
     const barW = barVal ? Math.round((barVal / barCeil) * 100) : 0;
-    const barColor = isYos ? '#e67e22' : (barVal === barCeil ? '#27ae60' : barVal === barFloor ? '#e74c3c' : '#93c5fd');
+    const barColor = isYos ? '#2563eb' : (barVal === barCeil ? '#27ae60' : barVal === barFloor ? '#e74c3c' : '#93c5fd');
     let deltaCls = 'same', deltaStr = '—';
     if (delta != null && !isYos) { deltaCls = delta > 0 ? 'above' : 'below'; deltaStr = fmtDelta(delta); }
 
@@ -1856,10 +1856,10 @@ function buildAcccaChart() {
       datasets: [{
         label: focusedDistrict,
         data: rankData,
-        borderColor: '#e67e22',
-        backgroundColor: 'rgba(230,126,34,0.08)',
-        pointBackgroundColor: '#e67e22',
-        pointBorderColor: '#b85c00',
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.08)',
+        pointBackgroundColor: '#2563eb',
+        pointBorderColor: '#1e40af',
         pointRadius: 6,
         pointHoverRadius: 8,
         borderWidth: 2.5,
@@ -1941,8 +1941,8 @@ function renderAccca() {
     // Quartile: based on rank within this year's reporting districts
     const t = rank != null ? (rank <= Math.ceil(n/4) ? 1 : rank <= Math.ceil(n/2) ? 2 : rank <= Math.ceil(3*n/4) ? 3 : 4) : 0;
     const tierTextColors = ['#1e8449','#7aaa30','#d48800','#c0392b'];
-    const valColor  = isFoc ? '#e67e22' : (t ? tierTextColors[t-1] : '#888');
-    const barColor  = isFoc ? '#e67e22' : (t ? TIER_COLORS[t-1]    : '#ccc');
+    const valColor  = isFoc ? '#2563eb' : (t ? tierTextColors[t-1] : '#888');
+    const barColor  = isFoc ? '#2563eb' : (t ? TIER_COLORS[t-1]    : '#ccc');
 
     const valHtml = val != null
       ? (stale ? '<span title="No change from the previous survey — the district likely did not submit updated data for 2025. The actual current contribution may be higher." style="color:#d97706;cursor:help">⚠</span> ' : '') +
