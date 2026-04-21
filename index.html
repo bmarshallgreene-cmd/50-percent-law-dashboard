@@ -485,7 +485,7 @@
           <th onclick="setCorrSort('ccfsRank')" style="text-align:right" title="CCFS-311 H&W per FT faculty, full methodology. Rank badge updates to reflect active pool size.">CCFS H&amp;W/FT</th>
           <th id="corrYfaHeader" onclick="setCorrSort('yfaRank')" style="text-align:right" title="Average (mean) annual employer-paid medical benefit per FT faculty member. Source: YFA Benefits Survey, Spring 2026. Shows — for districts not in the survey or without avg data.">YFA Avg Medical</th>
           <th onclick="setCorrSort('acccaRank')" style="text-align:right" title="Mean employer-paid H&W across all admin/management positions. Source: ACCCA 2025 Survey.">ACCCA Admin</th>
-          <th id="corrAgreeHeader" onclick="setCorrSort('spread')" style="text-align:center" title="YFA mode: max rank minus min rank across all three methods. All-71 mode: |CCFS rank − ACCCA rank|. Lower = more consistent. Hover a row for details.">Agreement&nbsp;↕</th>
+          <th id="corrAgreeHeader" onclick="setCorrSort('spread')" style="text-align:center" title="How much the available data sources agree on this district's position. Click to sort most-to-least confident.">Confidence</th>
         </tr>
       </thead>
       <tbody id="corrBody"></tbody>
@@ -784,7 +784,14 @@ function renderCorrTable() {
     : 'YFA Avg Medical';
 
   const agreeHdr = document.getElementById('corrAgreeHeader');
-  if (agreeHdr) agreeHdr.innerHTML = 'Confidence&nbsp;↕';
+  if (agreeHdr) agreeHdr.innerHTML = 'Confidence';
+
+  // Apply sort-direction class to active column header
+  const colKeys = ['name','ccfsRank','yfaRank','acccaRank','spread'];
+  document.querySelectorAll('#corrTable thead th').forEach((th, i) => {
+    th.classList.remove('asc','desc');
+    if (colKeys[i] === corrSortCol) th.classList.add(corrSortDir === 1 ? 'asc' : 'desc');
+  });
 
   const footerNote = document.getElementById('corrFooterNote');
   if (footerNote) footerNote.innerHTML = corrShowAll
