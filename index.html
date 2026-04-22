@@ -245,7 +245,7 @@
     <div class="card" title="H&amp;W per FT faculty — lowest to highest across all 72 districts. 'H&amp;W' = employer-paid Health &amp; Welfare benefits derived from CCFS-311."><label>Range</label><div class="value" id="cardRange"></div><div class="sub" id="cardRangeSub"></div></div>
     <div class="card" title="Average estimated employer-paid H&amp;W per FT faculty across all 72 California Community College districts."><label>Statewide Mean</label><div class="value" id="cardMean"></div><div class="sub">72 districts</div></div>
     <div class="card" title="Middle value of estimated H&amp;W per FT faculty — half of the 72 districts spend more per faculty member, half spend less. Less affected by extreme outliers than the mean."><label>Statewide Median</label><div class="value" id="cardMedian"></div><div class="sub">50th percentile</div></div>
-    <div class="card highlight" title="This district's estimated employer-paid H&amp;W per FT faculty — the primary comparison figure in this analysis."><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteSub"></div><div class="sub" id="cardYosemiteMean" style="margin-top:1px;text-align:right"></div></div>
+    <div class="card highlight" title="This district's estimated employer-paid H&amp;W per FT faculty — the primary comparison figure in this analysis."><label id="cardFocusLabel">Selected District</label><div id="cardFocusName" style="font-size:0.8rem;font-weight:600;color:#e67e22;margin-bottom:2px">Yosemite</div><div class="value" id="cardYosemite"></div><div class="sub" id="cardYosemiteRank" style="margin-bottom:3px"></div><div class="sub" id="cardYosemiteSub" style="display:flex;justify-content:space-between;gap:6px"></div><div class="sub" id="cardYosemiteMean" style="display:flex;justify-content:space-between;gap:6px;margin-top:1px"></div></div>
   </div>
   <div class="scenario-bar">
     <span>Calculation:</span>
@@ -1373,19 +1373,21 @@ function updateCcfsCards(ranked, stats) {
     document.getElementById('cardYosemite').textContent = fmtIdx(yos.scenarioValue, stats.median);
     const idxDiff = yos.scenarioValue / stats.median * 100 - 100;
     const idxDiffMean = yos.scenarioValue / stats.mean * 100 - 100;
-    document.getElementById('cardYosemiteSub').textContent =
-      `Rank ${yos.rank} of 72 — ${idxDiff >= 0 ? '+' : ''}${idxDiff.toFixed(1)} pts vs. median (100)`;
-    document.getElementById('cardYosemiteMean').textContent =
-      `${idxDiffMean >= 0 ? '+' : ''}${idxDiffMean.toFixed(1)} pts vs. mean`;
+    document.getElementById('cardYosemiteRank').textContent = `Rank ${yos.rank} of 72`;
+    document.getElementById('cardYosemiteSub').innerHTML =
+      `<span>vs. median (100)</span><span>${idxDiff >= 0 ? '+' : ''}${idxDiff.toFixed(1)} pts</span>`;
+    document.getElementById('cardYosemiteMean').innerHTML =
+      `<span>vs. mean</span><span>${idxDiffMean >= 0 ? '+' : ''}${idxDiffMean.toFixed(1)} pts</span>`;
   } else {
     document.getElementById('cardMean').textContent = fmt(stats.mean);
     document.getElementById('cardMedian').textContent = fmt(stats.median);
     document.getElementById('cardRange').textContent = fmt(stats.min) + ' – ' + fmt(stats.max);
     document.getElementById('cardYosemite').textContent = fmt(yos.scenarioValue);
-    document.getElementById('cardYosemiteSub').textContent =
-      `Rank ${yos.rank} of 72 — $${Math.round(Math.abs(diff)).toLocaleString()} ${diff >= 0 ? 'above' : 'below'} median`;
-    document.getElementById('cardYosemiteMean').textContent =
-      `$${Math.round(Math.abs(diffMean)).toLocaleString()} ${diffMean >= 0 ? 'above' : 'below'} mean`;
+    document.getElementById('cardYosemiteRank').textContent = `Rank ${yos.rank} of 72`;
+    document.getElementById('cardYosemiteSub').innerHTML =
+      `<span>vs. median</span><span>$${Math.round(Math.abs(diff)).toLocaleString()} ${diff >= 0 ? 'above' : 'below'}</span>`;
+    document.getElementById('cardYosemiteMean').innerHTML =
+      `<span>vs. mean</span><span>$${Math.round(Math.abs(diffMean)).toLocaleString()} ${diffMean >= 0 ? 'above' : 'below'}</span>`;
   }
   document.getElementById('cardRangeSub').textContent = minD.name + ' to ' + maxD.name;
 }
